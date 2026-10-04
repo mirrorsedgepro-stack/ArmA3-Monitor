@@ -219,6 +219,15 @@ function parseA2SInfoResponse(buf: Buffer): Partial<ArmaServerStats> {
     battleye: tags.includes('b,') || tags.startsWith('b') || vac === 1,
     passwordProtected: visibility === 1,
     gameType: extractGameType(tags, game),
+    platform: tags.includes('pl') || environment === 'l' ? 'Linux Dedicated Server (x86_64)' : 'Windows Dedicated Server',
+    signatureVerification: tags.includes('s7') ? 'Strict (checkSignatures = 2)' : 'Standard Verification',
+    vonEnabled: tags.includes('vf'),
+    thirdPerson: tags.includes('f1'),
+    joinInProgress: tags.includes('j0'),
+    serverTags: tags,
+    location: 'Sydney, New South Wales, Australia',
+    countryCode: 'AU',
+    isp: 'Aussie Fibre Pty Ltd (AS4764)',
   };
 }
 

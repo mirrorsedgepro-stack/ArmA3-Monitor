@@ -29,6 +29,16 @@ export interface ArmaServerStats {
   discordUrl?: string;
   teamspeakUrl?: string;
   rulesOfEngagement?: string[];
+  // Extended Server Details
+  location?: string;
+  countryCode?: string;
+  isp?: string;
+  platform?: string;
+  signatureVerification?: string;
+  vonEnabled?: boolean;
+  thirdPerson?: boolean;
+  joinInProgress?: boolean;
+  serverTags?: string;
 }
 
 export const DEFAULT_SERVER_CONFIG = {
@@ -62,8 +72,17 @@ export const MOCK_SERVER_DATA: ArmaServerStats = {
   lastUpdated: new Date().toISOString(),
   discordUrl: DEFAULT_SERVER_CONFIG.discordUrl,
   teamspeakUrl: DEFAULT_SERVER_CONFIG.teamspeakUrl,
+  location: "Sydney, New South Wales, Australia",
+  countryCode: "AU",
+  isp: "Aussie Fibre Pty Ltd (AS4764)",
+  platform: "Linux Dedicated Server (x86_64)",
+  signatureVerification: "Strict (checkSignatures = 2)",
+  vonEnabled: true,
+  thirdPerson: true,
+  joinInProgress: true,
+  serverTags: "bf,r222,n0,s7,i1,mf,lf,vf,dt,tanti,g65545,h86f3694,f1,pl",
   playerList: [
-    { id: 1, name: "Frenchy", score: 0, timePlayedSeconds: 1200 }
+    { id: 1, name: "Frenchy", score: 0, timePlayedSeconds: 2160 }
   ],
   rulesOfEngagement: [
     "Cooperative Guerrilla Campaign: Coordinate with squad members before initiating outpost assaults.",
