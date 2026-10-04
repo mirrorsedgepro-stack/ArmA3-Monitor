@@ -75,8 +75,8 @@ Configure these either in `.env.local` (for local development) or directly in **
 
 | Variable | Description | Example Default |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_SERVER_NAME` | Display name of your Arma 3 server/community | `[TF-AEGIS] Operation Thunderfall` |
-| `NEXT_PUBLIC_SERVER_IP` | Public IP or domain name of your Arma 3 server | `144.76.57.12` |
+| `NEXT_PUBLIC_SERVER_NAME` | Display name of your Arma 3 server/community | `Frenchy's Antistasi Ultimate [RHS] \| 32-Player Dedicated` |
+| `NEXT_PUBLIC_SERVER_IP` | Public IP or domain name of your Arma 3 server | `180.181.238.103` |
 | `NEXT_PUBLIC_GAME_PORT` | Game connection port | `2302` |
 | `NEXT_PUBLIC_QUERY_PORT` | Steam A2S query port (normally Game Port + 1) | `2303` |
 | `NEXT_PUBLIC_DISCORD_URL` | Community Discord invite link | `https://discord.gg/arma3` |
