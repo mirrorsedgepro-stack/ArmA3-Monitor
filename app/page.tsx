@@ -11,13 +11,13 @@ import { ServerRules } from '@/components/ServerRules';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { Shield, Sparkles, RefreshCw, Layers, CheckCircle2, ChevronRight, Terminal, Globe, Server } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
   const [mods, setMods] = useState<ArmaMod[]>(DEFAULT_MODS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Modals state
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
@@ -86,7 +86,6 @@ export default function Home() {
     }
   }, [serverConfig]);
 
-  // Initial fetch and auto-refresh poll every 25 seconds
   useEffect(() => {
     fetchServerStats();
 
@@ -127,61 +126,29 @@ export default function Home() {
     } catch {
       // ignore
     }
-    // Re-trigger query
     setTimeout(() => {
       fetchServerStats();
     }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-tactical-950 tactical-grid flex flex-col justify-between">
+    <div className="min-h-screen bg-[#090a0f] text-zinc-200 flex flex-col justify-between selection:bg-zinc-700 selection:text-white">
       <div>
-        {/* Top Military HUD Navigation */}
+        {/* Homepage Minimalist Navigation Bar */}
         <Header
           stats={stats}
           onRefresh={fetchServerStats}
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
+          onDownloadPreset={handleDownloadPreset}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
 
-        {/* Main Operational Container */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        {/* Main Content Dashboard */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
           
-          {/* Quick Telemetry & Auto-refresh status bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-tactical-900/60 border border-tactical-800 text-xs font-mono">
-            <div className="flex items-center gap-3">
-              <span className="text-zinc-400">LAST TELEMETRY:</span>
-              <span className="text-emerald-400">
-                {stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : 'Just now'}
-              </span>
-              <span className="text-zinc-600 hidden sm:inline">&bull;</span>
-              <span className="text-zinc-400 hidden sm:inline">
-                SOURCE: <strong className="text-zinc-300 uppercase">{stats.querySource}</strong>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 hover:text-zinc-200">
-                <input
-                  type="checkbox"
-                  checked={autoRefresh}
-                  onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="rounded border-tactical-700 text-emerald-500 focus:ring-emerald-400 h-3.5 w-3.5 bg-tactical-950"
-                />
-                <span>Auto-poll (25s)</span>
-              </label>
-
-              <button
-                onClick={() => setIsConfigModalOpen(true)}
-                className="text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <span>Edit Target IP</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          {/* Section 1: Server Overview & Real-Time Stats */}
+          {/* Top Row: Information Widgets */}
           <ServerOverview
             stats={stats}
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
@@ -189,35 +156,38 @@ export default function Home() {
             modCount={mods.length}
           />
 
-          {/* Section 2: All Loaded Mods & Addon Repository */}
+          {/* Grouped Services: Loaded Server Mods */}
           <ModList
             mods={mods}
             serverName={serverConfig.name}
             onDownloadPreset={handleDownloadPreset}
             onOpenPresetModal={() => setIsPresetModalOpen(true)}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
 
-          {/* Section 3: Server SOP, Keybindings & Radio Frequencies */}
+          {/* Guidelines & Keybinds */}
           <ServerRules rules={stats.rulesOfEngagement} />
 
         </main>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-16 border-t border-tactical-800 bg-tactical-950 py-8 text-xs font-mono text-zinc-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Clean Minimalist Footer */}
+      <footer className="border-t border-zinc-800/80 bg-zinc-950/40 py-5 text-xs text-zinc-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-500" />
-            <span className="text-zinc-400 font-bold">{serverConfig.name}</span>
+            <span className="font-medium text-zinc-400">{serverConfig.name}</span>
             <span>&bull;</span>
-            <span>Vercel Production Deployment</span>
+            <span>Arma 3 Server Monitor</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-zinc-400">Direct Connect:</span>
-            <code className="text-emerald-400 bg-tactical-900 px-2 py-1 rounded border border-tactical-800">
+          <div className="flex items-center gap-3">
+            <span>Direct:</span>
+            <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
               {stats.ip}:{stats.port}
             </code>
+            <span>&bull;</span>
+            <span className="text-zinc-600">Updated {stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : 'Live'}</span>
           </div>
         </div>
       </footer>

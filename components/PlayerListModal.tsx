@@ -29,89 +29,77 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
       <div 
-        className="w-full max-w-2xl rounded-xl bg-tactical-900 border border-tactical-700 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-xl rounded-xl bg-zinc-900 border border-zinc-800 shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="p-5 border-b border-tactical-700 bg-tactical-950 flex items-center justify-between">
+        {/* Header */}
+        <div className="p-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <Users className="w-5 h-5" />
+            <div className="p-1.5 rounded-md bg-zinc-800 text-zinc-300">
+              <Users className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                Active Tactical Roster
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-tactical-800 text-emerald-400 border border-tactical-700">
-                  {players.length} Operators
+              <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                Active Players
+                <span className="text-xs font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">
+                  {players.length}
                 </span>
               </h3>
-              <p className="text-xs text-zinc-400 truncate max-w-md">{serverName}</p>
+              <p className="text-xs text-zinc-500 truncate max-w-sm">{serverName}</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-tactical-800 transition-colors"
+            className="p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Filter Input */}
-        <div className="p-4 border-b border-tactical-800 bg-tactical-900/50">
+        <div className="p-3 border-b border-zinc-800 bg-zinc-900/60">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
             <input
               type="text"
-              placeholder="Search active soldier or callsign..."
+              placeholder="Search player name..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg bg-tactical-950 border border-tactical-700 text-zinc-200 placeholder-zinc-500 text-xs font-mono focus:outline-none focus:border-emerald-500"
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:border-zinc-700"
             />
           </div>
         </div>
 
-        {/* Roster Table */}
-        <div className="overflow-y-auto p-4 space-y-2 flex-1 scrollbar-thin">
+        {/* Roster List */}
+        <div className="overflow-y-auto p-3 space-y-1 flex-1">
           {filtered.length === 0 ? (
-            <div className="text-center py-10 text-zinc-500 text-xs font-mono">
-              No players matching &quot;{filter}&quot;
+            <div className="text-center py-8 text-zinc-500 text-xs">
+              No players found
             </div>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {filtered.map((player, idx) => (
                 <div
                   key={player.id || idx}
-                  className="flex items-center justify-between p-3 rounded-lg bg-tactical-950/60 border border-tactical-800 hover:border-emerald-500/30 hover:bg-tactical-850/80 transition-colors"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/60 hover:bg-zinc-800/40 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 text-center text-xs font-mono text-zinc-500">
-                      #{idx + 1}
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 text-center text-xs font-mono text-zinc-500">
+                      {idx + 1}
                     </span>
-                    <Shield className="w-4 h-4 text-emerald-400/70" />
-                    <div>
-                      <div className="text-sm font-semibold text-zinc-200 font-mono">
-                        {player.name}
-                      </div>
-                      <div className="text-[11px] text-zinc-500 flex items-center gap-2">
-                        <span>Squad Role: Inf / Recon</span>
-                      </div>
-                    </div>
+                    <span className="text-xs font-medium text-zinc-200">
+                      {player.name}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs font-mono">
+                  <div className="flex items-center gap-3 text-xs text-zinc-500 font-mono">
                     {player.score > 0 && (
-                      <div className="flex items-center gap-1 text-amber-400" title="Combat Score">
-                        <Award className="w-3.5 h-3.5" />
-                        <span>{player.score}</span>
-                      </div>
+                      <span className="text-zinc-400">{player.score} pts</span>
                     )}
-                    <div className="flex items-center gap-1 text-zinc-400" title="Time in Mission">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{formatDuration(player.timePlayedSeconds)}</span>
-                    </div>
+                    <span>{formatDuration(player.timePlayedSeconds)}</span>
                   </div>
                 </div>
               ))}
@@ -119,14 +107,14 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-4 border-t border-tactical-800 bg-tactical-950 flex items-center justify-between text-xs font-mono text-zinc-500">
-          <span>Synced via Steam A2S Player query</span>
+        {/* Footer */}
+        <div className="p-3 border-t border-zinc-800 bg-zinc-950 flex items-center justify-between text-xs text-zinc-500">
+          <span>Synced via Steam A2S query</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded bg-tactical-800 hover:bg-tactical-700 text-zinc-200 transition-colors"
+            className="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 transition-colors"
           >
-            Close Roster
+            Close
           </button>
         </div>
       </div>

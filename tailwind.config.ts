@@ -5,55 +5,38 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./data/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   darkMode: "class",
   theme: {
     extend: {
       colors: {
-        tactical: {
-          950: "#070a0e",
-          900: "#0b1017",
-          850: "#101721",
-          800: "#16202c",
-          700: "#223144",
-          600: "#324660",
-          500: "#496385",
-        },
-        hud: {
-          green: "#10b981",
-          emerald: "#059669",
-          amber: "#f59e0b",
-          cyan: "#06b6d4",
-          blue: "#3b82f6",
-          red: "#ef4444",
+        homepage: {
+          bg: "#090a0f",
+          card: "#12131a",
+          cardHover: "#171821",
+          border: "#1f2230",
+          borderHover: "#2d3245",
         },
       },
       fontFamily: {
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
         mono: [
           "ui-monospace",
           "SFMono-Regular",
           "Menlo",
           "Monaco",
           "Consolas",
-          "Liberation Mono",
-          "Courier New",
           "monospace",
         ],
-      },
-      boxShadow: {
-        "tactical-glow": "0 0 25px -5px rgba(16, 185, 129, 0.25)",
-        "amber-glow": "0 0 25px -5px rgba(245, 158, 11, 0.25)",
-        "cyan-glow": "0 0 25px -5px rgba(6, 182, 212, 0.25)",
-      },
-      animation: {
-        "pulse-subtle": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "scanline": "scanline 8s linear infinite",
-      },
-      keyframes: {
-        scanline: {
-          "0%": { transform: "translateY(-100%)" },
-          "100%": { transform: "translateY(1000%)" },
-        },
       },
     },
   },

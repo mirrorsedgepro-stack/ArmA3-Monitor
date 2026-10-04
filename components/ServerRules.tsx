@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, Radio, Keyboard, ShieldAlert, HeartPulse, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, Keyboard, Radio, ChevronRight } from 'lucide-react';
 
 interface ServerRulesProps {
   rules?: string[];
@@ -11,157 +11,133 @@ export function ServerRules({ rules }: ServerRulesProps) {
   const [activeTab, setActiveTab] = useState<'rules' | 'keybinds' | 'comms'>('rules');
 
   const defaultRules = rules || [
-    "Strict Roleplay / MilSim communication over TFAR radio frequencies. Maintain radio discipline.",
-    "Positive ID required prior to weapons release. Friendly fire will result in an immediate kick/ban.",
-    "Armor, Fixed-Wing, and Rotary assets require proper crew certification and JTAC clearance.",
-    "All infantry squads must embed at least 1 certified Combat Life Saver (CLS) or Medic.",
-    "Zeus Game Masters have final authority on mission scenario flow and live ordnance drops.",
-    "No trolling, griefing, or unauthorized asset destruction in Base Operations Area (FOB)."
+    "Cooperative Guerrilla Campaign: Coordinate with squad members before initiating outpost assaults.",
+    "Capture and secure enemy munitions, fuel trucks, and communication towers to build rebel support.",
+    "Positive ID on non-combatants and civilians. Civilian casualties lower rebel town support.",
+    "Use ACE interaction (Windows Key) for equipment handling, medical care, and logistics.",
+    "Maintain respect and tactical communications on server voice or Discord.",
+    "No deliberate destruction of rebel headquarters (HQ) or team assets."
   ];
 
   return (
-    <div className="rounded-xl bg-tactical-900 border border-tactical-700 shadow-md overflow-hidden">
-      {/* Tab Header */}
-      <div className="flex border-b border-tactical-800 bg-tactical-950 font-mono text-xs">
+    <div className="rounded-xl bg-zinc-900/40 border border-zinc-800/80 overflow-hidden">
+      {/* Tab Switcher */}
+      <div className="flex border-b border-zinc-800/80 bg-zinc-900/60 text-xs font-medium">
         <button
           onClick={() => setActiveTab('rules')}
-          className={`flex items-center gap-2 px-5 py-3.5 font-bold transition-all border-b-2 ${
+          className={`flex items-center gap-1.5 px-4 py-3 transition-colors border-b-2 ${
             activeTab === 'rules'
-              ? 'border-emerald-500 text-emerald-400 bg-tactical-900'
+              ? 'border-zinc-200 text-zinc-100 bg-zinc-900/80'
               : 'border-transparent text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <ShieldAlert className="w-4 h-4" />
-          <span>Rules of Engagement (ROE)</span>
+          <Shield className="w-3.5 h-3.5" />
+          <span>Server Guidelines</span>
         </button>
 
         <button
           onClick={() => setActiveTab('keybinds')}
-          className={`flex items-center gap-2 px-5 py-3.5 font-bold transition-all border-b-2 ${
+          className={`flex items-center gap-1.5 px-4 py-3 transition-colors border-b-2 ${
             activeTab === 'keybinds'
-              ? 'border-emerald-500 text-emerald-400 bg-tactical-900'
+              ? 'border-zinc-200 text-zinc-100 bg-zinc-900/80'
               : 'border-transparent text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <Keyboard className="w-4 h-4" />
-          <span>ACE3 &amp; Essential Keybinds</span>
+          <Keyboard className="w-3.5 h-3.5" />
+          <span>Keybindings</span>
         </button>
 
         <button
           onClick={() => setActiveTab('comms')}
-          className={`flex items-center gap-2 px-5 py-3.5 font-bold transition-all border-b-2 ${
+          className={`flex items-center gap-1.5 px-4 py-3 transition-colors border-b-2 ${
             activeTab === 'comms'
-              ? 'border-emerald-500 text-emerald-400 bg-tactical-900'
+              ? 'border-zinc-200 text-zinc-100 bg-zinc-900/80'
               : 'border-transparent text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <Radio className="w-4 h-4" />
-          <span>TFAR Comms &amp; Frequencies</span>
+          <Radio className="w-3.5 h-3.5" />
+          <span>Comms &amp; Radio</span>
         </button>
       </div>
 
       {/* Tab Content */}
-      <div className="p-6">
+      <div className="p-5">
         {activeTab === 'rules' && (
-          <div className="space-y-4">
-            <h4 className="text-sm font-mono font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
-              Operational Protocol &amp; Server Rules
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {defaultRules.map((rule, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-3 p-3.5 rounded-lg bg-tactical-950 border border-tactical-800 text-xs leading-relaxed"
-                >
-                  <span className="font-mono font-bold text-emerald-400 bg-tactical-900 px-2 py-0.5 rounded border border-tactical-700 shrink-0">
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  <span className="text-zinc-300 font-medium">{rule}</span>
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs text-zinc-300">
+            {defaultRules.map((rule, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-2.5 p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60"
+              >
+                <span className="font-mono text-zinc-500 font-medium shrink-0">
+                  {String(idx + 1).padStart(2, '0')}.
+                </span>
+                <span className="leading-relaxed">{rule}</span>
+              </div>
+            ))}
           </div>
         )}
 
         {activeTab === 'keybinds' && (
-          <div className="space-y-4">
-            <h4 className="text-sm font-mono font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-              <Keyboard className="w-4 h-4 text-emerald-400" />
-              Tactical Keyboard Shortcuts
-            </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs">
+            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
+              <span className="text-zinc-400">ACE Interaction</span>
+              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
+                Left Windows
+              </kbd>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-tactical-950 border border-tactical-800 flex justify-between items-center">
-                <span className="text-zinc-300">ACE Interaction</span>
-                <kbd className="px-2 py-1 rounded bg-tactical-850 border border-tactical-700 text-emerald-400 font-mono font-bold">
-                  Left Windows
-                </kbd>
-              </div>
+            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
+              <span className="text-zinc-400">ACE Self Interaction</span>
+              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
+                Ctrl + Left Win
+              </kbd>
+            </div>
 
-              <div className="p-3 rounded-lg bg-tactical-950 border border-tactical-800 flex justify-between items-center">
-                <span className="text-zinc-300">ACE Self Interaction</span>
-                <kbd className="px-2 py-1 rounded bg-tactical-850 border border-tactical-700 text-emerald-400 font-mono font-bold">
-                  Ctrl + Left Windows
-                </kbd>
-              </div>
+            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
+              <span className="text-zinc-400">Climb / Mantle</span>
+              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
+                Custom User 1 (V)
+              </kbd>
+            </div>
 
-              <div className="p-3 rounded-lg bg-tactical-950 border border-tactical-800 flex justify-between items-center">
-                <span className="text-zinc-300">TFAR Short-Range Radio</span>
-                <kbd className="px-2 py-1 rounded bg-tactical-850 border border-tactical-700 text-cyan-400 font-mono font-bold">
-                  Caps Lock
-                </kbd>
-              </div>
+            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
+              <span className="text-zinc-400">Earplugs</span>
+              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
+                End
+              </kbd>
+            </div>
 
-              <div className="p-3 rounded-lg bg-tactical-950 border border-tactical-800 flex justify-between items-center">
-                <span className="text-zinc-300">TFAR Long-Range Radio</span>
-                <kbd className="px-2 py-1 rounded bg-tactical-850 border border-tactical-700 text-cyan-400 font-mono font-bold">
-                  Ctrl + Caps Lock
-                </kbd>
-              </div>
+            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
+              <span className="text-zinc-400">Direct Comms</span>
+              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
+                Caps Lock
+              </kbd>
+            </div>
 
-              <div className="p-3 rounded-lg bg-tactical-950 border border-tactical-800 flex justify-between items-center">
-                <span className="text-zinc-300">Voice Volume (Whisper/Shout)</span>
-                <kbd className="px-2 py-1 rounded bg-tactical-850 border border-tactical-700 text-zinc-300 font-mono font-bold">
-                  Ctrl + Tab
-                </kbd>
-              </div>
-
-              <div className="p-3 rounded-lg bg-tactical-950 border border-tactical-800 flex justify-between items-center">
-                <span className="text-zinc-300">Enhanced Mantling / Climb</span>
-                <kbd className="px-2 py-1 rounded bg-tactical-850 border border-tactical-700 text-amber-400 font-mono font-bold">
-                  Custom User 1 (V)
-                </kbd>
-              </div>
+            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
+              <span className="text-zinc-400">Voice Volume</span>
+              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
+                Ctrl + Tab
+              </kbd>
             </div>
           </div>
         )}
 
         {activeTab === 'comms' && (
-          <div className="space-y-4">
-            <h4 className="text-sm font-mono font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-              <Radio className="w-4 h-4 text-cyan-400" />
-              Standard Task Force Radio Net Matrix
-            </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-3.5 rounded-lg bg-zinc-900/60 border border-zinc-800/60 space-y-1">
+              <div className="font-medium text-zinc-200">In-Game Direct Voice</div>
+              <p className="text-zinc-400 text-[11px]">
+                Built-in positional VOIP with acoustic obstruction and distance falloff. Use <kbd className="text-zinc-300">Caps Lock</kbd>.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="p-4 rounded-lg bg-tactical-950 border border-tactical-800 space-y-1.5">
-                <div className="font-mono text-cyan-400 font-bold">ALPHA SQUAD (1-1)</div>
-                <div className="text-zinc-400">SR: <strong className="text-zinc-200 font-mono">110.0 MHz</strong></div>
-                <div className="text-zinc-500 text-[11px]">Primary Infantry Assault Net</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-tactical-950 border border-tactical-800 space-y-1.5">
-                <div className="font-mono text-cyan-400 font-bold">BRAVO SQUAD (1-2)</div>
-                <div className="text-zinc-400">SR: <strong className="text-zinc-200 font-mono">120.0 MHz</strong></div>
-                <div className="text-zinc-500 text-[11px]">Weapons &amp; Support Squad</div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-tactical-950 border border-tactical-800 space-y-1.5">
-                <div className="font-mono text-cyan-400 font-bold">VIPER / CAS / MEDEVAC</div>
-                <div className="text-zinc-400">LR: <strong className="text-zinc-200 font-mono">30.0 MHz</strong></div>
-                <div className="text-zinc-500 text-[11px]">Platoon &amp; Rotary Operations Net</div>
-              </div>
+            <div className="p-3.5 rounded-lg bg-zinc-900/60 border border-zinc-800/60 space-y-1">
+              <div className="font-medium text-zinc-200">Community Discord</div>
+              <p className="text-zinc-400 text-[11px]">
+                Join squad briefing and coordination voice channels prior to mission deployment.
+              </p>
             </div>
           </div>
         )}
