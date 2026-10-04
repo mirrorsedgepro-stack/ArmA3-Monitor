@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Shield, Keyboard, Radio, ChevronRight } from 'lucide-react';
+import { Shield, Keyboard, Radio, CheckCircle, ChevronRight, Zap } from 'lucide-react';
 
 interface ServerRulesProps {
   rules?: string[];
@@ -20,128 +20,157 @@ export function ServerRules({ rules }: ServerRulesProps) {
   ];
 
   return (
-    <div className="rounded-xl bg-zinc-900/40 border border-zinc-800/80 overflow-hidden">
-      {/* Tab Switcher */}
-      <div className="flex border-b border-zinc-800/80 bg-zinc-900/60 text-xs font-medium">
-        <button
-          onClick={() => setActiveTab('rules')}
-          className={`flex items-center gap-1.5 px-4 py-3 transition-colors border-b-2 ${
-            activeTab === 'rules'
-              ? 'border-zinc-200 text-zinc-100 bg-zinc-900/80'
-              : 'border-transparent text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <Shield className="w-3.5 h-3.5" />
-          <span>Server Guidelines</span>
-        </button>
+    <section id="rules" className="space-y-4 pt-4">
+      <div className="rounded-2xl bg-gradient-to-b from-ga-surface to-ga-card border border-white/[0.08] shadow-ga-card overflow-hidden">
+        {/* Header Tabs */}
+        <div className="flex border-b border-white/[0.08] bg-[#0E101D] text-xs font-medium">
+          <button
+            onClick={() => setActiveTab('rules')}
+            className={`flex items-center gap-2 px-5 py-3.5 transition-colors border-b-2 ${
+              activeTab === 'rules'
+                ? 'border-ga-mint text-white bg-white/[0.04]'
+                : 'border-transparent text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Shield className="w-4 h-4 text-ga-mint" />
+            <span>Operational SOP &amp; Rules</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('keybinds')}
-          className={`flex items-center gap-1.5 px-4 py-3 transition-colors border-b-2 ${
-            activeTab === 'keybinds'
-              ? 'border-zinc-200 text-zinc-100 bg-zinc-900/80'
-              : 'border-transparent text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <Keyboard className="w-3.5 h-3.5" />
-          <span>Keybindings</span>
-        </button>
+          <button
+            onClick={() => setActiveTab('keybinds')}
+            className={`flex items-center gap-2 px-5 py-3.5 transition-colors border-b-2 ${
+              activeTab === 'keybinds'
+                ? 'border-ga-blue text-white bg-white/[0.04]'
+                : 'border-transparent text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Keyboard className="w-4 h-4 text-ga-blue" />
+            <span>ACE3 &amp; Combat Keybinds</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('comms')}
-          className={`flex items-center gap-1.5 px-4 py-3 transition-colors border-b-2 ${
-            activeTab === 'comms'
-              ? 'border-zinc-200 text-zinc-100 bg-zinc-900/80'
-              : 'border-transparent text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          <Radio className="w-3.5 h-3.5" />
-          <span>Comms &amp; Radio</span>
-        </button>
-      </div>
+          <button
+            onClick={() => setActiveTab('comms')}
+            className={`flex items-center gap-2 px-5 py-3.5 transition-colors border-b-2 ${
+              activeTab === 'comms'
+                ? 'border-purple-400 text-white bg-white/[0.04]'
+                : 'border-transparent text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Radio className="w-4 h-4 text-purple-400" />
+            <span>Voice &amp; Communications</span>
+          </button>
+        </div>
 
-      {/* Tab Content */}
-      <div className="p-5">
-        {activeTab === 'rules' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs text-zinc-300">
-            {defaultRules.map((rule, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-2.5 p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60"
-              >
-                <span className="font-mono text-zinc-500 font-medium shrink-0">
-                  {String(idx + 1).padStart(2, '0')}.
-                </span>
-                <span className="leading-relaxed">{rule}</span>
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'rules' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">
+                  Server Guidelines &amp; Code of Conduct
+                </h3>
+                <span className="text-xs text-zinc-500 font-mono">6 Core Directives</span>
               </div>
-            ))}
-          </div>
-        )}
 
-        {activeTab === 'keybinds' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs">
-            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
-              <span className="text-zinc-400">ACE Interaction</span>
-              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
-                Left Windows
-              </kbd>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                {defaultRules.map((rule, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-colors"
+                  >
+                    <span className="font-mono text-ga-mint font-semibold text-xs shrink-0 mt-0.5">
+                      0{idx + 1}.
+                    </span>
+                    <span className="text-zinc-300 leading-relaxed">{rule}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
-              <span className="text-zinc-400">ACE Self Interaction</span>
-              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
-                Ctrl + Left Win
-              </kbd>
-            </div>
+          {activeTab === 'keybinds' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">
+                  Essential Gameplay &amp; Interaction Keybinds
+                </h3>
+                <span className="text-xs text-zinc-500 font-mono">Default Mapping</span>
+              </div>
 
-            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
-              <span className="text-zinc-400">Climb / Mantle</span>
-              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
-                Custom User 1 (V)
-              </kbd>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
+                  <span className="text-zinc-300">ACE Interaction</span>
+                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-ga-mint">
+                    Left Windows
+                  </kbd>
+                </div>
 
-            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
-              <span className="text-zinc-400">Earplugs</span>
-              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
-                End
-              </kbd>
-            </div>
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
+                  <span className="text-zinc-300">ACE Self Interaction</span>
+                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-ga-mint">
+                    Ctrl + Left Win
+                  </kbd>
+                </div>
 
-            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
-              <span className="text-zinc-400">Direct Comms</span>
-              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
-                Caps Lock
-              </kbd>
-            </div>
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
+                  <span className="text-zinc-300">Climb &amp; Mantle</span>
+                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-ga-blue">
+                    Custom User 1 (V)
+                  </kbd>
+                </div>
 
-            <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800/60 flex justify-between items-center">
-              <span className="text-zinc-400">Voice Volume</span>
-              <kbd className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-200">
-                Ctrl + Tab
-              </kbd>
-            </div>
-          </div>
-        )}
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
+                  <span className="text-zinc-300">Combat Earplugs</span>
+                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-zinc-300">
+                    End
+                  </kbd>
+                </div>
 
-        {activeTab === 'comms' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-3.5 rounded-lg bg-zinc-900/60 border border-zinc-800/60 space-y-1">
-              <div className="font-medium text-zinc-200">In-Game Direct Voice</div>
-              <p className="text-zinc-400 text-[11px]">
-                Built-in positional VOIP with acoustic obstruction and distance falloff. Use <kbd className="text-zinc-300">Caps Lock</kbd>.
-              </p>
-            </div>
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
+                  <span className="text-zinc-300">Direct Comms</span>
+                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-purple-400">
+                    Caps Lock
+                  </kbd>
+                </div>
 
-            <div className="p-3.5 rounded-lg bg-zinc-900/60 border border-zinc-800/60 space-y-1">
-              <div className="font-medium text-zinc-200">Community Discord</div>
-              <p className="text-zinc-400 text-[11px]">
-                Join squad briefing and coordination voice channels prior to mission deployment.
-              </p>
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
+                  <span className="text-zinc-300">Whisper / Shout</span>
+                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-zinc-300">
+                    Ctrl + Tab
+                  </kbd>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {activeTab === 'comms' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">
+                  Audio &amp; Voice Channels
+                </h3>
+                <span className="text-xs text-zinc-500 font-mono">Communications</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1.5">
+                  <div className="font-semibold text-white">In-Game Proximity VOIP</div>
+                  <p className="text-zinc-400 text-xs leading-relaxed">
+                    Arma 3 standard high-fidelity voice transmission with dynamic terrain occlusion and realistic acoustic reverberation. Press <kbd className="text-ga-mint">Caps Lock</kbd> to speak.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1.5">
+                  <div className="font-semibold text-white">Squad Discord Server</div>
+                  <p className="text-zinc-400 text-xs leading-relaxed">
+                    Join mission briefings, recruit rebel squadmates, and post operation feedback on the community Discord channel.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

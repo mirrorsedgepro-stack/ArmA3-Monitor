@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Server, Search, Download, Settings, Copy, Check, ExternalLink, RefreshCw } from 'lucide-react';
+import { Download, Copy, Check, RefreshCw, Settings, ExternalLink, Terminal, ChevronRight } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
 interface HeaderProps {
@@ -10,8 +10,8 @@ interface HeaderProps {
   isLoading: boolean;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
+  activeSection: string;
+  setActiveSection: (sec: string) => void;
 }
 
 export function Header({
@@ -20,8 +20,8 @@ export function Header({
   isLoading,
   onOpenConfig,
   onDownloadPreset,
-  searchQuery,
-  setSearchQuery,
+  activeSection,
+  setActiveSection,
 }: HeaderProps) {
   const [copied, setCopied] = useState(false);
   const isOnline = stats.status === 'online';
@@ -32,63 +32,97 @@ export function Header({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const navLinks = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'mods', label: 'Addons & Mods' },
+    { id: 'rules', label: 'Server SOP' },
+  ];
+
   return (
-    <header className="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
+    <header className="border-b border-white/[0.08] bg-[#0B0D17]/90 backdrop-blur-xl sticky top-0 z-50 transition-all">
+      {/* Top micro-announcement banner (GameAnalytics style) */}
+      <div className="bg-gradient-to-r from-ga-indigo/20 via-ga-surface to-ga-mint/10 border-b border-white/[0.05] py-1.5 px-4 text-center text-xs">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-ga-mint animate-pulse" />
+          <span className="text-zinc-300 font-medium">
+            Live Arma 3 Server: <strong className="text-white">{stats.name}</strong>
+          </span>
+          <span className="text-zinc-500 hidden sm:inline">&bull;</span>
+          <span className="text-ga-mint font-mono text-[11px] hidden sm:inline">
+            Direct IP: {stats.ip}:{stats.port}
+          </span>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between h-16">
           
-          {/* Left: Minimalist logo / title */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-8 h-8 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
-              <Server className="w-4 h-4 text-zinc-300" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-zinc-100 tracking-tight">
-                  {stats.name || "Arma 3 Server"}
-                </span>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-zinc-900 text-zinc-400 border border-zinc-800">
-                  <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                  {isOnline ? 'online' : 'offline'}
-                </span>
+          {/* Left: Brand Identity with GameAnalytics-inspired geometric logo */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="relative w-9 h-9 rounded-lg bg-[#161826] border border-white/10 flex items-center justify-center shadow-ga-card overflow-hidden group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                {/* GameAnalytics signature colored corner bars */}
+                <div className="absolute top-0 right-0 w-3 h-1 bg-ga-mint" />
+                <div className="absolute bottom-0 left-0 w-3 h-1 bg-ga-indigo" />
+                <div className="w-4 h-4 text-white font-black text-xs flex items-center justify-center">
+                  <span className="tracking-tighter text-white font-mono font-bold">A3</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-white tracking-tight">
+                    ArmaAnalytics
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-ga-mint/10 text-ga-mint border border-ga-mint/20">
+                    Live Hub
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Center: Search input (Homepage search bar style) */}
-          <div className="flex-1 max-w-md hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <input
-                type="text"
-                placeholder="Filter mods, authors, categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-1.5 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-200 placeholder-zinc-500 text-xs focus:outline-none focus:border-zinc-700 transition-colors"
-              />
-              {searchQuery && (
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-white/[0.08]">
+              {navLinks.map((link) => (
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-300"
+                  key={link.id}
+                  onClick={() => {
+                    setActiveSection(link.id);
+                    const el = document.getElementById(link.id);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    activeSection === link.id
+                      ? 'text-white bg-white/[0.08]'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                  }`}
                 >
-                  &times;
+                  {link.label}
                 </button>
-              )}
-            </div>
+              ))}
+            </nav>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2">
-            {/* Quick Copy IP */}
+          {/* Right: Actions & CTAs */}
+          <div className="flex items-center gap-2.5">
+            {/* Server Status Pill */}
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs">
+              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-ga-mint' : 'bg-red-500'}`} />
+              <span className="text-zinc-300 font-mono text-[11px]">
+                {stats.players}/{stats.maxPlayers} Online
+              </span>
+            </div>
+
+            {/* Copy IP Button */}
             <button
               onClick={copyDirectConnect}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 text-xs font-mono transition-colors"
-              title="Click to copy IP:Port"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg ga-btn-secondary text-xs font-mono"
+              title="Copy IP:Port to clipboard"
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400">Copied</span>
+                  <Check className="w-3.5 h-3.5 text-ga-mint" />
+                  <span className="text-ga-mint font-medium">Copied</span>
                 </>
               ) : (
                 <>
@@ -99,42 +133,43 @@ export function Header({
               )}
             </button>
 
-            {/* Download Preset */}
+            {/* Preset Download CTA */}
             <button
               onClick={onDownloadPreset}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-850 text-zinc-200 border border-zinc-800 text-xs font-medium transition-colors"
-              title="Download Arma 3 Launcher HTML Preset"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg ga-btn-secondary text-xs"
+              title="Download official Arma 3 Launcher HTML Preset"
             >
-              <Download className="w-3.5 h-3.5 text-zinc-400" />
+              <Download className="w-3.5 h-3.5 text-ga-mint" />
               <span>Preset (.html)</span>
             </button>
 
-            {/* Direct Connect Link */}
+            {/* Direct Connect (Primary GameAnalytics Mint Button) */}
             <a
               href={`steam://connect/${stats.ip}:${stats.port}`}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-zinc-100 hover:bg-white text-zinc-900 font-medium text-xs transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg ga-btn-primary text-xs"
               title="Launch Arma 3 & Connect"
             >
-              <span>Join</span>
+              <Terminal className="w-3.5 h-3.5" />
+              <span>Direct Join</span>
             </a>
 
             {/* Refresh */}
             <button
               onClick={onRefresh}
               disabled={isLoading}
-              className="p-1.5 rounded-md bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors disabled:opacity-50"
+              className="p-1.5 rounded-lg ga-btn-secondary text-zinc-400 hover:text-white disabled:opacity-50"
               title="Refresh telemetry"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-zinc-200' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-ga-mint' : ''}`} />
             </button>
 
             {/* Settings */}
             <button
               onClick={onOpenConfig}
-              className="p-1.5 rounded-md bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
-              title="Server Configuration"
+              className="p-1.5 rounded-lg ga-btn-secondary text-zinc-400 hover:text-white"
+              title="Configure Server IP"
             >
-              <Settings className="w-3.5 h-3.5" />
+              <Settings className="w-4 h-4" />
             </button>
           </div>
         </div>

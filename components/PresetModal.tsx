@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Download, Upload, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { X, Download, Upload, CheckCircle2, AlertCircle, Info, Sparkles } from 'lucide-react';
 import { parseArma3PresetHtml, generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { ArmaMod } from '@/data/defaultMods';
 
@@ -97,48 +97,48 @@ export function PresetModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <div 
-        className="w-full max-w-xl rounded-xl bg-zinc-900 border border-zinc-800 shadow-xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-xl rounded-2xl bg-[#101320] border border-white/[0.1] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-zinc-800 text-zinc-300">
-              <Download className="w-4 h-4" />
+        <div className="p-5 border-b border-white/[0.08] bg-[#0E101D] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-ga-mint/10 border border-ga-mint/20 flex items-center justify-center text-ga-mint">
+              <Download className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-zinc-100">Arma 3 Launcher Preset</h3>
-              <p className="text-xs text-zinc-500">Download or import official BI Launcher .html preset</p>
+              <h3 className="text-base font-bold text-white">Arma 3 Launcher Preset Manager</h3>
+              <p className="text-xs text-zinc-400">Download or import official Bohemia Interactive XML/HTML presets</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-zinc-800 bg-zinc-950/60 text-xs">
+        <div className="flex border-b border-white/[0.08] bg-[#0E101D]/60 text-xs font-medium">
           <button
             onClick={() => setActiveTab('download')}
-            className={`flex-1 py-2.5 px-4 text-center font-medium transition-colors border-b-2 ${
+            className={`flex-1 py-3 px-4 text-center transition-colors border-b-2 ${
               activeTab === 'download'
-                ? 'border-zinc-200 text-zinc-100 bg-zinc-900'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? 'border-ga-mint text-white bg-white/[0.04]'
+                : 'border-transparent text-zinc-400 hover:text-white'
             }`}
           >
             Download Preset (.html)
           </button>
           <button
             onClick={() => setActiveTab('import')}
-            className={`flex-1 py-2.5 px-4 text-center font-medium transition-colors border-b-2 ${
+            className={`flex-1 py-3 px-4 text-center transition-colors border-b-2 ${
               activeTab === 'import'
-                ? 'border-zinc-200 text-zinc-100 bg-zinc-900'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? 'border-ga-mint text-white bg-white/[0.04]'
+                : 'border-transparent text-zinc-400 hover:text-white'
             }`}
           >
             Import Custom Preset
@@ -146,55 +146,56 @@ export function PresetModal({
         </div>
 
         {/* Content Body */}
-        <div className="p-5 overflow-y-auto space-y-5 flex-1">
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
           {activeTab === 'download' ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-zinc-950 border border-zinc-800 space-y-2.5">
+              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-zinc-300">Synchronized Modpack</span>
-                  <span className="text-zinc-500 font-mono">{currentMods.length} mods</span>
+                  <span className="font-semibold text-white">Synchronized Modpack</span>
+                  <span className="text-ga-mint font-mono font-semibold">{currentMods.length} Mods</span>
                 </div>
-                <p className="text-xs text-zinc-400">
-                  Bohemia Interactive standard HTML preset format. Drag and drop into your Arma 3 Launcher to subscribe and load.
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Drag and drop this downloaded preset file directly into the official Bohemia Interactive Arma 3 Launcher to automatically subscribe, download, and configure load order.
                 </p>
                 <button
                   onClick={handleDownload}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-medium text-xs transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg ga-btn-primary text-xs font-semibold shadow-ga-mint"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download Preset (.html)</span>
+                  <span>Download Launcher Preset (.html)</span>
                 </button>
               </div>
 
               {/* Instructions */}
               <div className="space-y-2">
-                <h4 className="text-xs font-medium text-zinc-400">Quick Guide:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-                    <span className="text-zinc-300 font-medium block mb-0.5">1. Download</span>
-                    <p className="text-zinc-500 leading-normal text-[11px]">Save the .html file</p>
+                <h4 className="text-xs font-semibold text-white uppercase tracking-wider">How it works:</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <span className="text-ga-mint font-semibold block mb-1">01. DOWNLOAD</span>
+                    <p className="text-zinc-400 leading-normal text-[11px]">Save the .html preset file</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-                    <span className="text-zinc-300 font-medium block mb-0.5">2. Drag &amp; Drop</span>
-                    <p className="text-zinc-500 leading-normal text-[11px]">Drop into Arma 3 Launcher</p>
+                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <span className="text-ga-blue font-semibold block mb-1">02. DRAG &amp; DROP</span>
+                    <p className="text-zinc-400 leading-normal text-[11px]">Drop file into Arma 3 Launcher</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
-                    <span className="text-zinc-300 font-medium block mb-0.5">3. Play</span>
-                    <p className="text-zinc-500 leading-normal text-[11px]">Steam syncs all mods</p>
+                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <span className="text-purple-400 font-semibold block mb-1">03. AUTO SYNC</span>
+                    <p className="text-zinc-400 leading-normal text-[11px]">Steam automatically downloads</p>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <p className="text-xs text-zinc-400">
                 Upload your Arma 3 Launcher HTML preset or paste raw content:
               </p>
 
               {/* File upload zone */}
-              <label className="flex flex-col items-center justify-center p-5 border border-dashed border-zinc-700 hover:border-zinc-500 rounded-lg bg-zinc-950 cursor-pointer transition-colors">
-                <Upload className="w-5 h-5 text-zinc-400 mb-1" />
-                <span className="text-xs font-medium text-zinc-300">Choose .html preset file</span>
+              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/[0.1] hover:border-ga-mint/50 rounded-xl bg-white/[0.02] cursor-pointer transition-colors">
+                <Upload className="w-6 h-6 text-zinc-400 mb-1.5" />
+                <span className="text-xs font-semibold text-white">Choose .html preset file</span>
+                <span className="text-[11px] text-zinc-500 mt-0.5">Exported from Arma 3 Launcher</span>
                 <input
                   type="file"
                   accept=".html,.htm"
@@ -208,22 +209,22 @@ export function PresetModal({
                 placeholder="Or paste HTML preset code..."
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 placeholder-zinc-500 text-xs font-mono focus:outline-none focus:border-zinc-700"
+                className="w-full p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white placeholder-zinc-500 text-xs font-mono focus:outline-none focus:border-ga-mint/50"
               />
 
               <button
                 onClick={handleTextImport}
-                className="w-full py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs transition-colors"
+                className="w-full py-2.5 rounded-lg ga-btn-secondary text-xs font-semibold hover:border-white/[0.25]"
               >
-                Parse &amp; Apply Mods
+                Parse &amp; Synchronize Modpack
               </button>
 
               {importStatus && (
                 <div
-                  className={`p-2.5 rounded-lg text-xs flex items-center gap-2 ${
+                  className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
                     importStatus.isError
                       ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : 'bg-ga-mint/10 text-ga-mint border border-ga-mint/20'
                   }`}
                 >
                   {importStatus.isError ? (

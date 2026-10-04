@@ -11,6 +11,7 @@ import { ServerRules } from '@/components/ServerRules';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
+import { Sparkles, Terminal, Shield, ArrowUpRight } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
@@ -18,6 +19,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeSection, setActiveSection] = useState<string>('overview');
   
   // Modals state
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
@@ -39,7 +41,6 @@ export default function Home() {
     bmId: '',
   });
 
-  // Load saved config & mods from localStorage if available
   useEffect(() => {
     try {
       const savedConfig = localStorage.getItem('arma3_server_config');
@@ -132,31 +133,32 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090a0f] text-zinc-200 flex flex-col justify-between selection:bg-zinc-700 selection:text-white">
+    <div className="min-h-screen bg-[#0B0D17] text-white flex flex-col justify-between ga-bg-glow selection:bg-ga-mint selection:text-zinc-950">
       <div>
-        {/* Homepage Minimalist Navigation Bar */}
+        {/* GameAnalytics Header */}
         <Header
           stats={stats}
           onRefresh={fetchServerStats}
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
           onDownloadPreset={handleDownloadPreset}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
         />
 
-        {/* Main Content Dashboard */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Main Content Area */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
           
-          {/* Top Row: Information Widgets */}
+          {/* Section 1: Hero & Real-Time KPI Stats */}
           <ServerOverview
             stats={stats}
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
             onOpenConfig={() => setIsConfigModalOpen(true)}
+            onDownloadPreset={handleDownloadPreset}
             modCount={mods.length}
           />
 
-          {/* Grouped Services: Loaded Server Mods */}
+          {/* Section 2: Modpack Suite & Steam Workshop Repository */}
           <ModList
             mods={mods}
             serverName={serverConfig.name}
@@ -166,28 +168,36 @@ export default function Home() {
             setSearchQuery={setSearchQuery}
           />
 
-          {/* Guidelines & Keybinds */}
+          {/* Section 3: Server Guidelines, Keybindings & SOP */}
           <ServerRules rules={stats.rulesOfEngagement} />
 
         </main>
       </div>
 
-      {/* Clean Minimalist Footer */}
-      <footer className="border-t border-zinc-800/80 bg-zinc-950/40 py-5 text-xs text-zinc-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-zinc-400">{serverConfig.name}</span>
-            <span>&bull;</span>
-            <span>Arma 3 Server Monitor</span>
+      {/* GameAnalytics Style Footer */}
+      <footer className="mt-20 border-t border-white/[0.08] bg-[#080911]/90 py-10 text-xs text-zinc-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-[#161826] border border-white/10 flex items-center justify-center font-bold text-white text-[11px] font-mono">
+              A3
+            </div>
+            <div>
+              <div className="font-semibold text-white">{serverConfig.name}</div>
+              <div className="text-zinc-500 text-[11px]">Arma 3 Server Portal &bull; Powered by Steam A2S Query</div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span>Direct:</span>
-            <code className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+            <span className="text-zinc-400">Direct Connect:</span>
+            <code className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-ga-mint">
               {stats.ip}:{stats.port}
             </code>
-            <span>&bull;</span>
-            <span className="text-zinc-600">Updated {stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleTimeString() : 'Live'}</span>
+            <span className="text-zinc-600 hidden sm:inline">&bull;</span>
+            <span className="text-zinc-400">Status: <strong className="text-white uppercase">{stats.status}</strong></span>
+          </div>
+
+          <div className="text-zinc-500 text-[11px]">
+            Vercel Serverless Ready
           </div>
         </div>
       </footer>

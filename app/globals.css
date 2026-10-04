@@ -3,33 +3,71 @@
 @tailwind utilities;
 
 :root {
-  --background: #090a0f;
-  --foreground: #e4e4e7;
+  --background: #0B0D17;
+  --foreground: #FFFFFF;
 }
 
 body {
   color: var(--foreground);
   background-color: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-/* Minimalist scrollbars */
+/* Subtle GameAnalytics Ambient Glow */
+.ga-bg-glow {
+  background-image: 
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(70, 80, 240, 0.22), transparent 70%),
+    radial-gradient(circle at 10% 20%, rgba(20, 240, 175, 0.06), transparent 40%),
+    radial-gradient(circle at 90% 40%, rgba(77, 101, 255, 0.08), transparent 50%);
+}
+
+/* Custom Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0B0D17;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #1C2035;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #14F0AF;
+}
+
+/* GameAnalytics Button Styles */
+.ga-btn-primary {
+  background-color: #14F0AF;
+  color: #0B0D17;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ga-btn-primary:hover {
+  background-color: #0FE2A3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px 0 rgba(20, 240, 175, 0.35);
+}
+
+.ga-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ga-btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }

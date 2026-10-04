@@ -63,48 +63,48 @@ export function ServerConfigModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <div 
-        className="w-full max-w-md rounded-xl bg-zinc-900 border border-zinc-800 shadow-xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-md rounded-2xl bg-[#101320] border border-white/[0.1] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-zinc-800 text-zinc-300">
-              <Settings className="w-4 h-4" />
+        <div className="p-5 border-b border-white/[0.08] bg-[#0E101D] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-ga-indigo/20 border border-ga-indigo/30 flex items-center justify-center text-ga-blue">
+              <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-zinc-100">Server Settings</h3>
-              <p className="text-xs text-zinc-500">Configure target server IP and query parameters</p>
+              <h3 className="text-base font-bold text-white">Target Server Configuration</h3>
+              <p className="text-xs text-zinc-400">Configure target server IP &amp; query parameters</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-3.5 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Server Display Name
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
+              Community / Server Display Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Frenchy's Antistasi"
-              className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs focus:outline-none focus:border-zinc-700"
+              placeholder="e.g. Frenchy's Antistasi Ultimate"
+              className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs focus:outline-none focus:border-ga-mint/50"
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-semibold text-zinc-300 mb-1">
                 Server IP
               </label>
               <input
@@ -113,12 +113,12 @@ export function ServerConfigModal({
                 value={ip}
                 onChange={(e) => setIp(e.target.value)}
                 placeholder="180.181.238.103"
-                className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-zinc-700"
+                className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs font-mono focus:outline-none focus:border-ga-mint/50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1">
+              <label className="block text-xs font-semibold text-zinc-300 mb-1">
                 Port
               </label>
               <input
@@ -131,13 +131,13 @@ export function ServerConfigModal({
                   if (num) setQueryPort((num + 1).toString());
                 }}
                 placeholder="2302"
-                className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-zinc-700"
+                className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs font-mono focus:outline-none focus:border-ga-mint/50"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               Steam A2S Query Port
             </label>
             <input
@@ -145,20 +145,20 @@ export function ServerConfigModal({
               value={queryPort}
               onChange={(e) => setQueryPort(e.target.value)}
               placeholder="2303"
-              className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-zinc-700"
+              className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs font-mono focus:outline-none focus:border-ga-mint/50"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1">
-              BattleMetrics ID <span className="text-zinc-500 font-normal">(Optional)</span>
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
+              BattleMetrics Server ID <span className="text-zinc-500 font-normal">(Optional)</span>
             </label>
             <input
               type="text"
               value={bmId}
               onChange={(e) => setBmId(e.target.value)}
               placeholder="e.g. 2351240"
-              className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs font-mono focus:outline-none focus:border-zinc-700"
+              className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white text-xs font-mono focus:outline-none focus:border-ga-mint/50"
             />
           </div>
 
@@ -166,25 +166,25 @@ export function ServerConfigModal({
             <button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 text-xs transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg ga-btn-secondary text-xs text-zinc-400"
             >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset</span>
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Defaults</span>
             </button>
 
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-900 font-medium text-xs transition-colors"
+              className="flex items-center gap-1.5 px-5 py-2 rounded-lg ga-btn-primary text-xs font-semibold shadow-ga-mint"
             >
               {savedSuccess ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Saved</span>
+                  <Check className="w-3.5 h-3.5 text-zinc-950" />
+                  <span>Saved &amp; Updated</span>
                 </>
               ) : (
                 <>
                   <Save className="w-3.5 h-3.5" />
-                  <span>Apply</span>
+                  <span>Apply Settings</span>
                 </>
               )}
             </button>
