@@ -8,9 +8,11 @@ import { PlayerListModal } from '@/components/PlayerListModal';
 import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ServerRules } from '@/components/ServerRules';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
+import { ArrowUp, Sparkles, Compass, Layers, Shield } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
@@ -24,6 +26,8 @@ export default function Home() {
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState<boolean>(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
+  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
   // Server configuration
   const [serverConfig, setServerConfig] = useState<{
@@ -40,6 +44,31 @@ export default function Home() {
     bmId: '',
   });
 
+  // Track scroll position for smooth floating mechanics
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+
+      const overviewEl = document.getElementById('overview');
+      const modsEl = document.getElementById('mods');
+      const rulesEl = document.getElementById('rules');
+
+      const scrollPos = window.scrollY + 200;
+
+      if (rulesEl && scrollPos >= rulesEl.offsetTop) {
+        setActiveSection('rules');
+      } else if (modsEl && scrollPos >= modsEl.offsetTop) {
+        setActiveSection('mods');
+      } else {
+        setActiveSection('overview');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Check initial load and show tour if first-time user
   useEffect(() => {
     try {
       const savedConfig = localStorage.getItem('arma3_server_config');
@@ -52,6 +81,15 @@ export default function Home() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           setMods(parsed);
         }
+      }
+
+      const tourCompleted = localStorage.getItem('arma3_tour_completed');
+      if (!tourCompleted) {
+        // Start interactive tour after brief delay so elements are ready
+        const timer = setTimeout(() => {
+          setIsTourOpen(true);
+        }, 900);
+        return () => clearTimeout(timer);
       }
     } catch {
       // Ignore localStorage errors
@@ -131,6 +169,13 @@ export default function Home() {
     }, 100);
   };
 
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-arma-bg text-arma-text arma-grid-bg flex flex-col justify-between selection:bg-arma-amber selection:text-black">
       <div>
@@ -141,12 +186,13 @@ export default function Home() {
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
           onDownloadPreset={handleDownloadPreset}
+          onStartTour={() => setIsTourOpen(true)}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
         />
 
-        {/* Tactical Dashboard Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Tactical Dashboard Content - Generous Vertical Spacing & Rhythm */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-12 sm:space-y-16 lg:space-y-20">
           
           {/* Section 1: Operation Briefing & Technical Telemetry */}
           <ServerOverview
@@ -154,6 +200,7 @@ export default function Home() {
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
             onOpenConfig={() => setIsConfigModalOpen(true)}
             onDownloadPreset={handleDownloadPreset}
+            onStartTour={() => setIsTourOpen(true)}
             modCount={mods.length}
           />
 
@@ -173,26 +220,109 @@ export default function Home() {
         </main>
       </div>
 
+      {/* Floating Tactical Navigation & Smooth Scrolling HUD */}
+      {showScrollTop && (
+        <aside 
+          aria-label="Tactical Quick Navigation"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 p-1.5 rounded-xl bg-arma-surface/90 border border-arma-border backdrop-blur-md shadow-2xl font-mono text-xs"
+        >
+          <button
+            onClick={() => scrollToSection('overview')}
+            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              activeSection === 'overview'
+                ? 'bg-arma-amber text-black font-bold'
+                : 'text-arma-textMuted hover:text-arma-text'
+            }`}
+            title="Jump to Theater Overview"
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">OVERVIEW</span>
+          </button>
+
+          <button
+            onClick={() => scrollToSection('mods')}
+            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              activeSection === 'mods'
+                ? 'bg-arma-amber text-black font-bold'
+                : 'text-arma-textMuted hover:text-arma-text'
+            }`}
+            title="Jump to Addons"
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">ADDONS</span>
+          </button>
+
+          <button
+            onClick={() => scrollToSection('rules')}
+            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              activeSection === 'rules'
+                ? 'bg-arma-amber text-black font-bold'
+                : 'text-arma-textMuted hover:text-arma-text'
+            }`}
+            title="Jump to Directives"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">RULES</span>
+          </button>
+
+          <div className="w-px h-5 bg-arma-border mx-1" />
+
+          {/* Restart Tour */}
+          <button
+            onClick={() => setIsTourOpen(true)}
+            className="p-2 rounded-lg bg-arma-card hover:bg-arma-amber hover:text-black text-arma-amber transition-colors"
+            title="Start Interactive Guided Tour"
+          >
+            <Sparkles className="w-4 h-4" />
+          </button>
+
+          {/* Scroll to Top */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="p-2 rounded-lg bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
+            title="Smooth Scroll to Top"
+          >
+            <ArrowUp className="w-4 h-4" />
+          </button>
+        </aside>
+      )}
+
+      {/* Interactive Guided Onboarding Tour Modal */}
+      <OnboardingTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        setSearchQuery={setSearchQuery}
+      />
+
       {/* Military Command Footer */}
-      <footer className="mt-16 border-t border-arma-border bg-[#090b0e] py-6 text-xs font-mono text-arma-textMuted">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+      <footer className="mt-20 border-t border-arma-border bg-[#07090c] py-8 text-xs font-mono text-arma-textMuted">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="font-bold text-arma-text uppercase">{serverConfig.name}</span>
             <span>&bull;</span>
             <span className="text-arma-khaki">ARMA 3 DEDICATED OPERATIONS</span>
+            <span>&bull;</span>
+            <span>SYDNEY, AUSTRALIA</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span>DIRECT CONNECT:</span>
-            <code className="px-2 py-0.5 rounded bg-arma-card border border-arma-border text-arma-amber font-bold">
+            <code className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-amber font-bold">
               {stats.ip}:{stats.port}
             </code>
             <span>&bull;</span>
             <span>STATUS: <strong className="text-arma-green uppercase">{stats.status}</strong></span>
           </div>
 
-          <div className="text-arma-textDim text-[11px]">
-            VALVE A2S PROTOCOL &bull; VERCEL DEPLOYMENT
+          <div className="text-arma-textDim text-[11px] flex items-center gap-3">
+            <button
+              onClick={() => setIsTourOpen(true)}
+              className="text-arma-amber hover:underline font-bold"
+            >
+              TAKE GUIDED TOUR
+            </button>
+            <span>&bull;</span>
+            <span>VALVE A2S &bull; VERCEL DEPLOYMENT</span>
           </div>
         </div>
       </footer>

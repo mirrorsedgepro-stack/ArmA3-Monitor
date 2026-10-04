@@ -1,7 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Copy, Check, RefreshCw, Settings, Terminal, Shield, Crosshair } from 'lucide-react';
+import { 
+  Download, 
+  Copy, 
+  Check, 
+  RefreshCw, 
+  Settings, 
+  Terminal, 
+  Shield, 
+  Crosshair, 
+  Sparkles,
+  PlayCircle
+} from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
 interface HeaderProps {
@@ -10,6 +21,7 @@ interface HeaderProps {
   isLoading: boolean;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
+  onStartTour: () => void;
   activeSection: string;
   setActiveSection: (sec: string) => void;
 }
@@ -20,6 +32,7 @@ export function Header({
   isLoading,
   onOpenConfig,
   onDownloadPreset,
+  onStartTour,
   activeSection,
   setActiveSection,
 }: HeaderProps) {
@@ -41,7 +54,7 @@ export function Header({
   return (
     <header className="border-b border-arma-border bg-arma-surface/95 backdrop-blur-md sticky top-0 z-50">
       {/* Top Tactical C2 Ticker (Subdued Military Telemetry) */}
-      <div className="bg-[#090b0e] border-b border-[#1c212c] py-1 px-4 text-[11px] font-mono text-arma-textMuted">
+      <div className="bg-[#080a0d] border-b border-[#1a1f29] py-1.5 px-4 text-[11px] font-mono text-arma-textMuted">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-arma-text">
@@ -57,39 +70,39 @@ export function Header({
           <div className="flex items-center gap-3 text-arma-textDim">
             <span className="font-mono text-arma-textMuted">IP: {stats.ip}:{stats.port}</span>
             <span className="text-[#333b47]">&bull;</span>
-            <span className="font-mono text-arma-amber font-semibold">{stats.players}/{stats.maxPlayers} SLOTS</span>
+            <span className="font-mono text-arma-amber font-semibold">{stats.players}/{stats.maxPlayers} OPERATORS</span>
           </div>
         </div>
       </div>
 
-      {/* Main Command Bar */}
+      {/* Main Command Bar with generous spacing */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           
           {/* Left: Arma 3 Tactical Insignia */}
-          <div className="flex items-center gap-5">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-amber cursor-pointer hover:border-arma-amber transition-colors"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              >
-                <Crosshair className="w-4 h-4 text-arma-amber" />
+          <div className="flex items-center gap-6">
+            <div 
+              className="flex items-center gap-3.5 cursor-pointer group"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              <div className="w-10 h-10 rounded bg-arma-card border border-arma-border group-hover:border-arma-amber transition-colors flex items-center justify-center text-arma-amber shadow-inner">
+                <Crosshair className="w-5 h-5 text-arma-amber" />
               </div>
 
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-black text-sm text-arma-text uppercase tracking-wider font-mono">
+                  <span className="font-black text-sm sm:text-base text-arma-text uppercase tracking-wider font-mono">
                     {stats.name}
                   </span>
                 </div>
-                <div className="text-[10px] text-arma-khaki font-mono uppercase tracking-widest">
+                <div className="text-[10px] text-arma-khaki font-mono uppercase tracking-widest mt-0.5">
                   Bohemia Interactive &bull; Dedicated Operation
                 </div>
               </div>
             </div>
 
             {/* Tactical Navigation Links */}
-            <nav className="hidden lg:flex items-center space-x-1 pl-4 border-l border-arma-border text-xs font-mono">
+            <nav className="hidden lg:flex items-center space-x-2 pl-6 border-l border-arma-border text-xs font-mono">
               {navLinks.map((link) => (
                 <button
                   key={link.id}
@@ -98,9 +111,9 @@ export function Header({
                     const el = document.getElementById(link.id);
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className={`px-3 py-1.5 rounded transition-colors ${
+                  className={`px-3.5 py-2 rounded-md transition-all ${
                     activeSection === link.id
-                      ? 'text-arma-amber bg-arma-amberDim font-bold border border-arma-amber/30'
+                      ? 'text-arma-amber bg-arma-amberDim font-bold border border-arma-amber/40 shadow-sm'
                       : 'text-arma-textMuted hover:text-arma-text hover:bg-arma-card'
                   }`}
                 >
@@ -110,18 +123,29 @@ export function Header({
             </nav>
           </div>
 
-          {/* Right: Military Actions */}
-          <div className="flex items-center gap-2">
-            {/* Quick Copy IP */}
+          {/* Right: Spread-out Military Actions */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            {/* Quick Interactive Tour Trigger */}
+            <button
+              onClick={onStartTour}
+              className="flex items-center gap-2 px-3.5 py-2 rounded bg-arma-card hover:bg-arma-cardHover border border-arma-amber/40 text-arma-amber text-xs font-mono font-bold transition-all shadow-sm group"
+              title="Start visual step-by-step tour"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-arma-amber group-hover:rotate-12 transition-transform" />
+              <span className="hidden md:inline">GUIDED TOUR</span>
+              <span className="md:hidden">TOUR</span>
+            </button>
+
+            {/* Quick Copy IP Button */}
             <button
               onClick={copyDirectConnect}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded arma-btn-secondary text-xs font-mono"
+              className="flex items-center gap-2 px-3.5 py-2 rounded arma-btn-secondary text-xs font-mono transition-all"
               title="Copy Server IP and Port"
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-arma-amber" />
-                  <span className="text-arma-amber font-bold">COPIED</span>
+                  <Check className="w-3.5 h-3.5 text-arma-green" />
+                  <span className="text-arma-green font-bold">COPIED</span>
                 </>
               ) : (
                 <>
@@ -132,44 +156,46 @@ export function Header({
               )}
             </button>
 
-            {/* Download Preset */}
+            {/* Download Preset (.html) */}
             <button
               onClick={onDownloadPreset}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded arma-btn-secondary text-xs font-mono"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded arma-btn-secondary text-xs font-mono transition-all"
               title="Download official Arma 3 Launcher HTML Preset"
             >
               <Download className="w-3.5 h-3.5 text-arma-khaki" />
               <span>PRESET (.HTML)</span>
             </button>
 
-            {/* Direct Connect (Arma Amber Primary CTA) */}
+            {/* Direct Connect (Primary CTA) */}
             <a
               href={`steam://connect/${stats.ip}:${stats.port}`}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded arma-btn-primary text-xs font-mono font-bold"
+              className="flex items-center gap-2 px-5 py-2.5 rounded arma-btn-primary text-xs font-mono font-bold shadow-arma-amber transition-all"
               title="Launch Arma 3 and connect automatically"
             >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>DIRECT JOIN</span>
+              <Terminal className="w-4 h-4" />
+              <span className="hidden sm:inline">DIRECT JOIN</span>
+              <span className="sm:hidden">JOIN</span>
             </a>
 
-            {/* Refresh */}
-            <button
-              onClick={onRefresh}
-              disabled={isLoading}
-              className="p-1.5 rounded arma-btn-secondary text-arma-textMuted hover:text-arma-text disabled:opacity-50"
-              title="Refresh telemetry"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-arma-amber' : ''}`} />
-            </button>
+            {/* Utilities: Refresh & Settings */}
+            <div className="flex items-center gap-1.5 pl-2 border-l border-arma-border">
+              <button
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="p-2 rounded arma-btn-secondary text-arma-textMuted hover:text-arma-text disabled:opacity-50 transition-colors"
+                title="Refresh live telemetry"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-arma-amber' : ''}`} />
+              </button>
 
-            {/* Settings */}
-            <button
-              onClick={onOpenConfig}
-              className="p-1.5 rounded arma-btn-secondary text-arma-textMuted hover:text-arma-text"
-              title="Configure target IP"
-            >
-              <Settings className="w-3.5 h-3.5" />
-            </button>
+              <button
+                onClick={onOpenConfig}
+                className="p-2 rounded arma-btn-secondary text-arma-textMuted hover:text-arma-text transition-colors"
+                title="Server settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

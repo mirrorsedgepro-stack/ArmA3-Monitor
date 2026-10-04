@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
   ExternalLink, 
@@ -17,7 +17,8 @@ import {
   CheckCircle2, 
   Info,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Sparkles
 } from 'lucide-react';
 import { ArmaMod } from '@/data/defaultMods';
 
@@ -54,7 +55,7 @@ export function ModList({
   searchQuery,
   setSearchQuery,
 }: ModListProps) {
-  // Folders expansion state (Core & Equipment open by default)
+  // Folders expansion state
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
     core: true,
     equipment: true,
@@ -68,6 +69,28 @@ export function ModList({
   const [filterType, setFilterType] = useState<'all' | 'required' | 'optional'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedModId, setExpandedModId] = useState<string | null>(null);
+
+  // When search query changes, auto-expand folders that contain matches
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const q = searchQuery.toLowerCase().trim();
+      const updated: Record<string, boolean> = { ...openFolders };
+      CATEGORY_FOLDERS.forEach((f) => {
+        const matches = mods.some((m) => 
+          m.category === f.id && (
+            m.name.toLowerCase().includes(q) ||
+            m.id.includes(q) ||
+            m.author?.toLowerCase().includes(q) ||
+            m.tags?.some((t) => t.toLowerCase().includes(q))
+          )
+        );
+        if (matches) {
+          updated[f.id] = true;
+        }
+      });
+      setOpenFolders(updated);
+    }
+  }, [searchQuery, mods]);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders((prev) => ({
@@ -133,57 +156,57 @@ export function ModList({
   const totalOptional = mods.length - totalRequired;
 
   return (
-    <section id="mods" className="space-y-4">
-      {/* Manifest Master Control Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-lg bg-arma-surface border border-arma-border">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="px-2 py-0.5 rounded bg-arma-card text-arma-amber border border-arma-border font-bold">
+    <section id="mods" className="space-y-6 sm:space-y-8 scroll-mt-24">
+      {/* Manifest Master Control Bar (Spacious, De-Cramped) */}
+      <div id="tour-manifest-header" className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-7 sm:p-8 rounded-xl bg-arma-surface border border-arma-border shadow-lg">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+            <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-amber border border-arma-border font-bold">
               [ADDON FOLDERS // ARCHIVE]
             </span>
             <span className="text-arma-textMuted font-bold">
               {totalRequired} REQUIRED &bull; {totalOptional} OPTIONAL &bull; 30 TOTAL
             </span>
           </div>
-          <h2 className="text-xl font-bold text-arma-text font-mono tracking-tight uppercase mt-1">
+          <h2 className="text-2xl sm:text-3xl font-black text-arma-text font-mono tracking-tight uppercase">
             Server Addon Folders ({filteredMods.length} Visible)
           </h2>
-          <p className="text-xs text-arma-textMuted leading-relaxed mt-0.5">
+          <p className="text-xs sm:text-sm text-arma-textMuted leading-relaxed max-w-2xl">
             Organized into collapsible category directories. Expand folders to review addon descriptions or export the complete launcher preset (.html).
           </p>
         </div>
 
-        {/* Global Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+        {/* Global Action Buttons (Spread out with ample room) */}
+        <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
           <button
             onClick={expandAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded arma-btn-secondary text-[11px]"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg arma-btn-secondary text-xs hover:bg-arma-cardHover"
             title="Expand all category folders"
           >
-            <Maximize2 className="w-3 h-3 text-arma-amber" />
+            <Maximize2 className="w-3.5 h-3.5 text-arma-amber" />
             <span>EXPAND ALL</span>
           </button>
 
           <button
             onClick={collapseAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded arma-btn-secondary text-[11px]"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg arma-btn-secondary text-xs hover:bg-arma-cardHover"
             title="Collapse all category folders"
           >
-            <Minimize2 className="w-3 h-3 text-arma-textDim" />
+            <Minimize2 className="w-3.5 h-3.5 text-arma-textDim" />
             <span>COLLAPSE</span>
           </button>
 
           <button
             onClick={onDownloadPreset}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded arma-btn-primary font-bold shadow-arma-amber"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg arma-btn-primary font-bold shadow-arma-amber text-xs transition-all hover:scale-[1.02]"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
             <span>EXPORT PRESET</span>
           </button>
 
           <button
             onClick={onOpenPresetModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded arma-btn-secondary"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg arma-btn-secondary text-xs hover:bg-arma-cardHover"
           >
             <Filter className="w-3.5 h-3.5 text-arma-khaki" />
             <span>IMPORT</span>
@@ -191,64 +214,56 @@ export function ModList({
         </div>
       </div>
 
-      {/* Filter and Search Navigation Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 font-mono text-xs">
-        {/* Status Filters */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-center bg-arma-surface p-0.5 rounded border border-arma-border">
-            <button
-              onClick={() => setFilterType('all')}
-              className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
-                filterType === 'all'
-                  ? 'bg-arma-amber text-black'
-                  : 'text-arma-textMuted hover:text-arma-text'
-              }`}
-            >
-              ALL ({mods.length})
-            </button>
-            <button
-              onClick={() => setFilterType('required')}
-              className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
-                filterType === 'required'
-                  ? 'bg-arma-amber text-black'
-                  : 'text-arma-textMuted hover:text-arma-text'
-              }`}
-            >
-              REQUIRED ({totalRequired})
-            </button>
-            <button
-              onClick={() => setFilterType('optional')}
-              className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
-                filterType === 'optional'
-                  ? 'bg-arma-amber text-black'
-                  : 'text-arma-textMuted hover:text-arma-text'
-              }`}
-            >
-              OPTIONAL ({totalOptional})
-            </button>
-          </div>
+      {/* Filter and Search Navigation Bar (De-cramped with Generous Spacing) */}
+      <div id="tour-search" className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 font-mono text-xs">
+        {/* Status Filters - Spread out pills */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setFilterType('all')}
+            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all border ${
+              filterType === 'all'
+                ? 'bg-arma-amber text-black border-arma-amber shadow-sm'
+                : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
+            }`}
+          >
+            ALL ADDONS ({mods.length})
+          </button>
+          <button
+            onClick={() => setFilterType('required')}
+            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all border ${
+              filterType === 'required'
+                ? 'bg-arma-amber text-black border-arma-amber shadow-sm'
+                : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
+            }`}
+          >
+            REQUIRED ({totalRequired})
+          </button>
+          <button
+            onClick={() => setFilterType('optional')}
+            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all border ${
+              filterType === 'optional'
+                ? 'bg-arma-amber text-black border-arma-amber shadow-sm'
+                : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
+            }`}
+          >
+            OPTIONAL ({totalOptional})
+          </button>
         </div>
 
-        {/* Search Box */}
-        <div className="relative flex-1 sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-arma-textDim" />
+        {/* Search Box - Larger, clear tactical input */}
+        <div className="relative flex-1 md:max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-arma-textDim" />
           <input
             type="text"
             placeholder="SEARCH ADDON NAME, ID, TAG..."
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              // Auto-expand all folders when actively searching
-              if (e.target.value.trim().length > 0) {
-                expandAll();
-              }
-            }}
-            className="w-full pl-8 pr-7 py-1.5 rounded bg-arma-surface border border-arma-border text-arma-text placeholder-arma-textDim text-xs focus:outline-none focus:border-arma-amber"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-11 pr-8 py-3 rounded-lg bg-arma-surface border border-arma-border text-arma-text placeholder-arma-textDim text-xs sm:text-sm focus:outline-none focus:border-arma-amber transition-colors shadow-inner"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-arma-textDim hover:text-arma-text"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-arma-textDim hover:text-arma-text"
             >
               &times;
             </button>
@@ -257,7 +272,7 @@ export function ModList({
       </div>
 
       {/* Collapsible Category Folders */}
-      <div className="space-y-2.5">
+      <div className="space-y-4">
         {CATEGORY_FOLDERS.map((folder) => {
           const folderMods = groupedMods[folder.id] || [];
           if (folderMods.length === 0 && searchQuery) return null;
@@ -269,57 +284,57 @@ export function ModList({
           return (
             <div
               key={folder.id}
-              className="rounded-lg bg-arma-surface border border-arma-border overflow-hidden transition-all"
+              className="rounded-xl bg-arma-surface border border-arma-border overflow-hidden transition-all shadow-md"
             >
               {/* Folder Header (Click to Toggle) */}
               <button
                 onClick={() => toggleFolder(folder.id)}
-                className="w-full p-3.5 bg-arma-surface hover:bg-arma-card flex items-center justify-between transition-colors text-left font-mono"
+                className="w-full p-4 sm:p-5 bg-arma-surface hover:bg-arma-card flex items-center justify-between transition-colors text-left font-mono"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="text-arma-amber shrink-0">
-                    {isOpen ? <FolderOpen className="w-4 h-4 text-arma-amber" /> : <Folder className="w-4 h-4 text-arma-khaki" />}
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="text-arma-amber shrink-0 p-2 rounded-lg bg-arma-card border border-arma-border">
+                    {isOpen ? <FolderOpen className="w-5 h-5 text-arma-amber" /> : <Folder className="w-5 h-5 text-arma-khaki" />}
                   </div>
 
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-arma-text uppercase tracking-wide truncate">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="text-sm sm:text-base font-bold text-arma-text uppercase tracking-wide truncate">
                         {folder.title}
                       </span>
-                      <span className="text-[11px] font-bold px-1.5 py-0.2 rounded bg-arma-card text-arma-amber border border-arma-border shrink-0">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-arma-card text-arma-amber border border-arma-border shrink-0">
                         {folderMods.length} MODS
                       </span>
                       {reqCount > 0 && (
-                        <span className="text-[10px] text-arma-khaki hidden sm:inline">
+                        <span className="text-xs text-arma-khaki hidden sm:inline">
                           ({reqCount} REQ)
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-arma-textMuted truncate mt-0.5">
+                    <p className="text-xs text-arma-textMuted truncate mt-1">
                       {folder.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-arma-textDim text-xs shrink-0 ml-3">
-                  <span className="text-[11px] hidden md:inline">
-                    {isOpen ? 'COLLAPSE FOLDER' : 'EXPAND FOLDER'}
+                <div className="flex items-center gap-3 text-arma-textDim text-xs shrink-0 ml-4">
+                  <span className="text-xs font-bold hidden md:inline">
+                    {isOpen ? 'COLLAPSE' : 'EXPAND'}
                   </span>
                   {isOpen ? <ChevronUp className="w-4 h-4 text-arma-amber" /> : <ChevronDown className="w-4 h-4" />}
                 </div>
               </button>
 
-              {/* Folder Contents (Compact Tactical Table) */}
+              {/* Folder Contents (Spacious Tactical Table) */}
               {isOpen && (
                 <div className="border-t border-arma-border bg-[#0d0f13] overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs font-mono">
                     <thead>
-                      <tr className="border-b border-arma-border bg-[#0a0c10] text-[10px] text-arma-textDim uppercase">
-                        <th className="py-2.5 px-4 w-12 text-center">TYPE</th>
-                        <th className="py-2.5 px-4">ADDON NAME &amp; DESCRIPTION</th>
-                        <th className="py-2.5 px-4 w-28">EST. SIZE</th>
-                        <th className="py-2.5 px-4 w-36">WORKSHOP ID</th>
-                        <th className="py-2.5 px-4 w-28 text-right">ACTIONS</th>
+                      <tr className="border-b border-arma-border bg-[#090b0e] text-[11px] text-arma-textDim uppercase tracking-wider">
+                        <th className="py-3 px-5 w-16 text-center">TYPE</th>
+                        <th className="py-3 px-5">ADDON NAME &amp; DETAILS</th>
+                        <th className="py-3 px-5 w-32">EST. SIZE</th>
+                        <th className="py-3 px-5 w-40">STEAM WORKSHOP ID</th>
+                        <th className="py-3 px-5 w-32 text-right">ACTIONS</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-arma-border/60">
@@ -334,9 +349,9 @@ export function ModList({
                               onClick={() => setExpandedModId(isExpanded ? null : mod.id)}
                             >
                               {/* Type: REQ vs OPT */}
-                              <td className="py-2.5 px-4 text-center">
+                              <td className="py-3.5 px-5 text-center">
                                 {mod.required ? (
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-arma-amberDim text-arma-amber border border-arma-amber/30">
+                                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-arma-amberDim text-arma-amber border border-arma-amber/40">
                                     REQ
                                   </span>
                                 ) : (
@@ -347,50 +362,50 @@ export function ModList({
                               </td>
 
                               {/* Mod Name & Author */}
-                              <td className="py-2.5 px-4">
-                                <div className="font-bold text-arma-text hover:text-arma-amber transition-colors flex items-center gap-1.5">
+                              <td className="py-3.5 px-5">
+                                <div className="font-bold text-arma-text hover:text-arma-amber transition-colors flex items-center gap-2 text-sm">
                                   <span>{mod.name}</span>
                                   {mod.tags && mod.tags.length > 0 && (
-                                    <span className="text-[10px] text-arma-textDim font-normal hidden lg:inline">
+                                    <span className="text-[10px] text-arma-textDim font-normal hidden lg:inline bg-arma-card px-1.5 py-0.5 rounded border border-arma-border">
                                       #{mod.tags[0]}
                                     </span>
                                   )}
                                 </div>
                                 {mod.author && (
-                                  <div className="text-[10px] text-arma-textDim">
+                                  <div className="text-[11px] text-arma-textDim mt-0.5">
                                     Author: {mod.author} {mod.version ? `(v${mod.version})` : ''}
                                   </div>
                                 )}
                               </td>
 
                               {/* Size */}
-                              <td className="py-2.5 px-4 text-arma-textMuted text-[11px]">
+                              <td className="py-3.5 px-5 text-arma-textMuted text-xs">
                                 {mod.size || '—'}
                               </td>
 
                               {/* Workshop ID */}
-                              <td className="py-2.5 px-4">
+                              <td className="py-3.5 px-5">
                                 <button
                                   onClick={(e) => copyId(mod.id, e)}
-                                  className="text-arma-khaki hover:text-arma-amber flex items-center gap-1 font-mono text-[11px]"
+                                  className="text-arma-khaki hover:text-arma-amber flex items-center gap-1.5 font-mono text-xs"
                                   title="Click to copy Steam ID"
                                 >
                                   <span>{mod.id}</span>
                                   {copiedId === mod.id ? (
-                                    <Check className="w-3 h-3 text-arma-green" />
+                                    <Check className="w-3.5 h-3.5 text-arma-green" />
                                   ) : (
-                                    <Copy className="w-3 h-3 text-arma-textDim opacity-60" />
+                                    <Copy className="w-3.5 h-3.5 text-arma-textDim opacity-60" />
                                   )}
                                 </button>
                               </td>
 
                               {/* Actions */}
-                              <td className="py-2.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                                <div className="inline-flex items-center gap-1.5">
+                              <td className="py-3.5 px-5 text-right" onClick={(e) => e.stopPropagation()}>
+                                <div className="inline-flex items-center gap-2">
                                   <a
                                     href={`steam://url/CommunityFilePage/${mod.id}`}
-                                    className="p-1 rounded bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text"
-                                    title="Open in Steam App"
+                                    className="p-1.5 rounded-md bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text border border-arma-border transition-colors"
+                                    title="Open directly in Steam App"
                                   >
                                     <ArrowUpRight className="w-3.5 h-3.5" />
                                   </a>
@@ -398,10 +413,10 @@ export function ModList({
                                     href={mod.steamUrl || `https://steamcommunity.com/sharedfiles/filedetails/?id=${mod.id}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-2 py-0.5 rounded bg-arma-card hover:bg-arma-amber hover:text-black text-arma-text font-bold text-[10px] inline-flex items-center gap-1"
+                                    className="px-2.5 py-1 rounded-md bg-arma-card hover:bg-arma-amber hover:text-black text-arma-text font-bold text-xs inline-flex items-center gap-1 border border-arma-border transition-colors"
                                   >
                                     <span>WEB</span>
-                                    <ExternalLink className="w-2.5 h-2.5" />
+                                    <ExternalLink className="w-3 h-3" />
                                   </a>
                                 </div>
                               </td>
@@ -410,15 +425,15 @@ export function ModList({
                             {/* Optional Expandable Description Row */}
                             {isExpanded && mod.description && (
                               <tr className="bg-[#090b0f] text-xs">
-                                <td colSpan={5} className="py-3 px-6 text-arma-textMuted border-b border-arma-border/80">
-                                  <div className="flex items-start gap-2">
-                                    <Info className="w-3.5 h-3.5 text-arma-amber shrink-0 mt-0.5" />
-                                    <div>
-                                      <p className="leading-relaxed text-arma-text">{mod.description}</p>
+                                <td colSpan={5} className="py-4 px-8 text-arma-textMuted border-b border-arma-border/80">
+                                  <div className="flex items-start gap-3">
+                                    <Info className="w-4 h-4 text-arma-amber shrink-0 mt-0.5" />
+                                    <div className="space-y-2">
+                                      <p className="leading-relaxed text-arma-text text-xs sm:text-sm">{mod.description}</p>
                                       {mod.tags && (
-                                        <div className="flex flex-wrap gap-1 mt-1.5">
+                                        <div className="flex flex-wrap gap-1.5 pt-1">
                                           {mod.tags.map((t, idx) => (
-                                            <span key={idx} className="text-[10px] text-arma-textDim bg-arma-card px-1.5 py-0.2 rounded border border-arma-border">
+                                            <span key={idx} className="text-[10px] text-arma-textDim bg-arma-card px-2 py-0.5 rounded border border-arma-border">
                                               #{t}
                                             </span>
                                           ))}
