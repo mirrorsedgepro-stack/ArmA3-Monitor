@@ -8,11 +8,10 @@ import { PlayerListModal } from '@/components/PlayerListModal';
 import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ServerRules } from '@/components/ServerRules';
-import { OnboardingTour } from '@/components/OnboardingTour';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { ArrowUp, Sparkles, Compass, Layers, Shield } from 'lucide-react';
+import { ArrowUp, Compass, Layers, Shield } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
@@ -26,7 +25,6 @@ export default function Home() {
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState<boolean>(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
-  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
   // Server configuration
@@ -68,7 +66,7 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Check initial load and show tour if first-time user
+  // Check initial load
   useEffect(() => {
     try {
       const savedConfig = localStorage.getItem('arma3_server_config');
@@ -81,15 +79,6 @@ export default function Home() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           setMods(parsed);
         }
-      }
-
-      const tourCompleted = localStorage.getItem('arma3_tour_completed');
-      if (!tourCompleted) {
-        // Start interactive tour after brief delay so elements are ready
-        const timer = setTimeout(() => {
-          setIsTourOpen(true);
-        }, 900);
-        return () => clearTimeout(timer);
       }
     } catch {
       // Ignore localStorage errors
@@ -186,7 +175,6 @@ export default function Home() {
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
           onDownloadPreset={handleDownloadPreset}
-          onStartTour={() => setIsTourOpen(true)}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
         />
@@ -200,7 +188,6 @@ export default function Home() {
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
             onOpenConfig={() => setIsConfigModalOpen(true)}
             onDownloadPreset={handleDownloadPreset}
-            onStartTour={() => setIsTourOpen(true)}
             modCount={mods.length}
           />
 
@@ -267,15 +254,6 @@ export default function Home() {
 
           <div className="w-px h-5 bg-arma-border mx-1" />
 
-          {/* Restart Tour */}
-          <button
-            onClick={() => setIsTourOpen(true)}
-            className="p-2 rounded-lg bg-arma-card hover:bg-arma-amber hover:text-black text-arma-amber transition-colors"
-            title="Start Interactive Guided Tour"
-          >
-            <Sparkles className="w-4 h-4" />
-          </button>
-
           {/* Scroll to Top */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -286,13 +264,6 @@ export default function Home() {
           </button>
         </aside>
       )}
-
-      {/* Interactive Guided Onboarding Tour Modal */}
-      <OnboardingTour
-        isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
-        setSearchQuery={setSearchQuery}
-      />
 
       {/* Military Command Footer */}
       <footer className="mt-20 border-t border-arma-border bg-[#07090c] py-8 text-xs font-mono text-arma-textMuted">
@@ -314,15 +285,8 @@ export default function Home() {
             <span>STATUS: <strong className="text-arma-green uppercase">{stats.status}</strong></span>
           </div>
 
-          <div className="text-arma-textDim text-[11px] flex items-center gap-3">
-            <button
-              onClick={() => setIsTourOpen(true)}
-              className="text-arma-amber hover:underline font-bold"
-            >
-              TAKE GUIDED TOUR
-            </button>
-            <span>&bull;</span>
-            <span>VALVE A2S &bull; VERCEL DEPLOYMENT</span>
+          <div className="text-arma-textDim text-[11px]">
+            VALVE A2S PROTOCOL &bull; VERCEL DEPLOYMENT
           </div>
         </div>
       </footer>

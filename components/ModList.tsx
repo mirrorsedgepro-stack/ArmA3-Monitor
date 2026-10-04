@@ -158,7 +158,7 @@ export function ModList({
   return (
     <section id="mods" className="space-y-6 sm:space-y-8 scroll-mt-24">
       {/* Manifest Master Control Bar (Spacious, De-Cramped) */}
-      <div id="tour-manifest-header" className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-7 sm:p-8 rounded-xl bg-arma-surface border border-arma-border shadow-lg">
+      <div id="manifest-header" className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-7 sm:p-8 rounded-xl bg-arma-surface border border-arma-border shadow-lg">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-amber border border-arma-border font-bold">
@@ -215,7 +215,7 @@ export function ModList({
       </div>
 
       {/* Filter and Search Navigation Bar (De-cramped with Generous Spacing) */}
-      <div id="tour-search" className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 font-mono text-xs">
+      <div id="manifest-search" className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 font-mono text-xs">
         {/* Status Filters - Spread out pills */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button

@@ -8,10 +8,7 @@ import {
   RefreshCw, 
   Settings, 
   Terminal, 
-  Shield, 
-  Crosshair, 
-  Sparkles,
-  PlayCircle
+  Crosshair
 } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
@@ -21,7 +18,6 @@ interface HeaderProps {
   isLoading: boolean;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
-  onStartTour: () => void;
   activeSection: string;
   setActiveSection: (sec: string) => void;
 }
@@ -32,7 +28,6 @@ export function Header({
   isLoading,
   onOpenConfig,
   onDownloadPreset,
-  onStartTour,
   activeSection,
   setActiveSection,
 }: HeaderProps) {
@@ -125,17 +120,6 @@ export function Header({
 
           {/* Right: Spread-out Military Actions */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Quick Interactive Tour Trigger */}
-            <button
-              onClick={onStartTour}
-              className="flex items-center gap-2 px-3.5 py-2 rounded bg-arma-card hover:bg-arma-cardHover border border-arma-amber/40 text-arma-amber text-xs font-mono font-bold transition-all shadow-sm group"
-              title="Start visual step-by-step tour"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-arma-amber group-hover:rotate-12 transition-transform" />
-              <span className="hidden md:inline">GUIDED TOUR</span>
-              <span className="md:hidden">TOUR</span>
-            </button>
-
             {/* Quick Copy IP Button */}
             <button
               onClick={copyDirectConnect}

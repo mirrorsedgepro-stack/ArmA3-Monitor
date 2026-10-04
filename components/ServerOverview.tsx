@@ -18,12 +18,11 @@ import {
   Eye, 
   UserCheck, 
   ChevronDown, 
-  ChevronUp,
-  Copy,
-  Check,
-  Sparkles,
-  ArrowDown,
-  Layers
+  ChevronUp, 
+  Copy, 
+  Check, 
+  ArrowDown, 
+  Layers 
 } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
@@ -32,7 +31,6 @@ interface ServerOverviewProps {
   onOpenPlayerList: () => void;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
-  onStartTour?: () => void;
   modCount: number;
 }
 
@@ -41,7 +39,6 @@ export function ServerOverview({
   onOpenPlayerList,
   onOpenConfig,
   onDownloadPreset,
-  onStartTour,
   modCount,
 }: ServerOverviewProps) {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
@@ -112,7 +109,7 @@ export function ServerOverview({
           </div>
 
           {/* Spread-out Action Command Center Buttons */}
-          <div id="tour-connect" className="pt-2">
+          <div className="pt-2">
             <div className="flex flex-wrap items-stretch gap-4 sm:gap-5">
               {/* Primary Direct Connect */}
               <a
@@ -143,7 +140,6 @@ export function ServerOverview({
 
               {/* Download Launcher Preset */}
               <button
-                id="tour-preset"
                 onClick={onDownloadPreset}
                 className="flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover"
               >
@@ -159,17 +155,6 @@ export function ServerOverview({
                 <Users className="w-4 h-4 text-arma-amber" />
                 <span>OPERATORS ({stats.players}/{stats.maxPlayers})</span>
               </button>
-
-              {/* Interactive Guided Tour */}
-              {onStartTour && (
-                <button
-                  onClick={onStartTour}
-                  className="flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg bg-arma-amberDim hover:bg-arma-amber/20 border border-arma-amber/50 text-arma-amber text-sm font-mono font-bold transition-all"
-                >
-                  <Sparkles className="w-4 h-4 text-arma-amber" />
-                  <span>TAKE QUICK TOUR</span>
-                </button>
-              )}
             </div>
 
             {/* Quick jump cue */}
@@ -188,7 +173,7 @@ export function ServerOverview({
       </div>
 
       {/* 4 Technical Telemetry Data Panels (Spaced Out, High Readability) */}
-      <div id="tour-telemetry" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
         {/* Panel 1: Active Squad Operators */}
         <div 
           onClick={onOpenPlayerList}
