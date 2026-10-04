@@ -41,7 +41,7 @@ export function ServerConfigModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSaveConfig({
-      name: name.trim() || DEFAULT_SERVER_CONFIG.name,
+      name: name.trim().length > 2 ? name.trim() : DEFAULT_SERVER_CONFIG.name,
       ip: ip.trim() || DEFAULT_SERVER_CONFIG.ip,
       port: parseInt(port, 10) || 2302,
       queryPort: parseInt(queryPort, 10) || (parseInt(port, 10) ? parseInt(port, 10) + 1 : 2303),

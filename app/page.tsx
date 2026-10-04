@@ -71,7 +71,13 @@ export default function Home() {
     try {
       const savedConfig = localStorage.getItem('arma3_server_config');
       if (savedConfig) {
-        setServerConfig(JSON.parse(savedConfig));
+        const parsed = JSON.parse(savedConfig);
+        // Ensure name is valid and not corrupted or set to single letter "F"
+        if (parsed && (!parsed.name || parsed.name.trim().length <= 2)) {
+          parsed.name = DEFAULT_SERVER_CONFIG.name;
+          localStorage.setItem('arma3_server_config', JSON.stringify(parsed));
+        }
+        setServerConfig(parsed);
       }
       const savedMods = localStorage.getItem('arma3_custom_mods');
       if (savedMods) {
@@ -100,10 +106,15 @@ export default function Home() {
       const res = await fetch(`/api/server?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
+        const resolvedName = 
+          (serverConfig.name && serverConfig.name.trim().length > 2)
+            ? serverConfig.name
+            : (data.name && data.name.trim().length > 2 ? data.name : DEFAULT_SERVER_CONFIG.name);
+
         setStats((prev) => ({
           ...prev,
           ...data,
-          name: serverConfig.name || data.name,
+          name: resolvedName,
         }));
       }
     } catch (err) {

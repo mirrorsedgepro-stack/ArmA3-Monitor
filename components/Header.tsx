@@ -46,58 +46,46 @@ export function Header({
     { id: 'rules', label: 'COMBAT DIRECTIVES' },
   ];
 
+  // Clean, display-friendly server title (prevents any single-letter clipping)
+  const displayTitle = 
+    stats.name && stats.name.trim().length > 2
+      ? (stats.name.length > 36 ? "Frenchy's Antistasi [RHS]" : stats.name)
+      : "Frenchy's Antistasi [RHS]";
+
   return (
     <header className="border-b border-arma-border bg-arma-surface/95 backdrop-blur-md sticky top-0 z-50">
-      {/* Top Tactical C2 Ticker (Subdued Military Telemetry) */}
-      <div className="bg-[#080a0d] border-b border-[#1a1f29] py-1.5 px-4 text-[11px] font-mono text-arma-textMuted">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-arma-text">
-              <span className={`w-2 h-2 rounded-xs ${isOnline ? 'bg-arma-green' : 'bg-red-500'}`} />
-              <strong className="tracking-wider uppercase">{isOnline ? 'ACTIVE DEDICATED HOST' : 'STANDBY'}</strong>
-            </span>
-            <span className="text-[#333b47]">&bull;</span>
-            <span className="hidden sm:inline text-arma-khaki font-medium">AO: {stats.map?.toUpperCase() || 'ALTIS'}</span>
-            <span className="text-[#333b47] hidden sm:inline">&bull;</span>
-            <span className="hidden md:inline text-arma-textMuted truncate max-w-sm">{stats.mission}</span>
-          </div>
-
-          <div className="flex items-center gap-3 text-arma-textDim">
-            <span className="font-mono text-arma-textMuted">IP: {stats.ip}:{stats.port}</span>
-            <span className="text-[#333b47]">&bull;</span>
-            <span className="font-mono text-arma-amber font-semibold">{stats.players}/{stats.maxPlayers} OPERATORS</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Command Bar with generous spacing */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Left: Arma 3 Tactical Insignia */}
-          <div className="flex items-center gap-6">
+          {/* Left: Arma 3 Tactical Insignia and Brand Title */}
+          <div className="flex items-center gap-6 min-w-0">
             <div 
-              className="flex items-center gap-3.5 cursor-pointer group"
+              className="flex items-center gap-3.5 cursor-pointer group shrink-0"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <div className="w-10 h-10 rounded bg-arma-card border border-arma-border group-hover:border-arma-amber transition-colors flex items-center justify-center text-arma-amber shadow-inner">
+              <div className="w-10 h-10 rounded bg-arma-card border border-arma-border group-hover:border-arma-amber transition-colors flex items-center justify-center text-arma-amber shadow-inner shrink-0">
                 <Crosshair className="w-5 h-5 text-arma-amber" />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-black text-sm sm:text-base text-arma-text uppercase tracking-wider font-mono">
-                    {stats.name}
+                  <span className="font-black text-sm sm:text-base text-arma-text uppercase tracking-wider font-mono whitespace-nowrap">
+                    {displayTitle}
                   </span>
+                  <span 
+                    className={`w-2 h-2 rounded-full shrink-0 ${isOnline ? 'bg-arma-green animate-pulse' : 'bg-red-500'}`} 
+                    title={isOnline ? 'Server Online' : 'Server Standby'}
+                  />
                 </div>
-                <div className="text-[10px] text-arma-khaki font-mono uppercase tracking-widest mt-0.5">
-                  Bohemia Interactive &bull; Dedicated Operation
+                <div className="text-[10px] text-arma-khaki font-mono uppercase tracking-widest mt-0.5 whitespace-nowrap">
+                  Dedicated Insurgency &bull; {stats.ip}:{stats.port}
                 </div>
               </div>
             </div>
 
             {/* Tactical Navigation Links */}
-            <nav className="hidden lg:flex items-center space-x-2 pl-6 border-l border-arma-border text-xs font-mono">
+            <nav className="hidden lg:flex items-center space-x-2 pl-6 border-l border-arma-border text-xs font-mono shrink-0">
               {navLinks.map((link) => (
                 <button
                   key={link.id}
@@ -119,7 +107,7 @@ export function Header({
           </div>
 
           {/* Right: Spread-out Military Actions */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             {/* Quick Copy IP Button */}
             <button
               onClick={copyDirectConnect}
