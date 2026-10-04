@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Download, Upload, CheckCircle2, AlertCircle, Info, Sparkles } from 'lucide-react';
+import { X, Download, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { parseArma3PresetHtml, generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { ArmaMod } from '@/data/defaultMods';
 
@@ -55,7 +55,7 @@ export function PresetModal({
 
   const handleTextImport = () => {
     if (!importText.trim()) {
-      setImportStatus({ message: 'Please paste preset HTML content or workshop links', isError: true });
+      setImportStatus({ message: 'Paste preset HTML content or workshop links', isError: true });
       return;
     }
     parseAndApply(importText);
@@ -66,7 +66,7 @@ export function PresetModal({
       const parsed = parseArma3PresetHtml(content);
       if (parsed.length === 0) {
         setImportStatus({
-          message: 'No valid Arma 3 mods or Steam Workshop links were found in this file.',
+          message: 'No valid Arma 3 mods or Steam Workshop links were found.',
           isError: true,
         });
         return;
@@ -82,7 +82,7 @@ export function PresetModal({
 
       onApplyCustomMods(fullMods);
       setImportStatus({
-        message: `Successfully loaded ${fullMods.length} mods from preset!`,
+        message: `Successfully loaded ${fullMods.length} mods into manifest!`,
         isError: false,
       });
       setTimeout(() => {
@@ -97,105 +97,105 @@ export function PresetModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs font-mono">
       <div 
-        className="w-full max-w-xl rounded-2xl bg-[#101320] border border-white/[0.1] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-xl rounded-lg bg-arma-surface border border-arma-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-white/[0.08] bg-[#0E101D] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-ga-mint/10 border border-ga-mint/20 flex items-center justify-center text-ga-mint">
-              <Download className="w-5 h-5" />
+        <div className="p-4 border-b border-arma-border bg-[#0e1116] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-amber">
+              <Download className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Arma 3 Launcher Preset Manager</h3>
-              <p className="text-xs text-zinc-400">Download or import official Bohemia Interactive XML/HTML presets</p>
+              <h3 className="text-sm font-bold text-arma-text uppercase">ARMA 3 LAUNCHER PRESET</h3>
+              <p className="text-[11px] text-arma-textMuted">Bohemia Interactive XML/HTML preset synchronization</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            className="p-1 rounded text-arma-textMuted hover:text-arma-text hover:bg-arma-card transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-white/[0.08] bg-[#0E101D]/60 text-xs font-medium">
+        <div className="flex border-b border-arma-border bg-[#0e1116] text-xs">
           <button
             onClick={() => setActiveTab('download')}
-            className={`flex-1 py-3 px-4 text-center transition-colors border-b-2 ${
+            className={`flex-1 py-2.5 px-4 text-center font-bold uppercase transition-colors border-b-2 ${
               activeTab === 'download'
-                ? 'border-ga-mint text-white bg-white/[0.04]'
-                : 'border-transparent text-zinc-400 hover:text-white'
+                ? 'border-arma-amber text-arma-amber bg-arma-card'
+                : 'border-transparent text-arma-textMuted hover:text-arma-text'
             }`}
           >
-            Download Preset (.html)
+            EXPORT PRESET (.HTML)
           </button>
           <button
             onClick={() => setActiveTab('import')}
-            className={`flex-1 py-3 px-4 text-center transition-colors border-b-2 ${
+            className={`flex-1 py-2.5 px-4 text-center font-bold uppercase transition-colors border-b-2 ${
               activeTab === 'import'
-                ? 'border-ga-mint text-white bg-white/[0.04]'
-                : 'border-transparent text-zinc-400 hover:text-white'
+                ? 'border-arma-amber text-arma-amber bg-arma-card'
+                : 'border-transparent text-arma-textMuted hover:text-arma-text'
             }`}
           >
-            Import Custom Preset
+            IMPORT CUSTOM PRESET
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-5 overflow-y-auto space-y-4 flex-1">
           {activeTab === 'download' ? (
             <div className="space-y-4">
-              <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-3">
+              <div className="p-4 rounded bg-arma-card border border-arma-border space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-white">Synchronized Modpack</span>
-                  <span className="text-ga-mint font-mono font-semibold">{currentMods.length} Mods</span>
+                  <span className="font-bold text-arma-text uppercase">OPERATION LOADOUT</span>
+                  <span className="text-arma-amber font-bold">{currentMods.length} MODS</span>
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Drag and drop this downloaded preset file directly into the official Bohemia Interactive Arma 3 Launcher to automatically subscribe, download, and configure load order.
+                <p className="text-xs text-arma-textMuted leading-relaxed">
+                  Drop this file directly onto your official Bohemia Interactive Arma 3 Launcher. Steam will automatically subscribe, verify, and order each addon.
                 </p>
                 <button
                   onClick={handleDownload}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg ga-btn-primary text-xs font-semibold shadow-ga-mint"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded arma-btn-primary text-xs font-bold shadow-arma-amber"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download Launcher Preset (.html)</span>
+                  <span>DOWNLOAD ARMA 3 PRESET (.HTML)</span>
                 </button>
               </div>
 
               {/* Instructions */}
               <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-white uppercase tracking-wider">How it works:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <span className="text-ga-mint font-semibold block mb-1">01. DOWNLOAD</span>
-                    <p className="text-zinc-400 leading-normal text-[11px]">Save the .html preset file</p>
+                <h4 className="text-xs font-bold text-arma-text uppercase">INSTRUCTIONS:</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="p-3 rounded bg-arma-card border border-arma-border">
+                    <span className="text-arma-amber font-bold block mb-1">01. EXPORT</span>
+                    <p className="text-arma-textMuted text-[11px]">Save the .html preset</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <span className="text-ga-blue font-semibold block mb-1">02. DRAG &amp; DROP</span>
-                    <p className="text-zinc-400 leading-normal text-[11px]">Drop file into Arma 3 Launcher</p>
+                  <div className="p-3 rounded bg-arma-card border border-arma-border">
+                    <span className="text-arma-khaki font-bold block mb-1">02. DRAG &amp; DROP</span>
+                    <p className="text-arma-textMuted text-[11px]">Drop into Arma 3 Launcher</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <span className="text-purple-400 font-semibold block mb-1">03. AUTO SYNC</span>
-                    <p className="text-zinc-400 leading-normal text-[11px]">Steam automatically downloads</p>
+                  <div className="p-3 rounded bg-arma-card border border-arma-border">
+                    <span className="text-arma-green font-bold block mb-1">03. DEPLOY</span>
+                    <p className="text-arma-textMuted text-[11px]">Steam synchronizes</p>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-3.5">
-              <p className="text-xs text-zinc-400">
-                Upload your Arma 3 Launcher HTML preset or paste raw content:
+            <div className="space-y-3">
+              <p className="text-xs text-arma-textMuted">
+                Select your exported Arma 3 Launcher .html preset or paste contents below:
               </p>
 
               {/* File upload zone */}
-              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/[0.1] hover:border-ga-mint/50 rounded-xl bg-white/[0.02] cursor-pointer transition-colors">
-                <Upload className="w-6 h-6 text-zinc-400 mb-1.5" />
-                <span className="text-xs font-semibold text-white">Choose .html preset file</span>
-                <span className="text-[11px] text-zinc-500 mt-0.5">Exported from Arma 3 Launcher</span>
+              <label className="flex flex-col items-center justify-center p-5 border border-dashed border-arma-border hover:border-arma-amber/50 rounded bg-arma-card cursor-pointer transition-colors">
+                <Upload className="w-5 h-5 text-arma-textMuted mb-1" />
+                <span className="text-xs font-bold text-arma-text uppercase">CHOOSE .HTML PRESET FILE</span>
+                <span className="text-[10px] text-arma-textDim mt-0.5">EXPORTED FROM ARMA 3 LAUNCHER</span>
                 <input
                   type="file"
                   accept=".html,.htm"
@@ -206,25 +206,25 @@ export function PresetModal({
 
               <textarea
                 rows={4}
-                placeholder="Or paste HTML preset code..."
+                placeholder="OR PASTE PRESET HTML CODE..."
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                className="w-full p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-white placeholder-zinc-500 text-xs font-mono focus:outline-none focus:border-ga-mint/50"
+                className="w-full p-2.5 rounded bg-arma-card border border-arma-border text-arma-text placeholder-arma-textDim text-xs focus:outline-none focus:border-arma-amber"
               />
 
               <button
                 onClick={handleTextImport}
-                className="w-full py-2.5 rounded-lg ga-btn-secondary text-xs font-semibold hover:border-white/[0.25]"
+                className="w-full py-2 rounded arma-btn-secondary text-xs font-bold uppercase"
               >
-                Parse &amp; Synchronize Modpack
+                PARSE &amp; APPLY MODPACK
               </button>
 
               {importStatus && (
                 <div
-                  className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                  className={`p-2.5 rounded text-xs flex items-center gap-2 ${
                     importStatus.isError
                       ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                      : 'bg-ga-mint/10 text-ga-mint border border-ga-mint/20'
+                      : 'bg-arma-amberDim text-arma-amber border border-arma-amber/30'
                   }`}
                 >
                   {importStatus.isError ? (

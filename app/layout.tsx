@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Frenchy's Antistasi Ultimate | Arma 3 Server Intelligence & Mods",
-  description: "Live server telemetry, connected player roster, and complete Steam Workshop modpack synchronization for Arma 3.",
+  title: "Frenchy's Antistasi Ultimate | Arma 3 Dedicated Server Operations",
+  description: "Live server telemetry, active operator roster, and complete Steam Workshop modpack synchronization for Arma 3.",
   keywords: ['Arma 3', 'Antistasi Ultimate', 'RHS', 'Server Stats', 'Mods', 'Steam Workshop', 'Preset', 'A2S Query'],
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-[#0B0D17] text-white min-h-screen flex flex-col antialiased">
+      <body className="bg-arma-bg text-arma-text min-h-screen flex flex-col antialiased">
         {children}
       </body>
     </html>

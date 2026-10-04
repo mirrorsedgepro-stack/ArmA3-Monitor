@@ -11,7 +11,6 @@ import { ServerRules } from '@/components/ServerRules';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { Sparkles, Terminal, Shield, ArrowUpRight } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
@@ -133,9 +132,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D17] text-white flex flex-col justify-between ga-bg-glow selection:bg-ga-mint selection:text-zinc-950">
+    <div className="min-h-screen bg-arma-bg text-arma-text arma-grid-bg flex flex-col justify-between selection:bg-arma-amber selection:text-black">
       <div>
-        {/* GameAnalytics Header */}
+        {/* Tactical Command Bar */}
         <Header
           stats={stats}
           onRefresh={fetchServerStats}
@@ -146,10 +145,10 @@ export default function Home() {
           setActiveSection={setActiveSection}
         />
 
-        {/* Main Content Area */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12">
+        {/* Tactical Dashboard Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
           
-          {/* Section 1: Hero & Real-Time KPI Stats */}
+          {/* Section 1: Operation Briefing & Technical Telemetry */}
           <ServerOverview
             stats={stats}
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
@@ -158,7 +157,7 @@ export default function Home() {
             modCount={mods.length}
           />
 
-          {/* Section 2: Modpack Suite & Steam Workshop Repository */}
+          {/* Section 2: Addon Loadout & Workshop Manifest */}
           <ModList
             mods={mods}
             serverName={serverConfig.name}
@@ -168,36 +167,32 @@ export default function Home() {
             setSearchQuery={setSearchQuery}
           />
 
-          {/* Section 3: Server Guidelines, Keybindings & SOP */}
+          {/* Section 3: Combat Directives & Keybinds */}
           <ServerRules rules={stats.rulesOfEngagement} />
 
         </main>
       </div>
 
-      {/* GameAnalytics Style Footer */}
-      <footer className="mt-20 border-t border-white/[0.08] bg-[#080911]/90 py-10 text-xs text-zinc-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-[#161826] border border-white/10 flex items-center justify-center font-bold text-white text-[11px] font-mono">
-              A3
-            </div>
-            <div>
-              <div className="font-semibold text-white">{serverConfig.name}</div>
-              <div className="text-zinc-500 text-[11px]">Arma 3 Server Portal &bull; Powered by Steam A2S Query</div>
-            </div>
+      {/* Military Command Footer */}
+      <footer className="mt-16 border-t border-arma-border bg-[#090b0e] py-6 text-xs font-mono text-arma-textMuted">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-arma-text uppercase">{serverConfig.name}</span>
+            <span>&bull;</span>
+            <span className="text-arma-khaki">ARMA 3 DEDICATED OPERATIONS</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
-            <span className="text-zinc-400">Direct Connect:</span>
-            <code className="px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-ga-mint">
+          <div className="flex items-center gap-3">
+            <span>DIRECT CONNECT:</span>
+            <code className="px-2 py-0.5 rounded bg-arma-card border border-arma-border text-arma-amber font-bold">
               {stats.ip}:{stats.port}
             </code>
-            <span className="text-zinc-600 hidden sm:inline">&bull;</span>
-            <span className="text-zinc-400">Status: <strong className="text-white uppercase">{stats.status}</strong></span>
+            <span>&bull;</span>
+            <span>STATUS: <strong className="text-arma-green uppercase">{stats.status}</strong></span>
           </div>
 
-          <div className="text-zinc-500 text-[11px]">
-            Vercel Serverless Ready
+          <div className="text-arma-textDim text-[11px]">
+            VALVE A2S PROTOCOL &bull; VERCEL DEPLOYMENT
           </div>
         </div>
       </footer>

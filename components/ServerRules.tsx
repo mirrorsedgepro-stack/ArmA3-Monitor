@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Shield, Keyboard, Radio, CheckCircle, ChevronRight, Zap } from 'lucide-react';
+import { Shield, Keyboard, Radio, FileText } from 'lucide-react';
 
 interface ServerRulesProps {
   rules?: string[];
@@ -20,68 +20,66 @@ export function ServerRules({ rules }: ServerRulesProps) {
   ];
 
   return (
-    <section id="rules" className="space-y-4 pt-4">
-      <div className="rounded-2xl bg-gradient-to-b from-ga-surface to-ga-card border border-white/[0.08] shadow-ga-card overflow-hidden">
-        {/* Header Tabs */}
-        <div className="flex border-b border-white/[0.08] bg-[#0E101D] text-xs font-medium">
+    <section id="rules" className="space-y-4">
+      <div className="rounded-lg bg-arma-surface border border-arma-border overflow-hidden">
+        {/* Tactical Header Tabs */}
+        <div className="flex border-b border-arma-border bg-[#0e1116] text-xs font-mono">
           <button
             onClick={() => setActiveTab('rules')}
-            className={`flex items-center gap-2 px-5 py-3.5 transition-colors border-b-2 ${
+            className={`flex items-center gap-2 px-4 py-3 transition-colors border-b-2 font-bold uppercase ${
               activeTab === 'rules'
-                ? 'border-ga-mint text-white bg-white/[0.04]'
-                : 'border-transparent text-zinc-400 hover:text-white'
+                ? 'border-arma-amber text-arma-amber bg-arma-card'
+                : 'border-transparent text-arma-textMuted hover:text-arma-text'
             }`}
           >
-            <Shield className="w-4 h-4 text-ga-mint" />
-            <span>Operational SOP &amp; Rules</span>
+            <Shield className="w-3.5 h-3.5" />
+            <span>RULES OF ENGAGEMENT (ROE)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('keybinds')}
-            className={`flex items-center gap-2 px-5 py-3.5 transition-colors border-b-2 ${
+            className={`flex items-center gap-2 px-4 py-3 transition-colors border-b-2 font-bold uppercase ${
               activeTab === 'keybinds'
-                ? 'border-ga-blue text-white bg-white/[0.04]'
-                : 'border-transparent text-zinc-400 hover:text-white'
+                ? 'border-arma-amber text-arma-amber bg-arma-card'
+                : 'border-transparent text-arma-textMuted hover:text-arma-text'
             }`}
           >
-            <Keyboard className="w-4 h-4 text-ga-blue" />
-            <span>ACE3 &amp; Combat Keybinds</span>
+            <Keyboard className="w-3.5 h-3.5" />
+            <span>ACE3 &amp; COMBAT CONTROLS</span>
           </button>
 
           <button
             onClick={() => setActiveTab('comms')}
-            className={`flex items-center gap-2 px-5 py-3.5 transition-colors border-b-2 ${
+            className={`flex items-center gap-2 px-4 py-3 transition-colors border-b-2 font-bold uppercase ${
               activeTab === 'comms'
-                ? 'border-purple-400 text-white bg-white/[0.04]'
-                : 'border-transparent text-zinc-400 hover:text-white'
+                ? 'border-arma-amber text-arma-amber bg-arma-card'
+                : 'border-transparent text-arma-textMuted hover:text-arma-text'
             }`}
           >
-            <Radio className="w-4 h-4 text-purple-400" />
-            <span>Voice &amp; Communications</span>
+            <Radio className="w-3.5 h-3.5" />
+            <span>VOIP &amp; RADIO NETS</span>
           </button>
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-5">
           {activeTab === 'rules' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  Server Guidelines &amp; Code of Conduct
-                </h3>
-                <span className="text-xs text-zinc-500 font-mono">6 Core Directives</span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs font-mono text-arma-textMuted">
+                <span className="font-bold text-arma-text uppercase">STANDARD OPERATING DIRECTIVES</span>
+                <span>6 PROTOCOLS ACTIVE</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs font-mono">
                 {defaultRules.map((rule, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-colors"
+                    className="flex items-start gap-3 p-3 rounded bg-arma-card border border-arma-border"
                   >
-                    <span className="font-mono text-ga-mint font-semibold text-xs shrink-0 mt-0.5">
-                      0{idx + 1}.
+                    <span className="text-arma-amber font-bold shrink-0">
+                      [{String(idx + 1).padStart(2, '0')}]
                     </span>
-                    <span className="text-zinc-300 leading-relaxed">{rule}</span>
+                    <span className="text-arma-text leading-relaxed">{rule}</span>
                   </div>
                 ))}
               </div>
@@ -89,53 +87,51 @@ export function ServerRules({ rules }: ServerRulesProps) {
           )}
 
           {activeTab === 'keybinds' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  Essential Gameplay &amp; Interaction Keybinds
-                </h3>
-                <span className="text-xs text-zinc-500 font-mono">Default Mapping</span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs font-mono text-arma-textMuted">
+                <span className="font-bold text-arma-text uppercase">ACE3 MODULAR INTERACTION MAPPING</span>
+                <span>STANDARD KEYBINDS</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
-                  <span className="text-zinc-300">ACE Interaction</span>
-                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-ga-mint">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs font-mono">
+                <div className="p-3 rounded bg-arma-card border border-arma-border flex justify-between items-center">
+                  <span className="text-arma-textMuted">ACE Interaction</span>
+                  <kbd className="px-2 py-0.5 rounded bg-arma-surface border border-arma-border font-bold text-arma-amber">
                     Left Windows
                   </kbd>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
-                  <span className="text-zinc-300">ACE Self Interaction</span>
-                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-ga-mint">
+                <div className="p-3 rounded bg-arma-card border border-arma-border flex justify-between items-center">
+                  <span className="text-arma-textMuted">ACE Self Interact</span>
+                  <kbd className="px-2 py-0.5 rounded bg-arma-surface border border-arma-border font-bold text-arma-amber">
                     Ctrl + Left Win
                   </kbd>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
-                  <span className="text-zinc-300">Climb &amp; Mantle</span>
-                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-ga-blue">
-                    Custom User 1 (V)
+                <div className="p-3 rounded bg-arma-card border border-arma-border flex justify-between items-center">
+                  <span className="text-arma-textMuted">Climb / Mantle</span>
+                  <kbd className="px-2 py-0.5 rounded bg-arma-surface border border-arma-border font-bold text-arma-khaki">
+                    User 1 (V)
                   </kbd>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
-                  <span className="text-zinc-300">Combat Earplugs</span>
-                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-zinc-300">
+                <div className="p-3 rounded bg-arma-card border border-arma-border flex justify-between items-center">
+                  <span className="text-arma-textMuted">Combat Earplugs</span>
+                  <kbd className="px-2 py-0.5 rounded bg-arma-surface border border-arma-border font-bold text-arma-text">
                     End
                   </kbd>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
-                  <span className="text-zinc-300">Direct Comms</span>
-                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-purple-400">
+                <div className="p-3 rounded bg-arma-card border border-arma-border flex justify-between items-center">
+                  <span className="text-arma-textMuted">Direct VOIP</span>
+                  <kbd className="px-2 py-0.5 rounded bg-arma-surface border border-arma-border font-bold text-arma-text">
                     Caps Lock
                   </kbd>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex justify-between items-center">
-                  <span className="text-zinc-300">Whisper / Shout</span>
-                  <kbd className="px-2 py-1 rounded bg-white/[0.06] border border-white/[0.1] font-mono text-[11px] text-zinc-300">
+                <div className="p-3 rounded bg-arma-card border border-arma-border flex justify-between items-center">
+                  <span className="text-arma-textMuted">Voice Volume</span>
+                  <kbd className="px-2 py-0.5 rounded bg-arma-surface border border-arma-border font-bold text-arma-text">
                     Ctrl + Tab
                   </kbd>
                 </div>
@@ -144,26 +140,24 @@ export function ServerRules({ rules }: ServerRulesProps) {
           )}
 
           {activeTab === 'comms' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  Audio &amp; Voice Channels
-                </h3>
-                <span className="text-xs text-zinc-500 font-mono">Communications</span>
+            <div className="space-y-3 font-mono">
+              <div className="flex items-center justify-between text-xs text-arma-textMuted">
+                <span className="font-bold text-arma-text uppercase">COMMUNICATIONS &amp; SQUAD CHANNELS</span>
+                <span>DIRECT AUDIO NET</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1.5">
-                  <div className="font-semibold text-white">In-Game Proximity VOIP</div>
-                  <p className="text-zinc-400 text-xs leading-relaxed">
-                    Arma 3 standard high-fidelity voice transmission with dynamic terrain occlusion and realistic acoustic reverberation. Press <kbd className="text-ga-mint">Caps Lock</kbd> to speak.
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3.5 rounded bg-arma-card border border-arma-border space-y-1">
+                  <div className="font-bold text-arma-text uppercase">IN-GAME POSITIONAL DIRECT VOICE</div>
+                  <p className="text-arma-textMuted text-[11px] leading-relaxed">
+                    Arma 3 Von voice system with terrain occlusion and direct speech volume modes. Toggle whisper/normal/shout with <kbd className="text-arma-amber">Ctrl + Tab</kbd>.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1.5">
-                  <div className="font-semibold text-white">Squad Discord Server</div>
-                  <p className="text-zinc-400 text-xs leading-relaxed">
-                    Join mission briefings, recruit rebel squadmates, and post operation feedback on the community Discord channel.
+                <div className="p-3.5 rounded bg-arma-card border border-arma-border space-y-1">
+                  <div className="font-bold text-arma-text uppercase">COMMUNITY DISCORD OPERATIONS</div>
+                  <p className="text-arma-textMuted text-[11px] leading-relaxed">
+                    Squad briefing and platoon coordination. Connect prior to mission deployment for operational tasking.
                   </p>
                 </div>
               </div>

@@ -3,71 +3,72 @@
 @tailwind utilities;
 
 :root {
-  --background: #0B0D17;
-  --foreground: #FFFFFF;
+  --background: #0c0e12;
+  --foreground: #e1e4e8;
 }
 
 body {
   color: var(--foreground);
   background-color: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
-/* Subtle GameAnalytics Ambient Glow */
-.ga-bg-glow {
+/* Subtle tactical grid background (Arma 3 Map / HUD inspired) */
+.arma-grid-bg {
   background-image: 
-    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(70, 80, 240, 0.22), transparent 70%),
-    radial-gradient(circle at 10% 20%, rgba(20, 240, 175, 0.06), transparent 40%),
-    radial-gradient(circle at 90% 40%, rgba(77, 101, 255, 0.08), transparent 50%);
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* Custom Minimal Scrollbar */
+/* Subtle military scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0D17;
+  background: #0c0e12;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1C2035;
-  border-radius: 9999px;
+  background: #232936;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #14F0AF;
+  background: #d9822b;
 }
 
-/* GameAnalytics Button Styles */
-.ga-btn-primary {
-  background-color: #14F0AF;
-  color: #0B0D17;
+/* Arma 3 Signature Tactical Amber Button */
+.arma-btn-primary {
+  background-color: #d9822b;
+  color: #0c0e12;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.15s ease;
+}
+
+.arma-btn-primary:hover {
+  background-color: #ea8f34;
+  color: #000000;
+}
+
+/* Arma 3 Tactical Ghost / Secondary Button */
+.arma-btn-secondary {
+  background-color: rgba(22, 26, 34, 0.85);
+  border: 1px solid #28303f;
+  color: #c9d1d9;
   font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
 }
 
-.ga-btn-primary:hover {
-  background-color: #0FE2A3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px 0 rgba(20, 240, 175, 0.35);
-}
-
-.ga-btn-secondary {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #FFFFFF;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.ga-btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+.arma-btn-secondary:hover {
+  background-color: #1e2430;
+  border-color: #3f4a5f;
+  color: #ffffff;
 }
