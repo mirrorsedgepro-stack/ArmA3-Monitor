@@ -45,7 +45,7 @@ export default function Home() {
   // Track scroll position for smooth floating mechanics
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
+      setShowScrollTop(window.scrollY > 350);
 
       const overviewEl = document.getElementById('overview');
       const modsEl = document.getElementById('mods');
@@ -177,7 +177,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-arma-bg text-arma-text arma-grid-bg flex flex-col justify-between selection:bg-arma-amber selection:text-black">
+    <div className="min-h-screen bg-arma-bg text-arma-text arma-grid-bg flex flex-col justify-between selection:bg-arma-red selection:text-white">
       <div>
         {/* Tactical Command Bar */}
         <Header
@@ -190,8 +190,8 @@ export default function Home() {
           setActiveSection={setActiveSection}
         />
 
-        {/* Tactical Dashboard Content - Generous Vertical Spacing & Rhythm */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-12 sm:space-y-16 lg:space-y-20">
+        {/* Tactical Dashboard Content - Responsive mobile & desktop spacing */}
+        <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-14 space-y-8 sm:space-y-16 lg:space-y-20">
           
           {/* Section 1: Operation Briefing & Technical Telemetry */}
           <ServerOverview
@@ -222,13 +222,13 @@ export default function Home() {
       {showScrollTop && (
         <aside 
           aria-label="Tactical Quick Navigation"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 p-1.5 rounded-xl bg-arma-surface/90 border border-arma-border backdrop-blur-md shadow-2xl font-mono text-xs"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-1.5 sm:gap-2 p-1.5 rounded-xl bg-arma-surface/90 border border-arma-border backdrop-blur-md shadow-2xl font-mono text-xs"
         >
           <button
             onClick={() => scrollToSection('overview')}
-            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               activeSection === 'overview'
-                ? 'bg-arma-amber text-black font-bold'
+                ? 'bg-arma-red text-white font-bold'
                 : 'text-arma-textMuted hover:text-arma-text'
             }`}
             title="Jump to Theater Overview"
@@ -239,9 +239,9 @@ export default function Home() {
 
           <button
             onClick={() => scrollToSection('mods')}
-            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               activeSection === 'mods'
-                ? 'bg-arma-amber text-black font-bold'
+                ? 'bg-arma-red text-white font-bold'
                 : 'text-arma-textMuted hover:text-arma-text'
             }`}
             title="Jump to Addons"
@@ -252,9 +252,9 @@ export default function Home() {
 
           <button
             onClick={() => scrollToSection('rules')}
-            className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               activeSection === 'rules'
-                ? 'bg-arma-amber text-black font-bold'
+                ? 'bg-arma-red text-white font-bold'
                 : 'text-arma-textMuted hover:text-arma-text'
             }`}
             title="Jump to Directives"
@@ -263,12 +263,12 @@ export default function Home() {
             <span className="hidden sm:inline">RULES</span>
           </button>
 
-          <div className="w-px h-5 bg-arma-border mx-1" />
+          <div className="w-px h-5 bg-arma-border mx-0.5 sm:mx-1" />
 
           {/* Scroll to Top */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="p-2 rounded-lg bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
             title="Smooth Scroll to Top"
           >
             <ArrowUp className="w-4 h-4" />
@@ -277,19 +277,19 @@ export default function Home() {
       )}
 
       {/* Military Command Footer */}
-      <footer className="mt-20 border-t border-arma-border bg-[#07090c] py-8 text-xs font-mono text-arma-textMuted">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-wrap items-center gap-2">
+      <footer className="mt-16 sm:mt-20 border-t border-arma-border bg-[#07090c] py-6 sm:py-8 text-xs font-mono text-arma-textMuted">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-center md:text-left">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span className="font-bold text-arma-text uppercase">{serverConfig.name}</span>
-            <span>&bull;</span>
+            <span className="hidden sm:inline">&bull;</span>
             <span className="text-arma-khaki">ARMA 3 DEDICATED OPERATIONS</span>
-            <span>&bull;</span>
-            <span>SYDNEY, AUSTRALIA</span>
+            <span className="hidden sm:inline">&bull;</span>
+            <span className="hidden md:inline">SYDNEY, AUSTRALIA</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
             <span>DIRECT CONNECT:</span>
-            <code className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-amber font-bold">
+            <code className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded bg-arma-card border border-arma-border text-arma-red font-bold">
               {stats.ip}:{stats.port}
             </code>
             <span>&bull;</span>

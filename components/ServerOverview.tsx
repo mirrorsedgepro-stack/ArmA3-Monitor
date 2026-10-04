@@ -66,64 +66,64 @@ export function ServerOverview({
   };
 
   return (
-    <div id="overview" className="space-y-8 sm:space-y-10">
-      {/* Tactical Operation Hero Panel (Expansive, Non-Cramped) */}
-      <div className="rounded-xl bg-arma-surface border border-arma-border p-7 sm:p-10 lg:p-12 relative overflow-hidden shadow-xl">
-        {/* Subtle Background Accent Corner */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-arma-amber/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+    <div id="overview" className="space-y-6 sm:space-y-10">
+      {/* Tactical Operation Hero Panel (Expansive & Mobile Responsive) */}
+      <div className="rounded-xl bg-arma-surface border border-arma-border p-5 sm:p-8 lg:p-12 relative overflow-hidden shadow-xl">
+        {/* Subtle Background Crimson Accent */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-arma-red/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-6 sm:space-y-8">
           {/* Top Status & Theater Pills */}
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
-            <span className="px-3 py-1 rounded-md bg-arma-amberDim text-arma-amber border border-arma-amber/40 font-black tracking-wider uppercase flex items-center gap-1.5 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-arma-amber animate-pulse" />
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
+            <span className="px-2.5 py-1 rounded-md bg-arma-redDim text-arma-red border border-arma-red/40 font-black tracking-wider uppercase flex items-center gap-1.5 shadow-sm text-[11px] sm:text-xs">
+              <span className="w-2 h-2 rounded-full bg-arma-red animate-pulse" />
               LIVE OPERATIONS ACTIVE
             </span>
-            <span className="px-3 py-1 rounded-md bg-arma-card text-arma-khaki border border-arma-border flex items-center gap-1.5 font-bold uppercase">
-              <Compass className="w-4 h-4 text-arma-amber" />
+            <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-khaki border border-arma-border flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs">
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-red" />
               THEATER: {stats.map || 'ALTIS'}
             </span>
-            <span className="px-3 py-1 rounded-md bg-arma-card text-arma-textMuted border border-arma-border uppercase font-semibold">
+            <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-textMuted border border-arma-border uppercase font-semibold text-[11px] sm:text-xs">
               MODE: {stats.gameType}
             </span>
             {stats.location && (
-              <span className="px-3 py-1 rounded-md bg-arma-card text-arma-textDim border border-arma-border flex items-center gap-1.5 hidden sm:inline-flex">
+              <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-textDim border border-arma-border flex items-center gap-1.5 hidden md:inline-flex text-[11px] sm:text-xs">
                 <Globe className="w-3.5 h-3.5 text-arma-textMuted" />
                 {stats.location}
               </span>
             )}
           </div>
 
-          {/* Mission Title & Technical Coordinates (Show Don't Tell - Clean, Bold) */}
-          <div className="space-y-3 max-w-4xl">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-arma-text font-mono tracking-tight uppercase leading-tight">
+          {/* Mission Title & Coordinates */}
+          <div className="space-y-2 sm:space-y-3 max-w-4xl">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-arma-text font-mono tracking-tight uppercase leading-tight">
               {stats.mission}
             </h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-arma-textMuted font-mono">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-arma-textMuted font-mono">
               <span>HOST: <strong className="text-arma-text">{stats.name}</strong></span>
               <span className="text-arma-border">&bull;</span>
-              <span>ENDPOINT: <code className="text-arma-amber font-bold">{stats.ip}:{stats.port}</code></span>
+              <span>ENDPOINT: <code className="text-arma-red font-bold">{stats.ip}:{stats.port}</code></span>
               <span className="text-arma-border hidden sm:inline">&bull;</span>
-              <span className="text-arma-green font-bold hidden sm:inline">SIGNATURES LEVEL 2 VERIFIED</span>
+              <span className="text-arma-green font-bold hidden sm:inline">SIGNATURES LEVEL 2</span>
             </div>
           </div>
 
-          {/* Spread-out Action Command Center Buttons */}
+          {/* Spread-out Action Command Center Buttons (Full-width on mobile, spacious grid on desktop) */}
           <div className="pt-2">
-            <div className="flex flex-wrap items-stretch gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch gap-3 sm:gap-4 lg:gap-5">
               {/* Primary Direct Connect */}
               <a
                 href={`steam://connect/${stats.ip}:${stats.port}`}
-                className="flex items-center justify-center gap-3 px-8 py-4 rounded-lg arma-btn-primary text-sm font-mono font-black shadow-arma-amber tracking-wide transition-all hover:scale-[1.02] active:scale-[0.99] text-center"
+                className="flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg arma-btn-primary text-sm font-mono font-black shadow-arma-red tracking-wide transition-all hover:scale-[1.02] active:scale-[0.99] text-center w-full sm:w-auto"
               >
-                <Terminal className="w-5 h-5 text-black" />
+                <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 <span>LAUNCH ARMA 3 &amp; CONNECT</span>
               </a>
 
               {/* Copy IP */}
               <button
                 onClick={copyIp}
-                className="flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover"
+                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
               >
                 {copiedIp ? (
                   <>
@@ -141,7 +141,7 @@ export function ServerOverview({
               {/* Download Launcher Preset */}
               <button
                 onClick={onDownloadPreset}
-                className="flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover"
+                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
               >
                 <Download className="w-4 h-4 text-arma-khaki" />
                 <span>DOWNLOAD LAUNCHER PRESET</span>
@@ -150,67 +150,67 @@ export function ServerOverview({
               {/* Operator Roster */}
               <button
                 onClick={onOpenPlayerList}
-                className="flex items-center justify-center gap-2.5 px-6 py-4 rounded-lg bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text text-sm font-mono font-semibold transition-all"
+                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text text-sm font-mono font-semibold transition-all w-full sm:w-auto"
               >
-                <Users className="w-4 h-4 text-arma-amber" />
+                <Users className="w-4 h-4 text-arma-red" />
                 <span>OPERATORS ({stats.players}/{stats.maxPlayers})</span>
               </button>
             </div>
 
             {/* Quick jump cue */}
-            <div className="mt-6 flex items-center gap-2 text-xs font-mono text-arma-textDim">
+            <div className="mt-5 sm:mt-6 flex items-center gap-2 text-xs font-mono text-arma-textDim">
               <button 
                 onClick={scrollToMods}
-                className="hover:text-arma-amber flex items-center gap-1.5 transition-colors cursor-pointer group"
+                className="hover:text-arma-red flex items-center gap-1.5 transition-colors cursor-pointer group"
               >
-                <Layers className="w-3.5 h-3.5 text-arma-khaki group-hover:text-arma-amber" />
+                <Layers className="w-3.5 h-3.5 text-arma-khaki group-hover:text-arma-red" />
                 <span>View {modCount} Verified Server Addons Below</span>
-                <ArrowDown className="w-3.5 h-3.5 animate-bounce group-hover:text-arma-amber" />
+                <ArrowDown className="w-3.5 h-3.5 animate-bounce group-hover:text-arma-red" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 4 Technical Telemetry Data Panels (Spaced Out, High Readability) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+      {/* 4 Technical Telemetry Data Panels (Responsive 2-col on mobile, 4-col on desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {/* Panel 1: Active Squad Operators */}
         <div 
           onClick={onOpenPlayerList}
-          className="p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-amber/50 transition-all cursor-pointer group flex flex-col justify-between shadow-md"
+          className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-red/50 transition-all cursor-pointer group flex flex-col justify-between shadow-md"
         >
           <div>
-            <div className="flex items-center justify-between text-xs text-arma-textMuted mb-2 font-mono uppercase tracking-wider">
-              <span className="flex items-center gap-2 font-bold text-arma-text">
-                <Users className="w-4 h-4 text-arma-amber" />
-                OPERATORS IN AO
+            <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-red" />
+                OPERATORS
               </span>
-              <span className="text-[11px] text-arma-amber group-hover:underline font-bold">
+              <span className="text-[10px] sm:text-[11px] text-arma-red group-hover:underline font-bold hidden xs:inline">
                 ROSTER &rarr;
               </span>
             </div>
 
-            <div className="mt-3 flex items-baseline gap-2 font-mono">
-              <span className="text-3xl sm:text-4xl font-black text-arma-text tracking-tight">
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2 font-mono">
+              <span className="text-2xl sm:text-4xl font-black text-arma-text tracking-tight">
                 {stats.players}
               </span>
-              <span className="text-sm text-arma-textDim font-bold">
-                / {stats.maxPlayers} SLOTS
+              <span className="text-xs sm:text-sm text-arma-textDim font-bold">
+                / {stats.maxPlayers}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="mt-4 w-full bg-[#0a0c10] rounded-xs h-2 overflow-hidden border border-arma-border">
+            <div className="mt-3 sm:mt-4 w-full bg-[#0a0c10] rounded-xs h-1.5 sm:h-2 overflow-hidden border border-arma-border">
               <div 
-                className="bg-arma-amber h-2 rounded-xs transition-all duration-300"
+                className="bg-arma-red h-1.5 sm:h-2 rounded-xs transition-all duration-300"
                 style={{ width: `${Math.max(playerPercent, stats.players > 0 ? 6 : 0)}%` }}
               />
             </div>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-arma-border/60 flex items-center justify-between text-xs font-mono text-arma-textMuted">
-            <span>ACTIVE SOLDIER</span>
-            <span className="text-arma-text font-bold">
+          <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
+            <span className="hidden sm:inline">SOLDIER</span>
+            <span className="text-arma-text font-bold truncate max-w-[120px]">
               {stats.playerList && stats.playerList.length > 0 ? stats.playerList[0].name : "STANDBY"}
             </span>
           </div>
@@ -219,99 +219,99 @@ export function ServerOverview({
         {/* Panel 2: Verified Addons */}
         <div 
           onClick={scrollToMods}
-          className="p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-khaki/50 transition-all cursor-pointer group flex flex-col justify-between shadow-md"
+          className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-khaki/50 transition-all cursor-pointer group flex flex-col justify-between shadow-md"
         >
           <div>
-            <div className="flex items-center justify-between text-xs text-arma-textMuted mb-2 font-mono uppercase tracking-wider">
-              <span className="flex items-center gap-2 font-bold text-arma-text">
-                <Activity className="w-4 h-4 text-arma-khaki" />
-                MODPACK STATUS
+            <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
+                <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-khaki" />
+                MODPACK
               </span>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/30">
-                PARITY OK
+              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/30">
+                VERIFIED
               </span>
             </div>
 
-            <div className="mt-3 flex items-baseline gap-2 font-mono">
-              <span className="text-3xl sm:text-4xl font-black text-arma-text tracking-tight">
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2 font-mono">
+              <span className="text-2xl sm:text-4xl font-black text-arma-text tracking-tight">
                 {modCount}
               </span>
-              <span className="text-sm text-arma-textDim font-bold">
-                ADDONS LOADED
+              <span className="text-xs sm:text-sm text-arma-textDim font-bold">
+                MODS
               </span>
             </div>
 
-            <p className="mt-3 text-xs text-arma-textMuted font-mono truncate">
-              RHS, ACE3, Antistasi, JSRS Soundmod
+            <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
+              RHS, ACE3, Antistasi
             </p>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-arma-border/60 flex items-center justify-between text-xs font-mono text-arma-textMuted">
-            <span>PRESET EXPORT</span>
-            <span className="text-arma-amber font-bold group-hover:underline">VIEW MANIFEST &rarr;</span>
+          <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
+            <span className="hidden sm:inline">PRESET</span>
+            <span className="text-arma-red font-bold group-hover:underline">VIEW &rarr;</span>
           </div>
         </div>
 
         {/* Panel 3: Direct Steam A2S Query */}
-        <div className="p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-borderHover transition-all flex flex-col justify-between shadow-md">
+        <div className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-borderHover transition-all flex flex-col justify-between shadow-md">
           <div>
-            <div className="flex items-center justify-between text-xs text-arma-textMuted mb-2 font-mono uppercase tracking-wider">
-              <span className="flex items-center gap-2 font-bold text-arma-text">
-                <Radio className="w-4 h-4 text-arma-amber" />
-                A2S TELEMETRY
+            <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
+                <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-red" />
+                LATENCY
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-arma-green font-bold">
-                <span className="w-2 h-2 rounded-full bg-arma-green animate-pulse" />
-                UDP LIVE
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] text-arma-green font-bold">
+                <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-arma-green animate-pulse" />
+                LIVE
               </span>
             </div>
 
-            <div className="mt-3 flex items-baseline gap-2 font-mono">
-              <span className="text-3xl sm:text-4xl font-black text-arma-text tracking-tight">
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2 font-mono">
+              <span className="text-2xl sm:text-4xl font-black text-arma-text tracking-tight">
                 {stats.ping || 28}
               </span>
-              <span className="text-sm text-arma-textDim font-bold">
-                MS LATENCY
+              <span className="text-xs sm:text-sm text-arma-textDim font-bold">
+                MS
               </span>
             </div>
 
-            <p className="mt-3 text-xs text-arma-textMuted font-mono truncate">
-              GAME: <span className="text-arma-text font-bold">{stats.port}</span> &bull; QUERY: <span className="text-arma-text font-bold">{stats.queryPort}</span>
+            <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
+              PORT: <span className="text-arma-text font-bold">{stats.port}</span>
             </p>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-arma-border/60 flex items-center justify-between text-xs font-mono text-arma-textMuted">
-            <span>PROTOCOL</span>
+          <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
+            <span className="hidden sm:inline">PROTOCOL</span>
             <span className="text-arma-text font-bold">VALVE A2S</span>
           </div>
         </div>
 
         {/* Panel 4: Security & Engine Version */}
-        <div className="p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-borderHover transition-all flex flex-col justify-between shadow-md">
+        <div className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-borderHover transition-all flex flex-col justify-between shadow-md">
           <div>
-            <div className="flex items-center justify-between text-xs text-arma-textMuted mb-2 font-mono uppercase tracking-wider">
-              <span className="flex items-center gap-2 font-bold text-arma-text">
-                <ShieldCheck className="w-4 h-4 text-arma-khaki" />
-                SECURITY &amp; BUILD
+            <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-khaki" />
+                BUILD
               </span>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/30">
-                SECURED
+              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/30">
+                ACTIVE
               </span>
             </div>
 
-            <div className="mt-3 font-mono">
-              <div className="text-2xl sm:text-3xl font-black text-arma-text tracking-tight">
-                ARMA 3 v{stats.version}
+            <div className="mt-2 sm:mt-3 font-mono">
+              <div className="text-xl sm:text-3xl font-black text-arma-text tracking-tight truncate">
+                v{stats.version}
               </div>
             </div>
 
-            <p className="mt-3 text-xs text-arma-textMuted font-mono">
-              BATTLEYE ACTIVE &bull; NO PASSWORD
+            <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
+              BATTLEYE &bull; NO PASS
             </p>
           </div>
 
-          <div className="mt-5 pt-3 border-t border-arma-border/60 flex items-center justify-between text-xs font-mono text-arma-textMuted">
-            <span>PLATFORM</span>
+          <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
+            <span className="hidden sm:inline">OS</span>
             <span className="text-arma-text font-bold">LINUX x64</span>
           </div>
         </div>
@@ -323,94 +323,96 @@ export function ServerOverview({
           onClick={() => setShowDiagnostics(!showDiagnostics)}
           className="w-full p-4 sm:p-5 bg-arma-surface hover:bg-arma-card flex items-center justify-between text-xs font-mono text-arma-textMuted transition-colors text-left"
         >
-          <div className="flex items-center gap-3">
-            <Server className="w-4 h-4 text-arma-amber" />
-            <span className="font-bold text-arma-text uppercase tracking-wider">IN-DEPTH HOST DIAGNOSTICS &amp; NETWORK METADATA</span>
-            <span className="text-arma-textDim text-xs hidden sm:inline">({stats.platform || 'Linux 64-bit'} &bull; Sydney, AU)</span>
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <Server className="w-4 h-4 text-arma-red shrink-0" />
+            <span className="font-bold text-arma-text uppercase tracking-wider text-xs sm:text-sm truncate">
+              IN-DEPTH HOST DIAGNOSTICS
+            </span>
+            <span className="text-arma-textDim text-xs hidden md:inline">({stats.platform || 'Linux 64-bit'} &bull; Sydney, AU)</span>
           </div>
 
-          <div className="flex items-center gap-2 text-arma-amber font-bold text-xs">
-            <span>{showDiagnostics ? 'COLLAPSE DIAGNOSTICS' : 'EXPAND DIAGNOSTICS'}</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-arma-red font-bold text-xs shrink-0 ml-2">
+            <span className="hidden xs:inline">{showDiagnostics ? 'COLLAPSE' : 'EXPAND'}</span>
             {showDiagnostics ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </div>
         </button>
 
         {showDiagnostics && (
-          <div className="p-6 border-t border-arma-border bg-[#0d0f13] space-y-5 font-mono text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-4 sm:p-6 border-t border-arma-border bg-[#0d0f13] space-y-4 sm:space-y-5 font-mono text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Host & Location */}
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-arma-khaki" />
                   GEOLOCATION &amp; ISP
                 </div>
-                <div className="text-arma-text font-bold text-sm">{stats.location || 'Sydney, Australia'}</div>
-                <div className="text-arma-textMuted text-xs">{stats.isp || 'Aussie Fibre Pty Ltd (AS4764)'}</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.location || 'Sydney, Australia'}</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">{stats.isp || 'Aussie Fibre Pty Ltd (AS4764)'}</div>
               </div>
 
               {/* Server Engine & Platform */}
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-arma-amber" />
+                  <Cpu className="w-3.5 h-3.5 text-arma-red" />
                   HOST ARCHITECTURE
                 </div>
-                <div className="text-arma-text font-bold text-sm">{stats.platform || 'Linux Dedicated Server (x86_64)'}</div>
-                <div className="text-arma-textMuted text-xs">Protocol: r222 &bull; Build: {stats.version}</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.platform || 'Linux Dedicated Server (x86_64)'}</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">Protocol: r222 &bull; Build: {stats.version}</div>
               </div>
 
               {/* Signature Security */}
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Key className="w-3.5 h-3.5 text-arma-green" />
                   SIGNATURE ENFORCEMENT
                 </div>
-                <div className="text-arma-text font-bold text-sm">{stats.signatureVerification || 'Strict (checkSignatures = 2)'}</div>
-                <div className="text-arma-textMuted text-xs">Only verified .bisign keys allowed</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.signatureVerification || 'Strict (checkSignatures = 2)'}</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">Only verified .bisign keys allowed</div>
               </div>
 
               {/* Voice Over Net */}
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Mic className="w-3.5 h-3.5 text-arma-amber" />
+                  <Mic className="w-3.5 h-3.5 text-arma-red" />
                   VOICE OVER NET (VON)
                 </div>
-                <div className="text-arma-text font-bold text-sm">Enabled (High Quality Codec)</div>
-                <div className="text-arma-textMuted text-xs">In-game direct communication active</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">Enabled (High Quality Codec)</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">In-game direct communication active</div>
               </div>
 
               {/* Perspective & Gameplay */}
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-arma-khaki" />
                   PERSPECTIVE RULES
                 </div>
-                <div className="text-arma-text font-bold text-sm">1st &amp; 3rd Person View Allowed</div>
-                <div className="text-arma-textMuted text-xs">Crosshair enabled &bull; JIP Allowed</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">1st &amp; 3rd Person View Allowed</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">Crosshair enabled &bull; JIP Allowed</div>
               </div>
 
               {/* Connected Player Detail */}
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <UserCheck className="w-3.5 h-3.5 text-arma-green" />
                   SESSION OPERATOR
                 </div>
                 {stats.playerList && stats.playerList.length > 0 ? (
                   <>
-                    <div className="text-arma-amber font-bold text-sm">{stats.playerList[0].name}</div>
-                    <div className="text-arma-textMuted text-xs">
+                    <div className="text-arma-red font-bold text-xs sm:text-sm">{stats.playerList[0].name}</div>
+                    <div className="text-arma-textMuted text-[11px] sm:text-xs">
                       Session Time: {formatDuration(stats.playerList[0].timePlayedSeconds)} &bull; Score: {stats.playerList[0].score}
                     </div>
                   </>
                 ) : (
-                  <div className="text-arma-textMuted text-xs">No active soldiers connected</div>
+                  <div className="text-arma-textMuted text-[11px] sm:text-xs">No active soldiers connected</div>
                 )}
               </div>
             </div>
 
-            {/* Raw Server Tag Matrix */}
-            <div className="pt-3 text-[11px] text-arma-textDim flex flex-wrap items-center gap-2 border-t border-arma-border/50">
+            {/* Raw Server Tag Matrix (break-all prevents horizontal mobile overflow) */}
+            <div className="pt-2 sm:pt-3 text-[10px] sm:text-[11px] text-arma-textDim flex flex-wrap items-center gap-2 border-t border-arma-border/50">
               <span className="font-bold text-arma-textMuted">RAW BI ENGINE TAGS:</span>
-              <code className="bg-arma-surface px-2 py-0.5 rounded border border-arma-border text-arma-textMuted font-mono">
+              <code className="bg-arma-surface px-2 py-0.5 rounded border border-arma-border text-arma-textMuted font-mono break-all">
                 {stats.serverTags || 'bf,r222,n0,s7,i1,mf,lf,vf,dt,tanti,g65545,h86f3694,f1,pl'}
               </code>
             </div>

@@ -63,32 +63,32 @@ export function ServerConfigModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs font-mono">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs font-mono">
       <div 
-        className="w-full max-w-md rounded-lg bg-arma-surface border border-arma-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-md rounded-xl bg-arma-surface border border-arma-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-4 border-b border-arma-border bg-[#0e1116] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-amber">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-red shrink-0">
               <Settings className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-arma-text uppercase">C2 HOST SETTINGS</h3>
-              <p className="text-[11px] text-arma-textMuted">Target server address and query parameters</p>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-arma-text uppercase truncate">HOST SETTINGS</h3>
+              <p className="text-[10px] sm:text-[11px] text-arma-textMuted truncate">Server address and query parameters</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded text-arma-textMuted hover:text-arma-text hover:bg-arma-card transition-colors"
+            className="p-1.5 rounded text-arma-textMuted hover:text-arma-text hover:bg-arma-card transition-colors shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-3.5 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-3.5 overflow-y-auto">
           <div>
             <label className="block text-xs font-bold text-arma-text uppercase mb-1">
               COMMUNITY / SERVER NAME
@@ -98,7 +98,7 @@ export function ServerConfigModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Frenchy's Antistasi Ultimate"
-              className="w-full p-2 rounded bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-amber uppercase"
+              className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red uppercase"
             />
           </div>
 
@@ -113,7 +113,7 @@ export function ServerConfigModal({
                 value={ip}
                 onChange={(e) => setIp(e.target.value)}
                 placeholder="180.181.238.103"
-                className="w-full p-2 rounded bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-amber"
+                className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
               />
             </div>
 
@@ -131,7 +131,7 @@ export function ServerConfigModal({
                   if (num) setQueryPort((num + 1).toString());
                 }}
                 placeholder="2302"
-                className="w-full p-2 rounded bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-amber"
+                className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
               />
             </div>
           </div>
@@ -145,7 +145,7 @@ export function ServerConfigModal({
               value={queryPort}
               onChange={(e) => setQueryPort(e.target.value)}
               placeholder="2303"
-              className="w-full p-2 rounded bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-amber"
+              className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
             />
           </div>
 
@@ -158,7 +158,7 @@ export function ServerConfigModal({
               value={bmId}
               onChange={(e) => setBmId(e.target.value)}
               placeholder="e.g. 2351240"
-              className="w-full p-2 rounded bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-amber"
+              className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
             />
           </div>
 
@@ -166,15 +166,15 @@ export function ServerConfigModal({
             <button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-1 px-3 py-1.5 rounded arma-btn-secondary text-xs font-bold"
+              className="flex items-center gap-1 px-3 py-2 rounded-lg arma-btn-secondary text-xs font-bold"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>RESET</span>
             </button>
 
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded arma-btn-primary text-xs font-bold shadow-arma-amber"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg arma-btn-primary text-xs font-bold shadow-arma-red"
             >
               {savedSuccess ? (
                 <>

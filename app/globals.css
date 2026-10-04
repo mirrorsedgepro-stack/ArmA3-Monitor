@@ -5,6 +5,7 @@
 :root {
   --background: #0c0e12;
   --foreground: #e1e4e8;
+  --arma-red: #e03131;
 }
 
 html {
@@ -18,6 +19,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 /* Subtle tactical grid background (Arma 3 Map / HUD inspired) */
@@ -44,13 +46,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d9822b;
+  background: #e03131;
 }
 
-/* Arma 3 Signature Tactical Amber Button */
+/* Arma 3 Signature Tactical Red Primary CTA */
 .arma-btn-primary {
-  background-color: #d9822b;
-  color: #0c0e12;
+  background-color: #e03131;
+  color: #ffffff;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -58,8 +60,8 @@ body {
 }
 
 .arma-btn-primary:hover {
-  background-color: #ea8f34;
-  color: #000000;
+  background-color: #f03e3e;
+  color: #ffffff;
 }
 
 /* Arma 3 Tactical Ghost / Secondary Button */
