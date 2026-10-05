@@ -15,9 +15,6 @@ import { ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 
 interface HeaderProps {
   stats: ArmaServerStats;
-  servers?: ServerDefinition[];
-  activeServerId?: string;
-  onSelectServer?: (serverId: string) => void;
   onRefresh: () => void;
   isLoading: boolean;
   onOpenConfig: () => void;
@@ -29,9 +26,6 @@ interface HeaderProps {
 
 export function Header({
   stats,
-  servers,
-  activeServerId,
-  onSelectServer,
   onRefresh,
   isLoading,
   onOpenConfig,
@@ -55,14 +49,6 @@ export function Header({
     { id: 'mods', label: 'MODS (42)' },
   ];
 
-  const isReforger = stats.port === 2001 || stats.name.toLowerCase().includes('reforger');
-
-  const brandName = isReforger
-    ? "Frenchy's Reforger 128P"
-    : stats.name.toLowerCase().includes('wasteland') 
-    ? "Frenchy's A3Wasteland" 
-    : "Frenchy's Antistasi";
-
   return (
     <header className="border-b border-arma-border bg-arma-surface/95 backdrop-blur-md sticky top-0 z-50">
       {/* Main Command Bar with guaranteed space for brand and no letter clipping */}
@@ -82,8 +68,8 @@ export function Header({
               <div className="shrink-0 flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-black text-xs sm:text-base text-arma-text uppercase tracking-wider font-mono whitespace-nowrap">
-                    <span className="sm:hidden">{isReforger ? 'REFORGER' : 'ARMA 3'} &bull; {stats.port}</span>
-                    <span className="hidden sm:inline">{brandName}</span>
+                    <span className="sm:hidden">ANTISTASI &bull; {stats.port}</span>
+                    <span className="hidden sm:inline">Frenchy&apos;s Antistasi</span>
                   </span>
                   <span 
                     className={`w-2 h-2 rounded-full shrink-0 ${isOnline ? 'bg-arma-green animate-pulse' : 'bg-red-500'}`} 
@@ -95,26 +81,6 @@ export function Header({
                 </div>
               </div>
             </div>
-
-            {/* Server Quick Switcher in Header (Desktop) */}
-            {servers && servers.length > 1 && (
-              <div className="hidden xl:flex items-center gap-1 p-1 rounded-lg bg-arma-card border border-arma-border text-xs font-mono">
-                {servers.map((srv) => (
-                  <button
-                    key={srv.id}
-                    onClick={() => onSelectServer?.(srv.id)}
-                    className={`px-2.5 py-1 rounded transition-all font-bold uppercase flex items-center gap-1.5 ${
-                      srv.id === activeServerId
-                        ? 'bg-arma-red text-white shadow-sm'
-                        : 'text-arma-textMuted hover:text-arma-text hover:bg-arma-surface'
-                    }`}
-                  >
-                    <span>{srv.id === 'reforger' ? 'Reforger' : srv.id === 'antistasi' ? 'Antistasi' : 'Wasteland'}</span>
-                    <span className="text-[10px] font-normal opacity-75">:{srv.port}</span>
-                  </button>
-                ))}
-              </div>
-            )}
 
             {/* Navigation Links (Desktop only) */}
             <nav className="hidden lg:flex items-center space-x-2 pl-4 border-l border-arma-border text-xs font-mono shrink-0">

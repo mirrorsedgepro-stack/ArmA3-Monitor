@@ -10,18 +10,12 @@ import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
 import { EventTracker } from '@/components/EventTracker';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
-import { MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, MOCK_REFORGER_DATA, DEFAULT_SERVER_CONFIG, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
+import { MOCK_SERVER_DATA, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { ArrowUp, Compass, Layers, Flame } from 'lucide-react';
 
 export default function Home() {
-  const [activeServerId, setActiveServerId] = useState<string>('antistasi');
   const [serverConfig, setServerConfig] = useState<ServerDefinition>(SERVERS_LIST[0]);
-  const [allServerStats, setAllServerStats] = useState<Record<string, ArmaServerStats>>({
-    antistasi: MOCK_SERVER_DATA,
-    wasteland: MOCK_WASTELAND_DATA,
-    reforger: MOCK_REFORGER_DATA,
-  });
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
   const [mods, setMods] = useState<ArmaMod[]>(DEFAULT_MODS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -63,17 +57,11 @@ export default function Home() {
   // Check initial load
   useEffect(() => {
     try {
-      const savedServerId = localStorage.getItem('arma3_active_server_id');
-      if (savedServerId && SERVERS_LIST.some((s) => s.id === savedServerId)) {
-        setActiveServerId(savedServerId);
-        const target = SERVERS_LIST.find((s) => s.id === savedServerId);
-        if (target) {
-          setServerConfig(target);
-          if (savedServerId === 'wasteland') {
-            setStats(MOCK_WASTELAND_DATA);
-          } else if (savedServerId === 'reforger') {
-            setStats(MOCK_REFORGER_DATA);
-          }
+      const savedConfig = localStorage.getItem('arma3_server_config');
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig);
+        if (parsed && parsed.ip) {
+          setServerConfig((prev) => ({ ...prev, ...parsed }));
         }
       }
 
@@ -92,86 +80,36 @@ export default function Home() {
     }
   }, []);
 
-  const handleSelectServer = (serverId: string) => {
-    const target = SERVERS_LIST.find((s) => s.id === serverId);
-    if (!target) return;
-    setActiveServerId(serverId);
-    setServerConfig(target);
-    if (allServerStats[serverId]) {
-      setStats(allServerStats[serverId]);
-    } else if (serverId === 'reforger') {
-      setStats(MOCK_REFORGER_DATA);
-    } else if (serverId === 'wasteland') {
-      setStats(MOCK_WASTELAND_DATA);
-    } else {
-      setStats(MOCK_SERVER_DATA);
-    }
-    try {
-      localStorage.setItem('arma3_active_server_id', serverId);
-    } catch {
-      // ignore
-    }
-  };
-
   const fetchServerStats = useCallback(async () => {
     setIsLoading(true);
     try {
-      const fetchPromises = SERVERS_LIST.map(async (srv) => {
-        const isCurrentSelected = srv.id === activeServerId;
-        const targetConfig = isCurrentSelected ? serverConfig : srv;
-        const params = new URLSearchParams({
-          ip: targetConfig.ip,
-          port: targetConfig.port.toString(),
-          queryPort: targetConfig.queryPort.toString(),
+      const params = new URLSearchParams({
+        ip: serverConfig.ip,
+        port: serverConfig.port.toString(),
+        queryPort: serverConfig.queryPort.toString(),
+      });
+      if (serverConfig.bmId) {
+        params.append('bmId', serverConfig.bmId);
+      }
+
+      const res = await fetch(`/api/server?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        const resolvedName = (serverConfig.name && serverConfig.name.trim().length > 2)
+          ? serverConfig.name
+          : (data.name && data.name.trim().length > 2 ? data.name : serverConfig.name);
+
+        setStats({
+          ...data,
+          name: resolvedName,
         });
-        if (targetConfig.bmId) {
-          params.append('bmId', targetConfig.bmId);
-        }
-
-        try {
-          const res = await fetch(`/api/server?${params.toString()}`);
-          if (res.ok) {
-            const data = await res.json();
-            const resolvedName = (targetConfig.name && targetConfig.name.trim().length > 2)
-              ? targetConfig.name
-              : (data.name && data.name.trim().length > 2 ? data.name : srv.name);
-
-            return {
-              id: srv.id,
-              data: {
-                ...data,
-                name: resolvedName,
-              },
-            };
-          }
-        } catch (e) {
-          console.warn(`Failed to fetch ${srv.id}:`, e);
-        }
-        return null;
-      });
-
-      const results = await Promise.all(fetchPromises);
-      const updatedStats: Record<string, ArmaServerStats> = {};
-
-      results.forEach((res) => {
-        if (res && res.id) {
-          updatedStats[res.id] = res.data;
-        }
-      });
-
-      setAllServerStats((prev) => {
-        const merged = { ...prev, ...updatedStats };
-        if (merged[activeServerId]) {
-          setStats(merged[activeServerId]);
-        }
-        return merged;
-      });
+      }
     } catch (err) {
       console.warn('Failed to fetch server stats:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [activeServerId, serverConfig]);
+  }, [serverConfig]);
 
   useEffect(() => {
     fetchServerStats();
@@ -213,19 +151,10 @@ export default function Home() {
     queryPort: number;
     bmId?: string;
   }) => {
-    const matched = SERVERS_LIST.find((s) => s.port === newConfig.port || s.queryPort === newConfig.queryPort);
-    if (matched) {
-      setActiveServerId(matched.id);
-      setServerConfig({
-        ...matched,
-        ...newConfig,
-      });
-    } else {
-      setServerConfig((prev) => ({
-        ...prev,
-        ...newConfig,
-      }));
-    }
+    setServerConfig((prev) => ({
+      ...prev,
+      ...newConfig,
+    }));
     try {
       localStorage.setItem('arma3_server_config', JSON.stringify(newConfig));
     } catch {
@@ -249,9 +178,6 @@ export default function Home() {
         {/* Tactical Command Bar */}
         <Header
           stats={stats}
-          servers={SERVERS_LIST}
-          activeServerId={activeServerId}
-          onSelectServer={handleSelectServer}
           onRefresh={fetchServerStats}
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
@@ -264,13 +190,9 @@ export default function Home() {
         {/* Dashboard Content - Responsive mobile & desktop spacing */}
         <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-14 space-y-8 sm:space-y-16 lg:space-y-20">
           
-          {/* Section 1: Server Overview & Multi-Server Switcher */}
+          {/* Section 1: Server Overview */}
           <ServerOverview
             stats={stats}
-            servers={SERVERS_LIST}
-            activeServerId={activeServerId}
-            onSelectServer={handleSelectServer}
-            allServerStats={allServerStats}
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
             onOpenConfig={() => setIsConfigModalOpen(true)}
             onDownloadPreset={handleDownloadPreset}

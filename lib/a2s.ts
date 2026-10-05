@@ -18,7 +18,7 @@ export async function queryA2SServer(host: string, port: number, timeoutMs = 250
   let serverStats: Partial<ArmaServerStats> = {};
   let ping = 0;
   let hasInfo = false;
-  const resolvedGamePort = gamePort ?? (port === 2303 ? 2302 : port === 2403 ? 2402 : port === 17777 ? 2001 : port - 1);
+  const resolvedGamePort = gamePort ?? (port === 2303 ? 2302 : port - 1);
 
   return new Promise((resolve) => {
     let timer: NodeJS.Timeout;
@@ -210,14 +210,6 @@ function parseA2SInfoResponse(buf: Buffer): Partial<ArmaServerStats> {
     }
   }
 
-  const isReforger = (game && game.toLowerCase().includes('reforger')) || serverName.toLowerCase().includes('reforger') || serverName.toLowerCase().includes('ukraine war');
-
-  if (isReforger) {
-    if (!mission || mission === 'Arma Reforger' || mission === 'Arma 3 Operation') {
-      mission = 'Ukraine War Conflict - Everon';
-    }
-  }
-
   return {
     name: serverName,
     map: formatMapName(map),
@@ -227,16 +219,13 @@ function parseA2SInfoResponse(buf: Buffer): Partial<ArmaServerStats> {
     version,
     battleye: tags.includes('b,') || tags.startsWith('b') || vac === 1,
     passwordProtected: visibility === 1,
-    gameType: extractGameType(tags, game, serverName),
+    gameType: extractGameType(tags, game),
     platform: tags.includes('pl') || environment === 'l' ? 'Linux Dedicated Server (x86_64)' : 'Windows Dedicated Server',
-    signatureVerification: isReforger ? 'Bohemia Workshop Auto-Sync' : (tags.includes('s7') ? 'Strict (checkSignatures = 2)' : 'Standard Verification'),
-    vonEnabled: tags.includes('vf') || isReforger,
-    thirdPerson: tags.includes('f1') || isReforger,
-    joinInProgress: tags.includes('j0') || isReforger,
+    signatureVerification: tags.includes('s7') ? 'Strict (checkSignatures = 2)' : 'Standard Verification',
+    vonEnabled: tags.includes('vf'),
+    thirdPerson: tags.includes('f1'),
+    joinInProgress: tags.includes('j0'),
     serverTags: tags,
-    game: isReforger ? 'reforger' : 'arma3',
-    rconPort: isReforger ? 19999 : undefined,
-    lanIp: isReforger ? '192.168.8.194' : undefined,
     location: 'Sydney, New South Wales, Australia',
     countryCode: 'AU',
     isp: 'Aussie Fibre Pty Ltd (AS4764)',
@@ -290,10 +279,7 @@ function parseArmaTags(tags: string, defaultMap: string): string {
   return '';
 }
 
-function extractGameType(tags: string, gameName = '', serverName = ''): string {
-  if (gameName.toLowerCase().includes('reforger') || tags.includes('reforger') || serverName.toLowerCase().includes('ukraine')) {
-    return 'Conflict (Modern Warfare)';
-  }
+function extractGameType(tags: string, gameName = ''): string {
   if (gameName.toLowerCase().includes('antistasi') || tags.includes('tanti')) return 'Antistasi (Guerrilla Warfare)';
   if (tags.includes('tcoop') || tags.includes('coop')) return 'COOP';
   if (tags.includes('tvt') || tags.includes('pvp')) return 'PvP';

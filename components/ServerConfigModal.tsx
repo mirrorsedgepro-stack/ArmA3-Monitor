@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Settings, RotateCcw, Check, Save } from 'lucide-react';
-import { DEFAULT_SERVER_CONFIG, SERVERS_LIST } from '@/data/defaultServer';
+import { DEFAULT_SERVER_CONFIG } from '@/data/defaultServer';
 
 interface ServerConfigModalProps {
   isOpen: boolean;
@@ -47,14 +47,6 @@ export function ServerConfigModal({
   }, [isOpen, currentConfig]);
 
   if (!isOpen) return null;
-
-  const applyPreset = (srv: typeof SERVERS_LIST[0]) => {
-    setName(srv.name);
-    setIp(srv.ip);
-    setPort(srv.port.toString());
-    setQueryPort(srv.queryPort.toString());
-    setBmId(srv.bmId || '');
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,26 +99,6 @@ export function ServerConfigModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-3.5 overflow-y-auto">
-          {/* Quick Presets */}
-          <div>
-            <label className="block text-xs font-bold text-arma-text uppercase mb-1.5">
-              QUICK SERVER PRESETS
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {SERVERS_LIST.map((srv) => (
-                <button
-                  type="button"
-                  key={srv.id}
-                  onClick={() => applyPreset(srv)}
-                  className="px-2.5 py-1.5 rounded bg-arma-card hover:bg-arma-cardHover border border-arma-border hover:border-arma-red/40 text-[11px] text-left transition-colors"
-                >
-                  <div className="font-bold text-arma-text truncate">{srv.mode}</div>
-                  <div className="text-[10px] text-arma-khaki">Port {srv.port}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div>
             <label className="block text-xs font-bold text-arma-text uppercase mb-1">
               COMMUNITY / SERVER NAME

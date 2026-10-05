@@ -25,14 +25,10 @@ import {
   Layers,
   CheckCircle2
 } from 'lucide-react';
-import { ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
+import { ArmaServerStats } from '@/data/defaultServer';
 
 interface ServerOverviewProps {
   stats: ArmaServerStats;
-  servers?: ServerDefinition[];
-  activeServerId?: string;
-  onSelectServer?: (serverId: string) => void;
-  allServerStats?: Record<string, ArmaServerStats>;
   onOpenPlayerList: () => void;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
@@ -42,10 +38,6 @@ interface ServerOverviewProps {
 
 export function ServerOverview({
   stats,
-  servers,
-  activeServerId,
-  onSelectServer,
-  allServerStats,
   onOpenPlayerList,
   onOpenConfig,
   onDownloadPreset,
@@ -56,8 +48,6 @@ export function ServerOverview({
   const [copiedIp, setCopiedIp] = useState(false);
   const isOnline = stats.status === 'online';
   const playerPercent = Math.min(100, Math.round((stats.players / (stats.maxPlayers || 32)) * 100));
-  const isReforger = stats.port === 2001 || stats.name.toLowerCase().includes('reforger') || stats.game === 'reforger';
-  const isWasteland = stats.port === 2402 || stats.name.toLowerCase().includes('wasteland');
 
   const copyIp = () => {
     navigator.clipboard.writeText(`${stats.ip}:${stats.port}`);
@@ -80,97 +70,6 @@ export function ServerOverview({
 
   return (
     <div id="overview" className="space-y-6 sm:space-y-10">
-      {/* Multi-Server Selection Strip */}
-      {servers && servers.length > 1 && (
-        <div className="space-y-2.5 font-mono">
-          <div className="flex items-center justify-between text-xs text-arma-textMuted px-1">
-            <span className="font-bold text-arma-text uppercase flex items-center gap-1.5">
-              <Server className="w-3.5 h-3.5 text-arma-red" />
-              CHOOSE SERVER
-            </span>
-            <span className="text-[11px] text-arma-khaki font-semibold">{servers.length} DEDICATED SERVERS ONLINE</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {servers.map((srv) => {
-              const isSelected = srv.id === activeServerId;
-              const srvStats = allServerStats?.[srv.id];
-              const srvOnline = srvStats ? srvStats.status === 'online' : true;
-              const players = srvStats?.players ?? 0;
-              const maxPlayers = srvStats?.maxPlayers ?? (srv.id === 'reforger' ? 128 : 32);
-              const ping = srvStats?.ping ?? (srv.id === 'antistasi' ? 28 : srv.id === 'wasteland' ? 25 : 28);
-
-              return (
-                <button
-                  key={srv.id}
-                  onClick={() => onSelectServer?.(srv.id)}
-                  className={`p-4 sm:p-5 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between cursor-pointer ${
-                    isSelected
-                      ? 'bg-arma-surface border-arma-red shadow-lg shadow-arma-red/10 ring-1 ring-arma-red/50'
-                      : 'bg-arma-surface/60 border-arma-border hover:border-arma-borderHover hover:bg-arma-surface opacity-80 hover:opacity-100'
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="absolute top-0 right-0 w-28 h-28 bg-arma-red/10 rounded-full blur-xl pointer-events-none -mr-6 -mt-6" />
-                  )}
-
-                  <div className="space-y-1.5 relative z-10">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${srvOnline ? 'bg-arma-green animate-pulse' : 'bg-red-500'}`} />
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-arma-text">
-                          {srv.game === 'reforger' ? 'REFORGER' : 'ARMA 3'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        {srv.game === 'reforger' ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950/70 text-blue-400 border border-blue-500/40">
-                            WORKSHOP AUTO
-                          </span>
-                        ) : srv.hasModpack ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40">
-                            42 MODS
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/40">
-                            NO MODS REQ.
-                          </span>
-                        )}
-                        {isSelected && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-arma-red text-white shadow-xs">
-                            ACTIVE
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-sm sm:text-base font-black text-arma-text uppercase tracking-tight line-clamp-1">
-                      {srv.name}
-                    </div>
-
-                    <div className="text-[11px] text-arma-textMuted line-clamp-1">
-                      {srv.tagline}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-arma-border/60 flex items-center justify-between text-xs relative z-10">
-                    <span className="text-arma-khaki font-bold">
-                      PORT: <code className="text-arma-text">{srv.port}</code>
-                    </span>
-                    <span className="text-arma-textMuted">
-                      PLAYERS: <strong className="text-arma-text">{players}/{maxPlayers}</strong>
-                      <span className="text-arma-border mx-1.5">&bull;</span>
-                      <span className="text-arma-green font-bold">{ping}ms</span>
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* Server Hero Panel (Expansive & Mobile Responsive) */}
       <div className="rounded-xl bg-arma-surface border border-arma-border p-5 sm:p-8 lg:p-12 relative overflow-hidden shadow-xl">
         {/* Subtle Background Crimson Accent */}
@@ -246,24 +145,14 @@ export function ServerOverview({
                 )}
               </button>
 
-              {/* Download Launcher Preset / In-Game Workshop Auto */}
-              {isReforger ? (
-                <button
-                  onClick={onOpenConnect}
-                  className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
-                >
-                  <Download className="w-4 h-4 text-blue-400" />
-                  <span>WORKSHOP AUTO-SYNC</span>
-                </button>
-              ) : (
-                <button
-                  onClick={onDownloadPreset}
-                  className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
-                >
-                  <Download className="w-4 h-4 text-arma-khaki" />
-                  <span>{isWasteland ? 'DOWNLOAD CLIENT PRESET' : 'DOWNLOAD LAUNCHER PRESET'}</span>
-                </button>
-              )}
+              {/* Download Launcher Preset */}
+              <button
+                onClick={onDownloadPreset}
+                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
+              >
+                <Download className="w-4 h-4 text-arma-khaki" />
+                <span>DOWNLOAD LAUNCHER PRESET</span>
+              </button>
 
               {/* Players Button */}
               <button
@@ -277,26 +166,14 @@ export function ServerOverview({
 
             {/* Quick jump cue */}
             <div className="mt-5 sm:mt-6 flex items-center gap-2 text-xs font-mono">
-              {isReforger ? (
-                <div className="flex items-center gap-2 text-xs font-mono text-blue-400">
-                  <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
-                  <span>Arma Reforger Modern Conflict &bull; RHS + AFU + FPV Drones auto-download in-game! Direct connect to port 2001.</span>
-                </div>
-              ) : isWasteland ? (
-                <div className="flex items-center gap-2 text-xs font-mono text-arma-green">
-                  <CheckCircle2 className="w-4 h-4 text-arma-green shrink-0" />
-                  <span>Standard A3Wasteland &bull; No mods required to connect! Direct connect to port 2402 to play.</span>
-                </div>
-              ) : (
-                <button 
-                  onClick={scrollToMods}
-                  className="hover:text-arma-red flex items-center gap-1.5 transition-colors cursor-pointer group text-arma-textDim"
-                >
-                  <Layers className="w-3.5 h-3.5 text-arma-khaki group-hover:text-arma-red" />
-                  <span>View {modCount} Server Mods Below</span>
-                  <ArrowDown className="w-3.5 h-3.5 animate-bounce group-hover:text-arma-red" />
-                </button>
-              )}
+              <button 
+                onClick={scrollToMods}
+                className="hover:text-arma-red flex items-center gap-1.5 transition-colors cursor-pointer group text-arma-textDim"
+              >
+                <Layers className="w-3.5 h-3.5 text-arma-khaki group-hover:text-arma-red" />
+                <span>View {modCount} Server Mods Below</span>
+                <ArrowDown className="w-3.5 h-3.5 animate-bounce group-hover:text-arma-red" />
+              </button>
             </div>
           </div>
         </div>
@@ -348,42 +225,38 @@ export function ServerOverview({
 
         {/* Panel 2: Verified Addons / Game Mode */}
         <div 
-          onClick={isWasteland || isReforger ? undefined : scrollToMods}
-          className={`p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border transition-all flex flex-col justify-between shadow-md ${
-            isWasteland || isReforger ? '' : 'hover:border-arma-khaki/50 cursor-pointer group'
-          }`}
+          onClick={scrollToMods}
+          className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-khaki/50 cursor-pointer group transition-all flex flex-col justify-between shadow-md"
         >
           <div>
             <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
               <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-khaki" />
-                {isReforger ? 'WORKSHOP' : isWasteland ? 'GAME MOD' : 'MODPACK'}
+                MODPACK
               </span>
-              <span className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded border ${
-                isReforger ? 'bg-blue-950/70 text-blue-400 border-blue-500/30' : 'bg-arma-card text-arma-green border-arma-green/30'
-              }`}>
-                {isReforger ? 'AUTO-SYNC' : isWasteland ? 'VANILLA' : 'VERIFIED'}
+              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/30">
+                VERIFIED
               </span>
             </div>
 
             <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2 font-mono">
               <span className="text-2xl sm:text-4xl font-black text-arma-text tracking-tight">
-                {isReforger ? 'AUTO' : isWasteland ? '0' : modCount}
+                {modCount}
               </span>
               <span className="text-xs sm:text-sm text-arma-textDim font-bold">
-                {isReforger ? 'WORKSHOP' : isWasteland ? 'REQ MODS' : 'MODS'}
+                MODS
               </span>
             </div>
 
             <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
-              {isReforger ? 'RHS + AFU + FPV Drones' : isWasteland ? 'A3Wasteland Sandbox (Altis)' : 'RHS, ACE3, Antistasi'}
+              RHS, ACE3, Antistasi Ultimate
             </p>
           </div>
 
           <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
-            <span className="hidden sm:inline">{isReforger ? 'DELIVERY' : isWasteland ? 'REQUIREMENT' : 'PRESET'}</span>
-            <span className={isReforger ? 'text-blue-400 font-bold' : isWasteland ? 'text-arma-green font-bold' : 'text-arma-red font-bold group-hover:underline'}>
-              {isReforger ? 'IN-GAME WORKSHOP' : isWasteland ? 'NO MODS NEEDED' : 'VIEW →'}
+            <span className="hidden sm:inline">PRESET</span>
+            <span className="text-arma-red font-bold group-hover:underline">
+              VIEW →
             </span>
           </div>
         </div>
@@ -550,9 +423,9 @@ export function ServerOverview({
                   <Terminal className="w-3.5 h-3.5 text-arma-red" />
                   NETWORK &amp; PORTS
                 </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">Public: {stats.ip}:{stats.port}</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">Direct Connect: {stats.ip}:{stats.port}</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">
-                  Query: {stats.queryPort} {stats.rconPort ? `• RCON: ${stats.rconPort}` : ''} {stats.lanIp ? `• LAN: ${stats.lanIp}` : ''}
+                  Steam Query Port: {stats.queryPort} &bull; Protocol: Valve A2S
                 </div>
               </div>
             </div>
