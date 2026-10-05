@@ -145,12 +145,12 @@ export default function Home() {
   }, [fetchServerStats, autoRefresh]);
 
   const handleDownloadPreset = () => {
-    const html = generateArma3PresetHtml(serverConfig.name, mods);
+    const html = generateArma3PresetHtml('FAS', mods);
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${serverConfig.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_Preset.html`;
+    link.download = 'FAS_Preset.html';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

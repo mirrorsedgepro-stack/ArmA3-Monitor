@@ -27,12 +27,12 @@ export function PresetModal({
   if (!isOpen) return null;
 
   const handleDownload = () => {
-    const html = generateArma3PresetHtml(serverName, currentMods);
+    const html = generateArma3PresetHtml('FAS', currentMods);
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${serverName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Preset.html`;
+    link.download = 'FAS_Preset.html';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

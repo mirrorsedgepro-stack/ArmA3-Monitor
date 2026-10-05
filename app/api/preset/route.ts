@@ -5,11 +5,11 @@ import { DEFAULT_SERVER_CONFIG } from '@/data/defaultServer';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const serverName = searchParams.get('serverName') || DEFAULT_SERVER_CONFIG.name;
+  const serverName = searchParams.get('serverName') || 'FAS';
   
   const html = generateArma3PresetHtml(serverName, DEFAULT_MODS);
   
-  const filename = `${serverName.replace(/[^a-zA-Z0-9_-]/g, '_')}_Preset.html`;
+  const filename = 'FAS_Preset.html';
 
   return new NextResponse(html, {
     status: 200,

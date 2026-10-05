@@ -25,11 +25,11 @@ export const CATEGORY_LABELS: Record<string, { label: string; color: string }> =
 
 export const DEFAULT_MODS: ArmaMod[] = [
   // ==========================================
-  // 1. Core Framework & Missions
+  // 1. Core Framework & Missions (5 mods)
   // ==========================================
   {
     id: "450814997",
-    name: "CBA_A3 (Community Base Addons)",
+    name: "CBA_A3",
     category: "core",
     required: true,
     size: "42.5 MB",
@@ -41,7 +41,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
   {
     id: "3020755032",
-    name: "Antistasi The Mod - Ultimate",
+    name: "Antistasi Ultimate - Mod",
     category: "core",
     required: true,
     size: "145.2 MB",
@@ -53,7 +53,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
   {
     id: "463939057",
-    name: "ace (Advanced Combat Environment 3)",
+    name: "ace",
     category: "core",
     required: true,
     size: "385.2 MB",
@@ -89,11 +89,11 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
 
   // ==========================================
-  // 2. RHS Factions & Military Gear
+  // 2. RHS Factions & Military Gear (4 mods)
   // ==========================================
   {
     id: "843425103",
-    name: "RHS: Armed Forces of the Russian Federation (RHSAFRF)",
+    name: "RHSAFRF",
     category: "equipment",
     required: true,
     size: "5.4 GB",
@@ -105,7 +105,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
   {
     id: "843577117",
-    name: "RHS: United States Armed Forces (RHSUSAF)",
+    name: "RHSUSAF",
     category: "equipment",
     required: true,
     size: "6.8 GB",
@@ -117,7 +117,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
   {
     id: "843593391",
-    name: "RHS: Gendarmerie and Rebel Equipment (RHSGREF)",
+    name: "RHSGREF",
     category: "equipment",
     required: true,
     size: "2.1 GB",
@@ -129,7 +129,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
   {
     id: "843632231",
-    name: "RHS: Serbian Armed Forces (RHSSAF)",
+    name: "RHSSAF",
     category: "equipment",
     required: true,
     size: "1.2 GB",
@@ -141,7 +141,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
 
   // ==========================================
-  // 3. Movement, Animations & Gunplay
+  // 3. Movement, Animations & Gunplay (14 mods)
   // ==========================================
   {
     id: "333310405",
@@ -287,9 +287,33 @@ export const DEFAULT_MODS: ArmaMod[] = [
     tags: ["ACE3", "Stamina", "Movement"],
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=782415569"
   },
+  {
+    id: "2946868556",
+    name: "ACSTG AI Cannot See Through Grass",
+    category: "realism",
+    required: true,
+    size: "1.8 MB",
+    author: "Community",
+    version: "1.2.0",
+    description: "Prevents enemy AI line-of-sight penetration through tall terrain grass and thick brush.",
+    tags: ["AI", "Grass", "Concealment", "Stealth"],
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2946868556"
+  },
+  {
+    id: "3346427969",
+    name: "Hide Among The Grass - HATG",
+    category: "realism",
+    required: true,
+    size: "2.1 MB",
+    author: "Community",
+    version: "1.0.1",
+    description: "Dynamically reduces AI visual detection range when players are crouched or prone inside foliage and grass.",
+    tags: ["Stealth", "Foliage", "Infiltration"],
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3346427969"
+  },
 
   // ==========================================
-  // 4. Audio & Soundscapes
+  // 4. Audio & Soundscapes (5 mods)
   // ==========================================
   {
     id: "3407948300",
@@ -353,7 +377,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
 
   // ==========================================
-  // 5. Visuals, Particles & Blood
+  // 5. Visuals, Particles & Blood (7 mods)
   // ==========================================
   {
     id: "2257686620",
@@ -441,7 +465,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
   },
 
   // ==========================================
-  // 6. HUD, Logistics & Quality of Life
+  // 6. HUD, Logistics & Quality of Life (7 mods)
   // ==========================================
   {
     id: "2791403093",
