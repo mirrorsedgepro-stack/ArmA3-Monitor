@@ -287,30 +287,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     tags: ["ACE3", "Stamina", "Movement"],
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=782415569"
   },
-  {
-    id: "2946868556",
-    name: "ACSTG AI Cannot See Through Grass",
-    category: "realism",
-    required: true,
-    size: "1.8 MB",
-    author: "Community",
-    version: "1.2.0",
-    description: "Prevents enemy AI line-of-sight penetration through tall terrain grass and thick brush.",
-    tags: ["AI", "Grass", "Concealment", "Stealth"],
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2946868556"
-  },
-  {
-    id: "3346427969",
-    name: "Hide Among The Grass - HATG",
-    category: "realism",
-    required: true,
-    size: "2.1 MB",
-    author: "Community",
-    version: "1.0.1",
-    description: "Dynamically reduces AI visual detection range when players are crouched or prone inside foliage and grass.",
-    tags: ["Stealth", "Foliage", "Infiltration"],
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3346427969"
-  },
 
   // ==========================================
   // 4. Audio & Soundscapes (5 mods)

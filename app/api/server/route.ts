@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const host = searchParams.get('ip') || DEFAULT_SERVER_CONFIG.ip;
   const gamePort = parseInt(searchParams.get('port') || `${DEFAULT_SERVER_CONFIG.port}`, 10);
   const queryPort = parseInt(searchParams.get('queryPort') || `${DEFAULT_SERVER_CONFIG.queryPort}`, 10);
+  const telemetryPort = parseInt(searchParams.get('telemetryPort') || process.env.TELEMETRY_PORT || '2310', 10);
   const bmId = searchParams.get('bmId') || process.env.BATTLEMETRICS_SERVER_ID;
   const mockFallback = searchParams.get('mock') !== 'false';
 
@@ -20,7 +21,45 @@ export async function GET(request: NextRequest) {
     queryPort: queryPort,
   };
 
-  // Attempt 1: Direct UDP A2S query (fast timeout)
+  // Attempt 1: HTTP Telemetry Bridge (works reliably in cloud serverless / Vercel without UDP block)
+  try {
+    const bridgeUrl = process.env.TELEMETRY_BRIDGE_URL || `http://${host}:${telemetryPort}/api/telemetry`;
+    const headers: Record<string, string> = {};
+    if (process.env.TELEMETRY_API_KEY) {
+      headers['x-api-key'] = process.env.TELEMETRY_API_KEY;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    const bridgeRes = await fetch(bridgeUrl, {
+      signal: controller.signal,
+      headers,
+      cache: 'no-store',
+    });
+    clearTimeout(timeoutId);
+
+    if (bridgeRes.ok) {
+      const bridgeData = await bridgeRes.json();
+      if (bridgeData && bridgeData.name) {
+        serverStats = {
+          ...serverStats,
+          ...bridgeData,
+          querySource: 'telemetry_bridge',
+          lastUpdated: new Date().toISOString(),
+        };
+        return NextResponse.json(serverStats, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=15',
+          },
+        });
+      }
+    }
+  } catch (bridgeErr) {
+    console.warn('Telemetry bridge query failed, attempting A2S fallback:', bridgeErr);
+  }
+
+  // Attempt 2: Direct UDP A2S query (fast timeout)
   try {
     const a2sRes = await queryA2SServer(host, queryPort, 2000, gamePort);
     if (a2sRes.success && a2sRes.data) {

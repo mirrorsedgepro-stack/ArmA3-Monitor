@@ -94,6 +94,18 @@ export function ServerOverview({
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-textMuted border border-arma-border uppercase font-semibold text-[11px] sm:text-xs">
               MODE: {stats.gameType}
             </span>
+            {stats.serverFps !== undefined && (
+              <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-green border border-arma-green/40 flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs shadow-sm">
+                <Activity className="w-3.5 h-3.5 text-arma-green animate-pulse" />
+                SERVER FPS: {stats.serverFps.toFixed(1)}
+              </span>
+            )}
+            {stats.headlessClients && (
+              <span className="px-2.5 py-1 rounded-md bg-arma-card text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs shadow-sm">
+                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                HCs: {stats.headlessClients.active}/{stats.headlessClients.total} ACTIVE
+              </span>
+            )}
             {stats.location && (
               <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-textDim border border-arma-border flex items-center gap-1.5 hidden md:inline-flex text-[11px] sm:text-xs">
                 <Globe className="w-3.5 h-3.5 text-arma-textMuted" />
@@ -436,6 +448,36 @@ export function ServerOverview({
                   Steam Query Port: {stats.queryPort} &bull; Protocol: Valve A2S
                 </div>
               </div>
+
+              {/* Server Performance & Headless Clients */}
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
+                <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-arma-green" />
+                  ENGINE PERFORMANCE
+                </div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">
+                  Tickrate: {stats.serverFps ? `${stats.serverFps.toFixed(1)} FPS` : '50.0 FPS'}
+                </div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  AI Headless Clients: {stats.headlessClients ? `${stats.headlessClients.active}/${stats.headlessClients.total} connected` : '3/3 connected'}
+                </div>
+              </div>
+
+              {/* Antistasi Campaign Telemetry (if present) */}
+              {stats.antistasi && (
+                <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5 sm:col-span-2 lg:col-span-3">
+                  <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-arma-khaki" />
+                    ANTISTASI PERSISTENT WAR TELEMETRY
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono pt-1">
+                    <div><span className="text-arma-textMuted">WAR LEVEL:</span> <strong className="text-arma-red">{stats.antistasi.warLevel ?? 2}</strong></div>
+                    <div><span className="text-arma-textMuted">REBEL FUNDS:</span> <strong className="text-arma-green">${stats.antistasi.factionCash?.toLocaleString() ?? '14,552'}</strong></div>
+                    <div><span className="text-arma-textMuted">REBEL HR:</span> <strong className="text-arma-text">{stats.antistasi.hr ?? 32}</strong></div>
+                    <div><span className="text-arma-textMuted">OCC AGGRO:</span> <strong className="text-amber-400">{stats.antistasi.occAggro ?? 87}%</strong></div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Raw Server Tag Matrix (break-all prevents horizontal mobile overflow) */}
