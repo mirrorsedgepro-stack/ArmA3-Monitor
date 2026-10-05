@@ -10,7 +10,7 @@ import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
 import { EventTracker } from '@/components/EventTracker';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
-import { MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, DEFAULT_SERVER_CONFIG, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
+import { MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, MOCK_REFORGER_DATA, DEFAULT_SERVER_CONFIG, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { ArrowUp, Compass, Layers, Flame } from 'lucide-react';
 
@@ -20,6 +20,7 @@ export default function Home() {
   const [allServerStats, setAllServerStats] = useState<Record<string, ArmaServerStats>>({
     antistasi: MOCK_SERVER_DATA,
     wasteland: MOCK_WASTELAND_DATA,
+    reforger: MOCK_REFORGER_DATA,
   });
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
   const [mods, setMods] = useState<ArmaMod[]>(DEFAULT_MODS);
@@ -70,6 +71,8 @@ export default function Home() {
           setServerConfig(target);
           if (savedServerId === 'wasteland') {
             setStats(MOCK_WASTELAND_DATA);
+          } else if (savedServerId === 'reforger') {
+            setStats(MOCK_REFORGER_DATA);
           }
         }
       }
@@ -96,6 +99,8 @@ export default function Home() {
     setServerConfig(target);
     if (allServerStats[serverId]) {
       setStats(allServerStats[serverId]);
+    } else if (serverId === 'reforger') {
+      setStats(MOCK_REFORGER_DATA);
     } else if (serverId === 'wasteland') {
       setStats(MOCK_WASTELAND_DATA);
     } else {

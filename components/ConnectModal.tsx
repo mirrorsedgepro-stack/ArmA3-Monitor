@@ -37,6 +37,9 @@ export function ConnectModal({
 
   if (!isOpen) return null;
 
+  const isReforger = stats.port === 2001 || stats.queryPort === 17777 || stats.name.toLowerCase().includes('reforger') || stats.game === 'reforger';
+  const isWasteland = stats.port === 2402 || stats.name.toLowerCase().includes('wasteland');
+
   const fullAddress = `${stats.ip}:${stats.port}`;
 
   const copyFull = () => {
@@ -58,12 +61,39 @@ export function ConnectModal({
   };
 
   const downloadBatchScript = () => {
-    const batContent = `@echo off
-title Connecting to Frenchy's Antistasi Ultimate...
+    const batContent = isReforger
+      ? `@echo off
+title Connecting to Arma Reforger: [UA/RU] 128P UKRAINE WAR CONFLICT...
 color 0c
 cls
 echo ==============================================================================
-echo       FRENCHY'S ANTISTASI ULTIMATE - CONNECTION INFO
+echo   ARMA REFORGER - 128P UKRAINE WAR CONFLICT (RHS + AFU + FPV DRONES)
+echo ==============================================================================
+echo  Server Target : ${stats.ip}:${stats.port}
+echo  Query Port    : ${stats.queryPort}
+echo  LAN Address   : 192.168.8.194:${stats.port}
+echo  RCON Port     : 19999
+echo ==============================================================================
+echo.
+echo [1/2] Opening Arma Reforger via Steam...
+start steam://run/1874880
+echo.
+echo [2/2] INSTRUCTIONS TO JOIN:
+echo  1. In the Arma Reforger main menu, click MULTIPLAYER.
+echo  2. Click DIRECT CONNECT.
+echo  3. Enter IP: ${stats.ip} and Port: ${stats.port}
+echo     (Or 192.168.8.194 if on local network).
+echo  4. Click JOIN. Required mods (RHS, AFU, FPV Drones) download automatically!
+echo.
+echo ==============================================================================
+pause
+`
+      : `@echo off
+title Connecting to ${stats.name}...
+color 0c
+cls
+echo ==============================================================================
+echo       ${stats.name.toUpperCase()} - CONNECTION INFO
 echo ==============================================================================
 echo  Server Target : ${stats.ip}:${stats.port}
 echo  Query Port    : ${stats.queryPort}
@@ -77,7 +107,7 @@ echo  1. In the Arma 3 Launcher, navigate to the SERVERS tab.
 echo  2. Click DIRECT CONNECT (in the bottom toolbar).
 echo  3. Enter IP: ${stats.ip}
 echo  4. Enter Port: ${stats.port}
-echo  5. Click JOIN - The Launcher will auto-match and subscribe to all 42 mods!
+echo  5. Click JOIN ${isWasteland ? 'to connect instantly!' : '- The Launcher will auto-match and subscribe to all 42 mods!'}
 echo.
 echo ==============================================================================
 pause
@@ -87,7 +117,9 @@ pause
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Connect_${stats.ip.replace(/\./g, '_')}_${stats.port}.bat`;
+    link.download = isReforger
+      ? `Connect_Reforger_${stats.ip.replace(/\./g, '_')}_${stats.port}.bat`
+      : `Connect_${stats.ip.replace(/\./g, '_')}_${stats.port}.bat`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -133,11 +165,20 @@ pause
           <div className="p-3.5 sm:p-4 rounded-lg bg-arma-red/10 border border-arma-red/30 space-y-1.5">
             <div className="flex items-center gap-2 text-arma-red font-mono font-bold text-xs sm:text-sm">
               <AlertTriangle className="w-4 h-4 shrink-0 text-arma-red" />
-              <span>HOW TO JOIN MODDED ARMA 3 SERVERS</span>
+              <span>{isReforger ? 'HOW TO JOIN ARMA REFORGER SERVERS' : 'HOW TO JOIN ARMA 3 SERVERS'}</span>
             </div>
             <p className="text-xs text-arma-text leading-relaxed font-sans">
-              Clicking direct web links (<code className="text-arma-red font-mono px-1 py-0.5 bg-black/40 rounded">steam://connect</code>) fails on modded servers with <strong className="text-arma-red font-mono">&quot;Wrong Game ID / Invalid App ID&quot;</strong> due to Steam client limitations with 64-bit AppIDs and mod requirements. 
-              Use the official <strong>Arma 3 Launcher Direct Connect</strong> below for seamless entry with automatic mod loading.
+              {isReforger ? (
+                <>
+                  Connect directly inside <strong>Arma Reforger</strong> via the <strong>Multiplayer &gt; Direct Connect</strong> menu. 
+                  When you join, Bohemia Interactive&apos;s built-in Workshop automatically downloads and loads all required mods (<strong>RHS, AFU, FPV Drones</strong>) seamlessly in-game!
+                </>
+              ) : (
+                <>
+                  Clicking direct web links (<code className="text-arma-red font-mono px-1 py-0.5 bg-black/40 rounded">steam://connect</code>) fails on modded servers with <strong className="text-arma-red font-mono">&quot;Wrong Game ID / Invalid App ID&quot;</strong> due to Steam client limitations. 
+                  Use the official <strong>Arma 3 Launcher Direct Connect</strong> below for seamless entry with automatic mod loading.
+                </>
+              )}
             </p>
           </div>
 
@@ -149,7 +190,7 @@ pause
                 RECOMMENDED JOIN METHOD
               </span>
               <span className="text-[10px] font-mono text-arma-khaki uppercase bg-arma-card px-2 py-0.5 rounded border border-arma-border">
-                AUTO-SYNC 42 MODS
+                {isReforger ? 'WORKSHOP AUTO-SYNC' : isWasteland ? 'NO MODS REQ.' : 'AUTO-SYNC 42 MODS'}
               </span>
             </div>
 
@@ -157,19 +198,22 @@ pause
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
                 <span className="w-5 h-5 rounded-full bg-arma-red text-white flex items-center justify-center text-[10px] shrink-0">1</span>
-                <span>OPEN OFFICIAL ARMA 3 LAUNCHER</span>
+                <span>{isReforger ? 'LAUNCH ARMA REFORGER VIA STEAM' : 'OPEN OFFICIAL ARMA 3 LAUNCHER'}</span>
               </div>
               <div className="pl-7">
                 <a
-                  href="steam://run/107410"
+                  href={isReforger ? "steam://run/1874880" : "steam://run/107410"}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg arma-btn-primary text-xs font-mono font-bold shadow-arma-red transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Play className="w-3.5 h-3.5 fill-white" />
-                  <span>LAUNCH ARMA 3 VIA STEAM</span>
+                  <span>{isReforger ? 'LAUNCH ARMA REFORGER (STEAM)' : 'LAUNCH ARMA 3 VIA STEAM'}</span>
                   <ExternalLink className="w-3 h-3 text-white/80" />
                 </a>
                 <p className="text-[11px] text-arma-textMuted mt-1.5 font-sans">
-                  This launches the official launcher using valid AppID <code className="text-arma-text font-mono">107410</code> (no errors).
+                  {isReforger 
+                    ? 'Launches Arma Reforger directly via Steam (AppID 1874880).' 
+                    : 'This launches the official launcher using valid AppID 107410 (no errors).'
+                  }
                 </p>
               </div>
             </div>
@@ -207,7 +251,7 @@ pause
                 </div>
 
                 {/* Individual IP & Port breakdown for Direct Connect dialog */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                <div className={`grid grid-cols-1 ${isReforger ? 'sm:grid-cols-2 md:grid-cols-4' : 'sm:grid-cols-2'} gap-2 text-xs font-mono`}>
                   <div className="p-2.5 rounded bg-arma-card/80 border border-arma-border/70 flex items-center justify-between">
                     <div>
                       <div className="text-[10px] text-arma-textMuted uppercase">Server IP</div>
@@ -224,7 +268,7 @@ pause
 
                   <div className="p-2.5 rounded bg-arma-card/80 border border-arma-border/70 flex items-center justify-between">
                     <div>
-                      <div className="text-[10px] text-arma-textMuted uppercase">Port</div>
+                      <div className="text-[10px] text-arma-textMuted uppercase">Game Port</div>
                       <div className="font-bold text-arma-text">{stats.port}</div>
                     </div>
                     <button
@@ -235,44 +279,97 @@ pause
                       {copiedPortOnly ? <Check className="w-3.5 h-3.5 text-arma-green" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
                   </div>
+
+                  {isReforger && (
+                    <>
+                      <div className="p-2.5 rounded bg-arma-card/80 border border-arma-border/70 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] text-arma-textMuted uppercase">LAN IP</div>
+                          <div className="font-bold text-arma-text">192.168.8.194</div>
+                        </div>
+                        <button
+                          onClick={() => navigator.clipboard.writeText('192.168.8.194')}
+                          className="p-1.5 rounded hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
+                          title="Copy LAN IP"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-arma-card/80 border border-arma-border/70 flex items-center justify-between">
+                        <div>
+                          <div className="text-[10px] text-arma-textMuted uppercase">A2S Query</div>
+                          <div className="font-bold text-arma-text">{stats.queryPort}</div>
+                        </div>
+                        <span className="text-[10px] text-arma-khaki uppercase font-bold">17777</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Instructions */}
-                <div className="p-3 rounded bg-black/40 border border-arma-border/60 text-xs text-arma-textMuted space-y-1 font-mono">
-                  <div className="text-arma-khaki font-bold uppercase text-[11px]">&gt; IN ARMA 3 LAUNCHER:</div>
-                  <div>1. Go to <strong className="text-white">SERVERS</strong> tab in the left sidebar.</div>
-                  <div>2. Click <strong className="text-white">DIRECT CONNECT</strong> (bottom right corner).</div>
-                  <div>3. Paste <strong className="text-arma-red">{stats.ip}</strong> and port <strong className="text-arma-red">{stats.port}</strong>.</div>
-                  <div>4. Click <strong className="text-arma-green">JOIN</strong> &bull; Select <em className="text-white">&quot;Setup DLCs and mods and join&quot;</em>.</div>
-                </div>
+                {isReforger ? (
+                  <div className="p-3 rounded bg-black/40 border border-arma-border/60 text-xs text-arma-textMuted space-y-1 font-mono">
+                    <div className="text-blue-400 font-bold uppercase text-[11px]">&gt; IN ARMA REFORGER:</div>
+                    <div>1. In main menu, click <strong className="text-white">MULTIPLAYER</strong>.</div>
+                    <div>2. Click <strong className="text-white">DIRECT CONNECT</strong> (bottom right).</div>
+                    <div>3. Enter Host: <strong className="text-arma-red">{stats.ip}</strong> and Port: <strong className="text-arma-red">{stats.port}</strong>.</div>
+                    <div>4. Click <strong className="text-arma-green">JOIN</strong> &bull; Click <em className="text-white">&quot;DOWNLOAD&quot;</em> to auto-sync RHS + AFU + FPV Drones!</div>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded bg-black/40 border border-arma-border/60 text-xs text-arma-textMuted space-y-1 font-mono">
+                    <div className="text-arma-khaki font-bold uppercase text-[11px]">&gt; IN ARMA 3 LAUNCHER:</div>
+                    <div>1. Go to <strong className="text-white">SERVERS</strong> tab in the left sidebar.</div>
+                    <div>2. Click <strong className="text-white">DIRECT CONNECT</strong> (bottom right corner).</div>
+                    <div>3. Paste <strong className="text-arma-red">{stats.ip}</strong> and port <strong className="text-arma-red">{stats.port}</strong>.</div>
+                    <div>4. Click <strong className="text-arma-green">JOIN</strong> &bull; Select <em className="text-white">&quot;Setup DLCs and mods and join&quot;</em>.</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Alternative Quick Methods: Preset HTML & Windows Batch Script */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* HTML Preset */}
-            <div className="p-4 rounded-lg bg-arma-surface border border-arma-border flex flex-col justify-between space-y-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
-                  <Layers className="w-4 h-4 text-arma-red" />
-                  <span>OFFICIAL MOD PRESET (.HTML)</span>
+            {/* HTML Preset or Workshop auto badge */}
+            {isReforger ? (
+              <div className="p-4 rounded-lg bg-arma-surface border border-arma-border flex flex-col justify-between space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
+                    <Layers className="w-4 h-4 text-blue-400" />
+                    <span>BOHEMIA WORKSHOP AUTO-SYNC</span>
+                  </div>
+                  <p className="text-[11px] text-arma-textMuted font-sans">
+                    Arma Reforger natively manages addon downloads. RHS, AFU, and FPV Drones download automatically upon connecting to port 2001.
+                  </p>
                 </div>
-                <p className="text-[11px] text-arma-textMuted font-sans">
-                  Drag and drop this file into your Arma 3 Launcher to subscribe and load all 42 required mods with 1 click.
-                </p>
+                <div className="px-3.5 py-2 rounded-lg bg-arma-card border border-blue-500/40 text-center text-xs font-mono text-blue-400 font-bold">
+                  AUTO-DOWNLOADED ON JOIN
+                </div>
               </div>
-              <button
-                onClick={() => {
-                  onDownloadPreset();
-                  onClose();
-                }}
-                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg arma-btn-secondary text-xs font-mono font-bold w-full transition-all"
-              >
-                <Download className="w-3.5 h-3.5 text-arma-khaki" />
-                <span>DOWNLOAD PRESET (.HTML)</span>
-              </button>
-            </div>
+            ) : (
+              <div className="p-4 rounded-lg bg-arma-surface border border-arma-border flex flex-col justify-between space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
+                    <Layers className="w-4 h-4 text-arma-red" />
+                    <span>OFFICIAL MOD PRESET (.HTML)</span>
+                  </div>
+                  <p className="text-[11px] text-arma-textMuted font-sans">
+                    Drag and drop this file into your Arma 3 Launcher to subscribe and load all 42 required mods with 1 click.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    onDownloadPreset();
+                    onClose();
+                  }}
+                  className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg arma-btn-secondary text-xs font-mono font-bold w-full transition-all"
+                >
+                  <Download className="w-3.5 h-3.5 text-arma-khaki" />
+                  <span>DOWNLOAD PRESET (.HTML)</span>
+                </button>
+              </div>
+            )}
 
             {/* 1-Click Batch Script */}
             <div className="p-4 rounded-lg bg-arma-surface border border-arma-border flex flex-col justify-between space-y-3">
@@ -282,7 +379,7 @@ pause
                   <span>WINDOWS 1-CLICK LAUNCH SCRIPT</span>
                 </div>
                 <p className="text-[11px] text-arma-textMuted font-sans">
-                  Download a <code className="text-arma-text font-mono">.bat</code> helper that opens the launcher with server parameters and details.
+                  Download a <code className="text-arma-text font-mono">.bat</code> helper that opens {isReforger ? 'Arma Reforger' : 'the launcher'} with server parameters and details.
                 </p>
               </div>
               <button
@@ -314,7 +411,7 @@ pause
                 <p>2. Select <strong className="text-arma-text">Game Servers</strong> (or Servers).</p>
                 <p>3. Navigate to the <strong className="text-arma-text">Favorites</strong> tab and click the <strong className="text-arma-text">+ (Add Server)</strong> button.</p>
                 <p>4. Enter the Steam Query address: <code className="text-arma-red font-bold">{stats.ip}:{stats.queryPort}</code></p>
-                <p>5. Click <strong className="text-arma-text">OK</strong>. Frenchy&apos;s Antistasi will now permanently appear in your Steam and in-game server favorites!</p>
+                <p>5. Click <strong className="text-arma-text">OK</strong>. The server will now permanently appear in your Steam and in-game server favorites!</p>
               </div>
             )}
           </div>

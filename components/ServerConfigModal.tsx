@@ -112,7 +112,7 @@ export function ServerConfigModal({
             <label className="block text-xs font-bold text-arma-text uppercase mb-1.5">
               QUICK SERVER PRESETS
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {SERVERS_LIST.map((srv) => (
                 <button
                   type="button"

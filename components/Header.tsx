@@ -55,7 +55,11 @@ export function Header({
     { id: 'mods', label: 'MODS (42)' },
   ];
 
-  const brandName = stats.name.toLowerCase().includes('wasteland') 
+  const isReforger = stats.port === 2001 || stats.name.toLowerCase().includes('reforger');
+
+  const brandName = isReforger
+    ? "Frenchy's Reforger 128P"
+    : stats.name.toLowerCase().includes('wasteland') 
     ? "Frenchy's A3Wasteland" 
     : "Frenchy's Antistasi";
 
@@ -78,7 +82,7 @@ export function Header({
               <div className="shrink-0 flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-black text-xs sm:text-base text-arma-text uppercase tracking-wider font-mono whitespace-nowrap">
-                    <span className="sm:hidden">ARMA 3 &bull; {stats.port}</span>
+                    <span className="sm:hidden">{isReforger ? 'REFORGER' : 'ARMA 3'} &bull; {stats.port}</span>
                     <span className="hidden sm:inline">{brandName}</span>
                   </span>
                   <span 
@@ -105,7 +109,7 @@ export function Header({
                         : 'text-arma-textMuted hover:text-arma-text hover:bg-arma-surface'
                     }`}
                   >
-                    <span>{srv.id === 'antistasi' ? 'Antistasi' : 'Wasteland'}</span>
+                    <span>{srv.id === 'reforger' ? 'Reforger' : srv.id === 'antistasi' ? 'Antistasi' : 'Wasteland'}</span>
                     <span className="text-[10px] font-normal opacity-75">:{srv.port}</span>
                   </button>
                 ))}

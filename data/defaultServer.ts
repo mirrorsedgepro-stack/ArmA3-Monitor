@@ -39,25 +39,33 @@ export interface ArmaServerStats {
   thirdPerson?: boolean;
   joinInProgress?: boolean;
   serverTags?: string;
+  game?: 'arma3' | 'reforger';
+  rconPort?: number;
+  lanIp?: string;
 }
 
 export interface ServerDefinition {
   id: string;
+  game: 'arma3' | 'reforger';
   name: string;
   ip: string;
   port: number;
   queryPort: number;
+  rconPort?: number;
+  lanIp?: string;
   mode: string;
   mission: string;
   map: string;
   hasModpack: boolean;
   bmId?: string;
   tagline: string;
+  maxPlayers?: number;
 }
 
 export const SERVERS_LIST: ServerDefinition[] = [
   {
     id: 'antistasi',
+    game: 'arma3',
     name: process.env.NEXT_PUBLIC_SERVER_NAME || "Frenchy's Antistasi Ultimate [RHS] | 32-Player Dedicated",
     ip: process.env.NEXT_PUBLIC_SERVER_IP || "180.181.238.103",
     port: parseInt(process.env.NEXT_PUBLIC_GAME_PORT || "2302", 10),
@@ -67,9 +75,11 @@ export const SERVERS_LIST: ServerDefinition[] = [
     map: "Altis",
     hasModpack: true,
     tagline: "24/7 Persistent Guerilla Campaign (42 Mods)",
+    maxPlayers: 32,
   },
   {
     id: 'wasteland',
+    game: 'arma3',
     name: "[AUS] Frenchy's A3Wasteland Altis | 32 Player",
     ip: "180.181.238.103",
     port: 2402,
@@ -79,6 +89,23 @@ export const SERVERS_LIST: ServerDefinition[] = [
     map: "Altis",
     hasModpack: false,
     tagline: "24/7 Survival, Base Building & Faction Warfare",
+    maxPlayers: 32,
+  },
+  {
+    id: 'reforger',
+    game: 'reforger',
+    name: "[UA/RU] 128P UKRAINE WAR CONFLICT | RHS + AFU + FPV DRONES",
+    ip: "180.181.238.103",
+    port: 2001,
+    queryPort: 17777,
+    rconPort: 19999,
+    lanIp: "192.168.8.194",
+    mode: "Conflict (Modern Warfare)",
+    mission: "Ukraine War Conflict - Everon",
+    map: "Everon",
+    hasModpack: false,
+    tagline: "128P Modern Warfare: RHS, AFU, FPV Drones (In-game Auto-Mod Download)",
+    maxPlayers: 128,
   },
 ];
 
@@ -155,5 +182,42 @@ export const MOCK_WASTELAND_DATA: ArmaServerStats = {
   thirdPerson: true,
   joinInProgress: true,
   serverTags: "bf,r222,n0,s7,i3,mf,lf,vt,dt,tsandbox,g65545,h8343ea4f,f1,pl,e15",
+  playerList: []
+};
+
+export const MOCK_REFORGER_DATA: ArmaServerStats = {
+  name: SERVERS_LIST[2].name,
+  ip: SERVERS_LIST[2].ip,
+  port: SERVERS_LIST[2].port,
+  queryPort: SERVERS_LIST[2].queryPort,
+  rconPort: SERVERS_LIST[2].rconPort,
+  lanIp: SERVERS_LIST[2].lanIp,
+  game: 'reforger',
+  status: "online",
+  ping: 28,
+  players: 0,
+  maxPlayers: 128,
+  map: "Everon",
+  mission: "Ukraine War Conflict - Everon",
+  gameType: "Conflict (Modern Warfare)",
+  version: "1.8.0.13",
+  battleye: true,
+  passwordProtected: false,
+  difficulty: "Realism",
+  timeOfDay: "08:00 (In-Game)",
+  uptime: "12h 00m",
+  querySource: "direct_a2s",
+  lastUpdated: new Date().toISOString(),
+  discordUrl: DEFAULT_SERVER_CONFIG.discordUrl,
+  teamspeakUrl: DEFAULT_SERVER_CONFIG.teamspeakUrl,
+  location: "Sydney, New South Wales, Australia",
+  countryCode: "AU",
+  isp: "Aussie Fibre Pty Ltd (AS4764)",
+  platform: "Linux Dedicated Server (x86_64)",
+  signatureVerification: "Bohemia Workshop Auto-Sync",
+  vonEnabled: true,
+  thirdPerson: true,
+  joinInProgress: true,
+  serverTags: "reforger,rhs,afu,fpv,ukraine,conflict",
   playerList: []
 };

@@ -56,6 +56,7 @@ export function ServerOverview({
   const [copiedIp, setCopiedIp] = useState(false);
   const isOnline = stats.status === 'online';
   const playerPercent = Math.min(100, Math.round((stats.players / (stats.maxPlayers || 32)) * 100));
+  const isReforger = stats.port === 2001 || stats.name.toLowerCase().includes('reforger') || stats.game === 'reforger';
   const isWasteland = stats.port === 2402 || stats.name.toLowerCase().includes('wasteland');
 
   const copyIp = () => {
@@ -87,17 +88,17 @@ export function ServerOverview({
               <Server className="w-3.5 h-3.5 text-arma-red" />
               CHOOSE SERVER
             </span>
-            <span className="text-[11px] text-arma-khaki font-semibold">2 DEDICATED SERVERS ONLINE</span>
+            <span className="text-[11px] text-arma-khaki font-semibold">{servers.length} DEDICATED SERVERS ONLINE</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {servers.map((srv) => {
               const isSelected = srv.id === activeServerId;
               const srvStats = allServerStats?.[srv.id];
               const srvOnline = srvStats ? srvStats.status === 'online' : true;
-              const players = srvStats?.players ?? (srv.id === 'antistasi' ? 1 : 0);
-              const maxPlayers = srvStats?.maxPlayers ?? 32;
-              const ping = srvStats?.ping ?? (srv.id === 'antistasi' ? 28 : 25);
+              const players = srvStats?.players ?? 0;
+              const maxPlayers = srvStats?.maxPlayers ?? (srv.id === 'reforger' ? 128 : 32);
+              const ping = srvStats?.ping ?? (srv.id === 'antistasi' ? 28 : srv.id === 'wasteland' ? 25 : 28);
 
               return (
                 <button
@@ -118,12 +119,16 @@ export function ServerOverview({
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${srvOnline ? 'bg-arma-green animate-pulse' : 'bg-red-500'}`} />
                         <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-arma-text">
-                          {srv.mode}
+                          {srv.game === 'reforger' ? 'REFORGER' : 'ARMA 3'}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-1.5">
-                        {srv.hasModpack ? (
+                        {srv.game === 'reforger' ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950/70 text-blue-400 border border-blue-500/40">
+                            WORKSHOP AUTO
+                          </span>
+                        ) : srv.hasModpack ? (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40">
                             42 MODS
                           </span>
@@ -241,14 +246,24 @@ export function ServerOverview({
                 )}
               </button>
 
-              {/* Download Launcher Preset */}
-              <button
-                onClick={onDownloadPreset}
-                className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
-              >
-                <Download className="w-4 h-4 text-arma-khaki" />
-                <span>{isWasteland ? 'DOWNLOAD CLIENT PRESET' : 'DOWNLOAD LAUNCHER PRESET'}</span>
-              </button>
+              {/* Download Launcher Preset / In-Game Workshop Auto */}
+              {isReforger ? (
+                <button
+                  onClick={onOpenConnect}
+                  className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
+                >
+                  <Download className="w-4 h-4 text-blue-400" />
+                  <span>WORKSHOP AUTO-SYNC</span>
+                </button>
+              ) : (
+                <button
+                  onClick={onDownloadPreset}
+                  className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg arma-btn-secondary text-sm font-mono font-bold transition-all hover:bg-arma-cardHover w-full sm:w-auto"
+                >
+                  <Download className="w-4 h-4 text-arma-khaki" />
+                  <span>{isWasteland ? 'DOWNLOAD CLIENT PRESET' : 'DOWNLOAD LAUNCHER PRESET'}</span>
+                </button>
+              )}
 
               {/* Players Button */}
               <button
@@ -262,7 +277,12 @@ export function ServerOverview({
 
             {/* Quick jump cue */}
             <div className="mt-5 sm:mt-6 flex items-center gap-2 text-xs font-mono">
-              {isWasteland ? (
+              {isReforger ? (
+                <div className="flex items-center gap-2 text-xs font-mono text-blue-400">
+                  <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span>Arma Reforger Modern Conflict &bull; RHS + AFU + FPV Drones auto-download in-game! Direct connect to port 2001.</span>
+                </div>
+              ) : isWasteland ? (
                 <div className="flex items-center gap-2 text-xs font-mono text-arma-green">
                   <CheckCircle2 className="w-4 h-4 text-arma-green shrink-0" />
                   <span>Standard A3Wasteland &bull; No mods required to connect! Direct connect to port 2402 to play.</span>
@@ -328,40 +348,42 @@ export function ServerOverview({
 
         {/* Panel 2: Verified Addons / Game Mode */}
         <div 
-          onClick={isWasteland ? undefined : scrollToMods}
+          onClick={isWasteland || isReforger ? undefined : scrollToMods}
           className={`p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border transition-all flex flex-col justify-between shadow-md ${
-            isWasteland ? '' : 'hover:border-arma-khaki/50 cursor-pointer group'
+            isWasteland || isReforger ? '' : 'hover:border-arma-khaki/50 cursor-pointer group'
           }`}
         >
           <div>
             <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
               <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
                 <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-khaki" />
-                {isWasteland ? 'GAME MOD' : 'MODPACK'}
+                {isReforger ? 'WORKSHOP' : isWasteland ? 'GAME MOD' : 'MODPACK'}
               </span>
-              <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-arma-card text-arma-green border border-arma-green/30">
-                {isWasteland ? 'VANILLA' : 'VERIFIED'}
+              <span className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded border ${
+                isReforger ? 'bg-blue-950/70 text-blue-400 border-blue-500/30' : 'bg-arma-card text-arma-green border-arma-green/30'
+              }`}>
+                {isReforger ? 'AUTO-SYNC' : isWasteland ? 'VANILLA' : 'VERIFIED'}
               </span>
             </div>
 
             <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2 font-mono">
               <span className="text-2xl sm:text-4xl font-black text-arma-text tracking-tight">
-                {isWasteland ? '0' : modCount}
+                {isReforger ? 'AUTO' : isWasteland ? '0' : modCount}
               </span>
               <span className="text-xs sm:text-sm text-arma-textDim font-bold">
-                {isWasteland ? 'REQ MODS' : 'MODS'}
+                {isReforger ? 'WORKSHOP' : isWasteland ? 'REQ MODS' : 'MODS'}
               </span>
             </div>
 
             <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
-              {isWasteland ? 'A3Wasteland Sandbox (Altis)' : 'RHS, ACE3, Antistasi'}
+              {isReforger ? 'RHS + AFU + FPV Drones' : isWasteland ? 'A3Wasteland Sandbox (Altis)' : 'RHS, ACE3, Antistasi'}
             </p>
           </div>
 
           <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
-            <span className="hidden sm:inline">{isWasteland ? 'REQUIREMENT' : 'PRESET'}</span>
-            <span className={isWasteland ? 'text-arma-green font-bold' : 'text-arma-red font-bold group-hover:underline'}>
-              {isWasteland ? 'NO MODS NEEDED' : 'VIEW →'}
+            <span className="hidden sm:inline">{isReforger ? 'DELIVERY' : isWasteland ? 'REQUIREMENT' : 'PRESET'}</span>
+            <span className={isReforger ? 'text-blue-400 font-bold' : isWasteland ? 'text-arma-green font-bold' : 'text-arma-red font-bold group-hover:underline'}>
+              {isReforger ? 'IN-GAME WORKSHOP' : isWasteland ? 'NO MODS NEEDED' : 'VIEW →'}
             </span>
           </div>
         </div>
@@ -520,6 +542,18 @@ export function ServerOverview({
                 ) : (
                   <div className="text-arma-textMuted text-[11px] sm:text-xs">No players currently connected</div>
                 )}
+              </div>
+
+              {/* Network Parameters & Ports */}
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
+                <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
+                  <Terminal className="w-3.5 h-3.5 text-arma-red" />
+                  NETWORK &amp; PORTS
+                </div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">Public: {stats.ip}:{stats.port}</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  Query: {stats.queryPort} {stats.rconPort ? `• RCON: ${stats.rconPort}` : ''} {stats.lanIp ? `• LAN: ${stats.lanIp}` : ''}
+                </div>
               </div>
             </div>
 

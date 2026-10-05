@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryA2SServer } from '@/lib/a2s';
 import { queryBattleMetrics } from '@/lib/battlemetrics';
-import { DEFAULT_SERVER_CONFIG, MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, SERVERS_LIST, ArmaServerStats } from '@/data/defaultServer';
+import { DEFAULT_SERVER_CONFIG, MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, MOCK_REFORGER_DATA, SERVERS_LIST, ArmaServerStats } from '@/data/defaultServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +13,9 @@ export async function GET(request: NextRequest) {
   const bmId = searchParams.get('bmId') || process.env.BATTLEMETRICS_SERVER_ID;
   const mockFallback = searchParams.get('mock') !== 'false';
 
+  const isReforger = gamePort === 2001 || queryPort === 17777;
   const isWasteland = gamePort === 2402 || queryPort === 2403;
-  const baseMock = isWasteland ? MOCK_WASTELAND_DATA : MOCK_SERVER_DATA;
+  const baseMock = isReforger ? MOCK_REFORGER_DATA : (isWasteland ? MOCK_WASTELAND_DATA : MOCK_SERVER_DATA);
 
   let serverStats: ArmaServerStats = {
     ...baseMock,
