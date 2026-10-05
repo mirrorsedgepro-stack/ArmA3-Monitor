@@ -8,10 +8,9 @@ import {
   RefreshCw, 
   Settings, 
   Terminal, 
-  Crosshair,
-  Flame
+  Crosshair
 } from 'lucide-react';
-import { ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
+import { ArmaServerStats } from '@/data/defaultServer';
 
 interface HeaderProps {
   stats: ArmaServerStats;
@@ -45,7 +44,6 @@ export function Header({
 
   const navLinks = [
     { id: 'overview', label: 'OVERVIEW' },
-    { id: 'events', label: 'LABOUR DAY EVENT (19:30)' },
     { id: 'mods', label: 'MODS (42)' },
   ];
 

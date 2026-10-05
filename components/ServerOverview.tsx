@@ -26,6 +26,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
+import { PlayerHistoryGraph } from '@/components/PlayerHistoryGraph';
 
 interface ServerOverviewProps {
   stats: ArmaServerStats;
@@ -325,6 +326,13 @@ export function ServerOverview({
           </div>
         </div>
       </div>
+
+      {/* Player Population History & Telemetry Curve */}
+      <PlayerHistoryGraph
+        currentPlayers={stats.players}
+        maxPlayers={stats.maxPlayers || 32}
+        serverName={stats.name}
+      />
 
       {/* Expanded Detailed Server Diagnostics (Toggleable) */}
       <div className="rounded-xl bg-arma-surface border border-arma-border overflow-hidden shadow-md">
