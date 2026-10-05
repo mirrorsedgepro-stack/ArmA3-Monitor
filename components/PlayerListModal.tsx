@@ -42,9 +42,9 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-arma-text uppercase flex items-center gap-2">
-                ACTIVE ROSTER
+                ONLINE PLAYERS
                 <span className="text-[11px] px-1.5 py-0.5 rounded bg-arma-card text-arma-red border border-arma-border font-bold">
-                  {players.length} OPERATORS
+                  {players.length} ONLINE
                 </span>
               </h3>
               <p className="text-[10px] sm:text-[11px] text-arma-textMuted truncate uppercase">{serverName}</p>
@@ -65,7 +65,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-arma-textDim" />
             <input
               type="text"
-              placeholder="FILTER CALLSIGN..."
+              placeholder="SEARCH PLAYERS..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 rounded bg-arma-card border border-arma-border text-arma-text placeholder-arma-textDim text-xs focus:outline-none focus:border-arma-red uppercase"
@@ -77,7 +77,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
         <div className="overflow-y-auto p-3 space-y-1 flex-1">
           {filtered.length === 0 ? (
             <div className="text-center py-8 text-arma-textDim text-xs uppercase">
-              NO OPERATORS MATCHING &quot;{filter}&quot;
+              NO PLAYERS MATCHING &quot;{filter}&quot;
             </div>
           ) : (
             <div className="space-y-1">
@@ -96,7 +96,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
                         {player.name}
                       </div>
                       <div className="text-[10px] text-arma-textMuted">
-                        INFANTRY RECON &bull; ALTIS AO
+                        Playing on Altis
                       </div>
                     </div>
                   </div>

@@ -61,11 +61,11 @@ export const MOCK_SERVER_DATA: ArmaServerStats = {
   maxPlayers: 32,
   map: "Altis",
   mission: "Antistasi Ultimate - Altis",
-  gameType: "Antistasi (Guerrilla Warfare)",
+  gameType: "Antistasi Ultimate",
   version: "2.22.154089",
   battleye: true,
   passwordProtected: false,
-  difficulty: "Custom Tactical",
+  difficulty: "Custom",
   timeOfDay: "08:30 (In-Game)",
   uptime: "6h 15m",
   querySource: "direct_a2s",
@@ -83,13 +83,5 @@ export const MOCK_SERVER_DATA: ArmaServerStats = {
   serverTags: "bf,r222,n0,s7,i1,mf,lf,vf,dt,tanti,g65545,h86f3694,f1,pl",
   playerList: [
     { id: 1, name: "Frenchy", score: 0, timePlayedSeconds: 2160 }
-  ],
-  rulesOfEngagement: [
-    "Cooperative Guerrilla Campaign: Coordinate with squad members before initiating outpost assaults.",
-    "Capture and secure enemy munitions, fuel trucks, and communication towers to build rebel support.",
-    "Positive ID on non-combatants and civilians. Civilian casualties lower rebel town support.",
-    "Use ACE interaction (Windows Key) for equipment handling, medical care, and logistics.",
-    "Maintain respect and tactical communications on server voice or Discord.",
-    "No deliberate destruction of rebel headquarters (HQ) or team assets."
   ]
 };

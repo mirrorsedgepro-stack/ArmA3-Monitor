@@ -44,10 +44,9 @@ export function Header({
   };
 
   const navLinks = [
-    { id: 'overview', label: 'THEATER OVERVIEW' },
-    { id: 'events', label: 'LABOUR DAY OP // 19:30' },
-    { id: 'mods', label: 'ADDON MANIFEST' },
-    { id: 'rules', label: 'COMBAT DIRECTIVES' },
+    { id: 'overview', label: 'OVERVIEW' },
+    { id: 'events', label: 'LABOUR DAY EVENT (19:30)' },
+    { id: 'mods', label: 'MODS (42)' },
   ];
 
   return (
@@ -141,7 +140,7 @@ export function Header({
             <button
               onClick={onOpenConnect}
               className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded arma-btn-primary text-xs font-mono font-bold shadow-arma-red transition-all shrink-0 hover:scale-105 active:scale-95 cursor-pointer"
-              title="Open Direct Connect & Deployment Guide"
+              title="Connect to Server"
             >
               <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               <span className="hidden sm:inline">DIRECT JOIN</span>
@@ -154,7 +153,7 @@ export function Header({
                 onClick={onRefresh}
                 disabled={isLoading}
                 className="hidden sm:flex p-2 rounded arma-btn-secondary text-arma-textMuted hover:text-arma-text disabled:opacity-50 transition-colors"
-                title="Refresh live telemetry"
+                title="Refresh server status"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-arma-red' : ''}`} />
               </button>

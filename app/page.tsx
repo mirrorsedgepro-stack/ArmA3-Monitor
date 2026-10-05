@@ -9,11 +9,10 @@ import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
 import { EventTracker } from '@/components/EventTracker';
-import { ServerRules } from '@/components/ServerRules';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { ArrowUp, Compass, Layers, Shield, Flame } from 'lucide-react';
+import { ArrowUp, Compass, Layers, Flame } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
@@ -53,13 +52,10 @@ export default function Home() {
       const overviewEl = document.getElementById('overview');
       const eventsEl = document.getElementById('events');
       const modsEl = document.getElementById('mods');
-      const rulesEl = document.getElementById('rules');
 
       const scrollPos = window.scrollY + 200;
 
-      if (rulesEl && scrollPos >= rulesEl.offsetTop) {
-        setActiveSection('rules');
-      } else if (modsEl && scrollPos >= modsEl.offsetTop) {
+      if (modsEl && scrollPos >= modsEl.offsetTop) {
         setActiveSection('mods');
       } else if (eventsEl && scrollPos >= eventsEl.offsetTop) {
         setActiveSection('events');
@@ -229,16 +225,13 @@ export default function Home() {
             setSearchQuery={setSearchQuery}
           />
 
-          {/* Section 4: Combat Directives & Keybinds */}
-          <ServerRules rules={stats.rulesOfEngagement} />
-
         </main>
       </div>
 
-      {/* Floating Tactical Navigation & Smooth Scrolling HUD */}
+      {/* Floating Quick Navigation & Smooth Scrolling */}
       {showScrollTop && (
         <aside 
-          aria-label="Tactical Quick Navigation"
+          aria-label="Quick Navigation"
           className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-1.5 sm:gap-2 p-1.5 rounded-xl bg-arma-surface/90 border border-arma-border backdrop-blur-md shadow-2xl font-mono text-xs"
         >
           <button
@@ -248,7 +241,7 @@ export default function Home() {
                 ? 'bg-arma-red text-white font-bold'
                 : 'text-arma-textMuted hover:text-arma-text'
             }`}
-            title="Jump to Theater Overview"
+            title="Jump to Server Overview"
           >
             <Compass className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">OVERVIEW</span>
@@ -261,10 +254,10 @@ export default function Home() {
                 ? 'bg-arma-red text-white font-bold'
                 : 'text-arma-textMuted hover:text-arma-text'
             }`}
-            title="Jump to Tonight's Operation"
+            title="Jump to Tonight's Event"
           >
             <Flame className="w-3.5 h-3.5 text-arma-red" />
-            <span className="hidden sm:inline">OPERATIONS</span>
+            <span className="hidden sm:inline">EVENT</span>
           </button>
 
           <button
@@ -274,23 +267,10 @@ export default function Home() {
                 ? 'bg-arma-red text-white font-bold'
                 : 'text-arma-textMuted hover:text-arma-text'
             }`}
-            title="Jump to Addons"
+            title="Jump to Mods"
           >
             <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">ADDONS</span>
-          </button>
-
-          <button
-            onClick={() => scrollToSection('rules')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-              activeSection === 'rules'
-                ? 'bg-arma-red text-white font-bold'
-                : 'text-arma-textMuted hover:text-arma-text'
-            }`}
-            title="Jump to Directives"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">RULES</span>
+            <span className="hidden sm:inline">MODS</span>
           </button>
 
           <div className="w-px h-5 bg-arma-border mx-0.5 sm:mx-1" />
@@ -306,13 +286,13 @@ export default function Home() {
         </aside>
       )}
 
-      {/* Military Command Footer */}
+      {/* Server Footer */}
       <footer className="mt-16 sm:mt-20 border-t border-arma-border bg-[#07090c] py-6 sm:py-8 text-xs font-mono text-arma-textMuted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-center md:text-left">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span className="font-bold text-arma-text uppercase">{serverConfig.name}</span>
             <span className="hidden sm:inline">&bull;</span>
-            <span className="text-arma-khaki">ARMA 3 DEDICATED OPERATIONS</span>
+            <span className="text-arma-khaki">24/7 DEDICATED SERVER</span>
             <span className="hidden sm:inline">&bull;</span>
             <span className="hidden md:inline">SYDNEY, AUSTRALIA</span>
           </div>

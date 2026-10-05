@@ -180,10 +180,10 @@ export function EventTracker({
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-arma-red font-bold uppercase tracking-widest">
             <Flame className="w-4 h-4 text-arma-red animate-pulse" />
-            <span>24/7 DEDICATED SERVER &bull; SPECIAL DISPATCH</span>
+            <span>24/7 SERVER &bull; COMMUNITY EVENT</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-arma-text uppercase font-mono tracking-tight mt-0.5">
-            Labour Day Event &bull; Tonight @ 19:30 AEDT
+            Labour Day Event &bull; Tonight @ 7:30 PM AEDT
           </h2>
         </div>
 
@@ -192,22 +192,22 @@ export function EventTracker({
           {timeLeft.isLive ? (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600/20 border border-red-500 text-red-400 font-mono text-xs font-black animate-pulse">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-              <span>OPERATION LIVE IN PROGRESS</span>
+              <span>EVENT LIVE NOW</span>
             </div>
           ) : timeLeft.isEnded ? (
             <div className="px-3 py-1.5 rounded-full bg-arma-card border border-arma-border text-arma-textMuted font-mono text-xs">
-              OPERATION CONCLUDED // DEBRIEFING
+              EVENT CONCLUDED
             </div>
           ) : (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-arma-red/10 border border-arma-red/30 text-arma-red font-mono text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-arma-red animate-pulse" />
-              <span>T-MINUS COUNTDOWN ACTIVE</span>
+              <span>STARTS IN</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Tactical Card */}
+      {/* Main Event Card */}
       <div className="border border-arma-border rounded-xl bg-gradient-to-b from-arma-card via-arma-card to-[#0d1015] shadow-xl overflow-hidden">
         
         {/* Top Highlight Banner with Live Clock Grid */}
@@ -225,11 +225,11 @@ export function EventTracker({
                   SERVER ONLINE 24/7
                 </span>
                 <span className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-khaki text-[11px] font-mono uppercase">
-                  TONIGHT &bull; 19:30 AEDT
+                  TONIGHT &bull; 7:30 PM AEDT
                 </span>
                 <span className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-textMuted text-[11px] font-mono font-bold uppercase flex items-center gap-1">
                   <Users className="w-3 h-3 text-arma-red" />
-                  {attendeeCount} / {event.slotsMax} OPERATORS
+                  {attendeeCount} / {event.slotsMax} PLAYERS
                 </span>
               </div>
 
@@ -245,23 +245,23 @@ export function EventTracker({
               <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs font-mono text-arma-textMuted pt-1">
                 <div className="flex items-center gap-1.5 text-arma-khaki">
                   <Clock className="w-3.5 h-3.5 text-arma-red" />
-                  <span>START: <strong className="text-white">19:30 AEDT (Sydney)</strong></span>
+                  <span>START: <strong className="text-white">7:30 PM AEDT (Sydney)</strong></span>
                 </div>
                 <div className="flex items-center gap-1.5 text-arma-textDim">
                   <span>LOCAL: <strong className="text-arma-text">{userLocalTimeStr}</strong></span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-arma-red" />
-                  <span>THEATER: <strong className="text-white">{event.theater}</strong></span>
+                  <span>MAP: <strong className="text-white">{event.theater}</strong></span>
                 </div>
               </div>
             </div>
 
-            {/* Right Col: High-Impact Digital Countdown HUD */}
+            {/* Right Col: Digital Countdown HUD */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center p-4 sm:p-5 rounded-xl bg-[#090b0e] border border-arma-border/80 shadow-inner">
               <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-arma-khaki mb-2 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-arma-red" />
-                <span>{timeLeft.isLive ? 'OPERATION TIME REMAINING' : 'COUNTDOWN TO ZERO-HOUR'}</span>
+                <span>{timeLeft.isLive ? 'TIME REMAINING' : 'COUNTDOWN TO 7:30 PM'}</span>
               </div>
 
               {/* Countdown Digits */}
@@ -336,12 +336,12 @@ export function EventTracker({
                 {isAttending ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-white" />
-                    <span>RSVP CONFIRMED &bull; MOBILIZED</span>
+                    <span>RSVP CONFIRMED &bull; SEE YOU THERE</span>
                   </>
                 ) : (
                   <>
                     <Award className="w-4 h-4 text-white" />
-                    <span>MOBILIZE &bull; RSVP TONIGHT</span>
+                    <span>I&apos;M PLAYING TONIGHT (RSVP)</span>
                   </>
                 )}
               </button>
@@ -352,7 +352,7 @@ export function EventTracker({
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-lg arma-btn-secondary font-mono text-xs sm:text-sm font-bold transition-all hover:bg-arma-cardHover"
               >
                 <Terminal className="w-4 h-4 text-arma-red" />
-                <span>DIRECT CONNECT DISPATCH</span>
+                <span>HOW TO CONNECT</span>
               </button>
             </div>
 
@@ -432,7 +432,7 @@ export function EventTracker({
           <div className="space-y-2">
             <div className="text-xs font-mono font-bold uppercase tracking-wider text-arma-khaki flex items-center gap-2">
               <Radio className="w-3.5 h-3.5 text-arma-red" />
-              <span>COMMANDER&apos;S DIRECTIVE // SITUATION BRIEFING</span>
+              <span>EVENT DETAILS</span>
             </div>
             <p className="text-xs sm:text-sm text-arma-text leading-relaxed font-sans bg-black/30 p-4 rounded-lg border border-arma-border/60">
               {event.briefing}
@@ -443,7 +443,7 @@ export function EventTracker({
           <div className="space-y-3">
             <div className="text-xs font-mono font-bold uppercase tracking-wider text-arma-khaki flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-arma-red" />
-              <span>MISSION PHASES // ZERO-HOUR TIMELINE</span>
+              <span>EVENT SCHEDULE</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -456,7 +456,7 @@ export function EventTracker({
                     <div className="flex items-center justify-between text-[11px] font-mono">
                       <span className="text-arma-red font-bold">{phase.time}</span>
                       <span className="px-1.5 py-0.5 rounded bg-arma-card border border-arma-border text-arma-textMuted text-[10px]">
-                        STAGE {idx + 1}
+                        PART {idx + 1}
                       </span>
                     </div>
                     <h4 className="text-xs font-mono font-bold text-white uppercase">
@@ -469,7 +469,7 @@ export function EventTracker({
 
                   <div className="pt-2 border-t border-arma-border/40 text-[10px] font-mono text-arma-khaki uppercase flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-arma-green" />
-                    <span>OBJECTIVE DEFINED</span>
+                    <span>PLANNED</span>
                   </div>
                 </div>
               ))}
@@ -479,7 +479,7 @@ export function EventTracker({
           {/* Mandatory Equipment & Comms Manifest */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 text-xs font-mono">
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
-              <div className="text-[10px] text-arma-textMuted uppercase">SERVER PERSISTENCE</div>
+              <div className="text-[10px] text-arma-textMuted uppercase">SERVER STATUS</div>
               <div className="font-bold text-arma-green mt-0.5 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
                 <span>24/7 (Hop in anytime)</span>
@@ -487,22 +487,22 @@ export function EventTracker({
             </div>
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
-              <div className="text-[10px] text-arma-textMuted uppercase">RADIO COMMUNICATIONS</div>
+              <div className="text-[10px] text-arma-textMuted uppercase">VOICE COMMS</div>
               <div className="font-bold text-arma-text mt-0.5 truncate">{event.commsChannel}</div>
             </div>
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
-              <div className="text-[10px] text-arma-textMuted uppercase">OPERATION HOST</div>
+              <div className="text-[10px] text-arma-textMuted uppercase">HOST</div>
               <div className="font-bold text-arma-text mt-0.5">{event.host}</div>
             </div>
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
-              <div className="text-[10px] text-arma-textMuted uppercase">REQUIRED MODPACK</div>
+              <div className="text-[10px] text-arma-textMuted uppercase">REQUIRED MODS</div>
               <div className="font-bold text-arma-red mt-0.5">42 Mods Active</div>
             </div>
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
-              <div className="text-[10px] text-arma-textMuted uppercase">SLOTS AVAILABLE</div>
+              <div className="text-[10px] text-arma-textMuted uppercase">SPOTS AVAILABLE</div>
               <div className="font-bold text-arma-green mt-0.5">{event.slotsMax - attendeeCount} Remaining ({event.slotsMax} Total)</div>
             </div>
           </div>

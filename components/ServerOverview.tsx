@@ -75,11 +75,11 @@ export function ServerOverview({
         <div className="absolute top-0 right-0 w-96 h-96 bg-arma-red/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
         <div className="relative z-10 space-y-6 sm:space-y-8">
-          {/* Top Status & Theater Pills */}
+          {/* Top Status & Map Pills */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
             <span className="px-2.5 py-1 rounded-md bg-arma-redDim text-arma-red border border-arma-red/40 font-black tracking-wider uppercase flex items-center gap-1.5 shadow-sm text-[11px] sm:text-xs">
-              <span className="w-2 h-2 rounded-full bg-arma-red animate-pulse" />
-              LIVE OPERATIONS ACTIVE
+              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-arma-green animate-pulse' : 'bg-red-500'}`} />
+              {isOnline ? 'SERVER ONLINE' : 'SERVER OFFLINE'}
             </span>
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-green border border-arma-green/40 flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
@@ -87,7 +87,7 @@ export function ServerOverview({
             </span>
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-khaki border border-arma-border flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs">
               <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-red" />
-              THEATER: {stats.map || 'ALTIS'}
+              MAP: {stats.map || 'ALTIS'}
             </span>
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-textMuted border border-arma-border uppercase font-semibold text-[11px] sm:text-xs">
               MODE: {stats.gameType}
@@ -100,17 +100,17 @@ export function ServerOverview({
             )}
           </div>
 
-          {/* Mission Title & Coordinates */}
+          {/* Server Title & Address */}
           <div className="space-y-2 sm:space-y-3 max-w-4xl">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-arma-text font-mono tracking-tight uppercase leading-tight">
               {stats.mission}
             </h1>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-arma-textMuted font-mono">
-              <span>HOST: <strong className="text-arma-text">{stats.name}</strong></span>
+              <span>SERVER: <strong className="text-arma-text">{stats.name}</strong></span>
               <span className="text-arma-border">&bull;</span>
-              <span>ENDPOINT: <code className="text-arma-red font-bold">{stats.ip}:{stats.port}</code></span>
+              <span>ADDRESS: <code className="text-arma-red font-bold">{stats.ip}:{stats.port}</code></span>
               <span className="text-arma-border hidden sm:inline">&bull;</span>
-              <span className="text-arma-green font-bold hidden sm:inline">24/7 PERSISTENT DEPLOYMENT</span>
+              <span className="text-arma-green font-bold hidden sm:inline">24/7 ONLINE</span>
             </div>
           </div>
 
@@ -123,7 +123,7 @@ export function ServerOverview({
                 className="flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg arma-btn-primary text-sm font-mono font-black shadow-arma-red tracking-wide transition-all hover:scale-[1.02] active:scale-[0.99] text-center w-full sm:w-auto cursor-pointer"
               >
                 <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                <span>LAUNCH ARMA 3 &amp; CONNECT</span>
+                <span>HOW TO CONNECT / JOIN</span>
               </button>
 
               {/* Copy IP */}
@@ -153,13 +153,13 @@ export function ServerOverview({
                 <span>DOWNLOAD LAUNCHER PRESET</span>
               </button>
 
-              {/* Operator Roster */}
+              {/* Players Button */}
               <button
                 onClick={onOpenPlayerList}
                 className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-4 rounded-lg bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text text-sm font-mono font-semibold transition-all w-full sm:w-auto"
               >
                 <Users className="w-4 h-4 text-arma-red" />
-                <span>OPERATORS ({stats.players}/{stats.maxPlayers})</span>
+                <span>PLAYERS ({stats.players}/{stats.maxPlayers})</span>
               </button>
             </div>
 
@@ -170,7 +170,7 @@ export function ServerOverview({
                 className="hover:text-arma-red flex items-center gap-1.5 transition-colors cursor-pointer group"
               >
                 <Layers className="w-3.5 h-3.5 text-arma-khaki group-hover:text-arma-red" />
-                <span>View {modCount} Verified Server Addons Below</span>
+                <span>View {modCount} Server Mods Below</span>
                 <ArrowDown className="w-3.5 h-3.5 animate-bounce group-hover:text-arma-red" />
               </button>
             </div>
@@ -180,7 +180,7 @@ export function ServerOverview({
 
       {/* 4 Technical Telemetry Data Panels (Responsive 2-col on mobile, 4-col on desktop) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        {/* Panel 1: Active Squad Operators */}
+        {/* Panel 1: Active Players */}
         <div 
           onClick={onOpenPlayerList}
           className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-red/50 transition-all cursor-pointer group flex flex-col justify-between shadow-md"
@@ -189,10 +189,10 @@ export function ServerOverview({
             <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
               <span className="flex items-center gap-1.5 sm:gap-2 font-bold text-arma-text">
                 <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-red" />
-                OPERATORS
+                PLAYERS
               </span>
               <span className="text-[10px] sm:text-[11px] text-arma-red group-hover:underline font-bold hidden xs:inline">
-                ROSTER &rarr;
+                VIEW LIST &rarr;
               </span>
             </div>
 
@@ -215,9 +215,9 @@ export function ServerOverview({
           </div>
 
           <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
-            <span className="hidden sm:inline">SOLDIER</span>
+            <span className="hidden sm:inline">ONLINE</span>
             <span className="text-arma-text font-bold truncate max-w-[120px]">
-              {stats.playerList && stats.playerList.length > 0 ? stats.playerList[0].name : "STANDBY"}
+              {stats.playerList && stats.playerList.length > 0 ? stats.playerList[0].name : "None online"}
             </span>
           </div>
         </div>
@@ -312,7 +312,7 @@ export function ServerOverview({
             </div>
 
             <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
-              BATTLEYE &bull; NO PASS
+              NO PASSWORD &bull; BATTLEYE
             </p>
           </div>
 
@@ -332,7 +332,7 @@ export function ServerOverview({
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <Server className="w-4 h-4 text-arma-red shrink-0" />
             <span className="font-bold text-arma-text uppercase tracking-wider text-xs sm:text-sm truncate">
-              IN-DEPTH HOST DIAGNOSTICS
+              SERVER DETAILS &amp; DIAGNOSTICS
             </span>
             <span className="text-arma-textDim text-xs hidden md:inline">({stats.platform || 'Linux 64-bit'} &bull; Sydney, AU)</span>
           </div>
@@ -350,7 +350,7 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-arma-khaki" />
-                  GEOLOCATION &amp; ISP
+                  LOCATION &amp; NETWORK
                 </div>
                 <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.location || 'Sydney, Australia'}</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">{stats.isp || 'Aussie Fibre Pty Ltd (AS4764)'}</div>
@@ -360,7 +360,7 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Cpu className="w-3.5 h-3.5 text-arma-red" />
-                  HOST ARCHITECTURE
+                  SERVER SYSTEM
                 </div>
                 <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.platform || 'Linux Dedicated Server (x86_64)'}</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">Protocol: r222 &bull; Build: {stats.version}</div>
@@ -370,7 +370,7 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Key className="w-3.5 h-3.5 text-arma-green" />
-                  SIGNATURE ENFORCEMENT
+                  SERVER SIGNATURES
                 </div>
                 <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.signatureVerification || 'Strict (checkSignatures = 2)'}</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">Only verified .bisign keys allowed</div>
@@ -380,7 +380,7 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Mic className="w-3.5 h-3.5 text-arma-red" />
-                  VOICE OVER NET (VON)
+                  IN-GAME VOICE (VON)
                 </div>
                 <div className="text-arma-text font-bold text-xs sm:text-sm">Enabled (High Quality Codec)</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">In-game direct communication active</div>
@@ -390,7 +390,7 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-arma-khaki" />
-                  PERSPECTIVE RULES
+                  CAMERA PERSPECTIVE
                 </div>
                 <div className="text-arma-text font-bold text-xs sm:text-sm">1st &amp; 3rd Person View Allowed</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">Crosshair enabled &bull; JIP Allowed</div>
@@ -400,7 +400,7 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <UserCheck className="w-3.5 h-3.5 text-arma-green" />
-                  SESSION OPERATOR
+                  CONNECTED PLAYER
                 </div>
                 {stats.playerList && stats.playerList.length > 0 ? (
                   <>
@@ -410,7 +410,7 @@ export function ServerOverview({
                     </div>
                   </>
                 ) : (
-                  <div className="text-arma-textMuted text-[11px] sm:text-xs">No active soldiers connected</div>
+                  <div className="text-arma-textMuted text-[11px] sm:text-xs">No players currently connected</div>
                 )}
               </div>
             </div>

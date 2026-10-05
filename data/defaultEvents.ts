@@ -27,44 +27,39 @@ export interface TacticalEvent {
 
 export const TONIGHT_EVENT: TacticalEvent = {
   id: 'op-antistasi-01',
-  codeName: 'OP: LABOUR DAY',
+  codeName: 'LABOUR DAY',
   title: 'Labour Day Event',
-  subtitle: 'Server is Online 24/7 • Special Community Campaign Event Tonight @ 19:30 AEDT',
+  subtitle: 'Server is online 24/7 • Community session tonight @ 7:30 PM AEDT',
   startTime: '2026-10-05T19:30:00+11:00', // Tonight at 7:30 PM AEDT (Sydney Local Time)
   durationHours: 3.5,
-  theater: 'Altis (Mediterranean Theater)',
-  missionName: 'Antistasi Ultimate - Altis (RHS Escalation)',
-  host: 'Frenchy [Commander]',
+  theater: 'Altis',
+  missionName: 'Antistasi Ultimate - Altis',
+  host: 'Frenchy',
   slotsMax: 32,
   initialAttendees: 14,
-  briefing: "The server runs 24/7 with persistent campaign progression—you can hop in and play anytime! Tonight at 19:30 AEDT, all squads mobilize for our official Labour Day Event: a coordinated multi-squad assault to capture hostile munitions depots, sabotage air search radar facilities, and liberate western Altis.",
-  rules: [
-    "Coordinate with squad lead on TFAR/in-game VOIP prior to weapons discharge.",
-    "Positive identification on all targets; civilian casualties reduce town support.",
-    "ACE medical procedures enforced - ensure 2x Tourniquets and bandages equipped.",
-    "Capture enemy supply crates and logistics trucks back to HQ for permanent garrison arming."
-  ],
+  briefing: "The server runs 24/7 with persistent campaign progression—you can hop in and play anytime! Tonight at 7:30 PM AEDT, everyone is jumping on together for our Labour Day session to run missions, capture outposts, and push the Antistasi campaign forward.",
+  rules: [],
   phases: [
     {
       time: '19:30 - 20:00 AEDT',
-      title: 'Phase I: Staging, Loadout & Briefing',
-      description: 'Check-in at Rebel HQ, ACE medical prep, gear calibration via Arsenal, TFAR radio frequency assignments.',
+      title: 'Hop On & Gear Up',
+      description: 'Join the server, grab your gear from the arsenal, and group up at HQ.',
       status: 'upcoming'
     },
     {
       time: '20:00 - 21:15 AEDT',
-      title: 'Phase II: Radar Outpost Recon & Sabotage',
-      description: 'Low-profile motorized insertion, elimination of enemy air-search radar, suppression of QRF patrols.',
+      title: 'Main Attacks & Base Capture',
+      description: 'Head out together to capture enemy outposts and take down the radar station.',
       status: 'upcoming'
     },
     {
       time: '21:15 - 22:30 AEDT',
-      title: 'Phase III: Logistics Convoy Seizure & Exfil',
-      description: 'Ambush and hijack enemy munitions transport, heavy vehicle recovery, convoy escort back to FOB.',
+      title: 'Loot & Logistics',
+      description: 'Hijack enemy supply trucks, bring ammo and vehicles back to HQ, and save progress.',
       status: 'upcoming'
     }
   ],
-  commsChannel: 'Task Force Arrowhead Radio (TFAR) & Server Discord',
+  commsChannel: 'Discord / In-Game Voice',
   serverIp: '180.181.238.103',
   serverPort: 2302,
 };

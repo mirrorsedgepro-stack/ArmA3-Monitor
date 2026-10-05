@@ -63,7 +63,7 @@ title Connecting to Frenchy's Antistasi Ultimate...
 color 0c
 cls
 echo ==============================================================================
-echo       FRENCHY'S ANTISTASI ULTIMATE [RHS] - TACTICAL DISPATCH
+echo       FRENCHY'S ANTISTASI ULTIMATE - CONNECTION INFO
 echo ==============================================================================
 echo  Server Target : ${stats.ip}:${stats.port}
 echo  Query Port    : ${stats.queryPort}
@@ -103,7 +103,7 @@ pause
         className="relative w-full max-w-2xl bg-arma-card border border-arma-border rounded-xl shadow-2xl overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Header Tactical Bar */}
+        {/* Top Header Bar */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-arma-surface border-b border-arma-border">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded bg-arma-red/15 border border-arma-red/40 flex items-center justify-center text-arma-red">
@@ -111,7 +111,7 @@ pause
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-black text-arma-text uppercase font-mono tracking-wider">
-                Direct Combat Deployment
+                Connect to Server
               </h2>
               <p className="text-[10px] sm:text-xs text-arma-khaki font-mono">
                 {stats.name}
@@ -129,11 +129,11 @@ pause
         {/* Content Body */}
         <div className="p-4 sm:p-6 space-y-5 max-h-[80vh] overflow-y-auto">
 
-          {/* Steam Bug Explanation Callout */}
+          {/* Steam Browser Protocol Notice */}
           <div className="p-3.5 sm:p-4 rounded-lg bg-arma-red/10 border border-arma-red/30 space-y-1.5">
             <div className="flex items-center gap-2 text-arma-red font-mono font-bold text-xs sm:text-sm">
               <AlertTriangle className="w-4 h-4 shrink-0 text-arma-red" />
-              <span>STEAM BROWSER PROTOCOL NOTICE</span>
+              <span>HOW TO JOIN MODDED ARMA 3 SERVERS</span>
             </div>
             <p className="text-xs text-arma-text leading-relaxed font-sans">
               Clicking direct web links (<code className="text-arma-red font-mono px-1 py-0.5 bg-black/40 rounded">steam://connect</code>) fails on modded servers with <strong className="text-arma-red font-mono">&quot;Wrong Game ID / Invalid App ID&quot;</strong> due to Steam client limitations with 64-bit AppIDs and mod requirements. 
@@ -146,7 +146,7 @@ pause
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold uppercase text-arma-red tracking-wider flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-arma-green" />
-                VERIFIED JOIN METHOD (RECOMMENDED)
+                RECOMMENDED JOIN METHOD
               </span>
               <span className="text-[10px] font-mono text-arma-khaki uppercase bg-arma-card px-2 py-0.5 rounded border border-arma-border">
                 AUTO-SYNC 42 MODS
