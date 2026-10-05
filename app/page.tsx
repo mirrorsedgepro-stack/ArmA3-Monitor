@@ -85,12 +85,15 @@ export default function Home() {
         }
         setServerConfig(parsed);
       }
-      const savedMods = localStorage.getItem('arma3_custom_mods');
+      const savedMods = localStorage.getItem('arma3_custom_mods_v3');
       if (savedMods) {
         const parsed = JSON.parse(savedMods);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setMods(parsed);
         }
+      } else {
+        localStorage.removeItem('arma3_custom_mods');
+        setMods(DEFAULT_MODS);
       }
     } catch {
       // Ignore localStorage errors
@@ -157,7 +160,7 @@ export default function Home() {
   const handleApplyCustomMods = (newMods: ArmaMod[]) => {
     setMods(newMods);
     try {
-      localStorage.setItem('arma3_custom_mods', JSON.stringify(newMods));
+      localStorage.setItem('arma3_custom_mods_v3', JSON.stringify(newMods));
     } catch {
       // ignore
     }

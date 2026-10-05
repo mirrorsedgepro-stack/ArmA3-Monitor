@@ -396,7 +396,7 @@ export function EventTracker({
               <button
                 onClick={onDownloadPreset}
                 className="hidden md:flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg arma-btn-secondary text-xs font-mono font-bold transition-all"
-                title="Download required 54-mod launcher preset"
+                title="Download required 40-mod launcher preset"
               >
                 <Download className="w-3.5 h-3.5 text-arma-khaki" />
                 <span>PRESET (.HTML)</span>
@@ -498,7 +498,7 @@ export function EventTracker({
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
               <div className="text-[10px] text-arma-textMuted uppercase">REQUIRED MODPACK</div>
-              <div className="font-bold text-arma-red mt-0.5">54 RHS Mods Active</div>
+              <div className="font-bold text-arma-red mt-0.5">40 Mods Active</div>
             </div>
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">

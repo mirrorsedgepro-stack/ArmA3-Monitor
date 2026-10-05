@@ -77,7 +77,7 @@ echo  1. In the Arma 3 Launcher, navigate to the SERVERS tab.
 echo  2. Click DIRECT CONNECT (in the bottom toolbar).
 echo  3. Enter IP: ${stats.ip}
 echo  4. Enter Port: ${stats.port}
-echo  5. Click JOIN - The Launcher will auto-match and subscribe to all 54 mods!
+echo  5. Click JOIN - The Launcher will auto-match and subscribe to all 40 mods!
 echo.
 echo ==============================================================================
 pause
@@ -149,7 +149,7 @@ pause
                 VERIFIED JOIN METHOD (RECOMMENDED)
               </span>
               <span className="text-[10px] font-mono text-arma-khaki uppercase bg-arma-card px-2 py-0.5 rounded border border-arma-border">
-                AUTO-SYNC 54 MODS
+                AUTO-SYNC 40 MODS
               </span>
             </div>
 
@@ -259,7 +259,7 @@ pause
                   <span>OFFICIAL MOD PRESET (.HTML)</span>
                 </div>
                 <p className="text-[11px] text-arma-textMuted font-sans">
-                  Drag and drop this file into your Arma 3 Launcher to subscribe and load all 54 RHS mods with 1 click.
+                  Drag and drop this file into your Arma 3 Launcher to subscribe and load all 40 required mods with 1 click.
                 </p>
               </div>
               <button

@@ -37,13 +37,12 @@ interface CategoryFolder {
 }
 
 const CATEGORY_FOLDERS: CategoryFolder[] = [
-  { id: 'core', title: 'CORE FRAMEWORKS & CAMPAIGN', description: 'Foundation frameworks and Antistasi Ultimate game mechanics' },
-  { id: 'equipment', title: 'FACTIONS, WEAPONS & VEHICLES (RHS)', description: 'United States, Russian, Serbian, and GREF military hardware' },
-  { id: 'realism', title: 'REALISM, BALLISTICS & MEDICAL (ACE3)', description: 'Advanced combat environment, wound simulation, D.I.R.T, and hit kinetics' },
-  { id: 'audio', title: 'AUDIO, ACOUSTICS & SFX', description: 'JSRS Soundmod, Soundscape reverberation, footsteps, and supersonic cracks' },
-  { id: 'qol', title: 'QUALITY OF LIFE & INTERFACE', description: 'Enhanced movement mantling, better inventory, minimap GPS, and animations' },
-  { id: 'server', title: 'SERVER & MISSION ADMINISTRATION', description: 'Zeus Enhanced (ZEN) and mission execution extensions' },
-  { id: 'terrain', title: 'TERRAINS & MAPS', description: 'Terrain textures and topographic environments' },
+  { id: 'core', title: '1. CORE FRAMEWORK & MISSIONS', description: 'Foundation frameworks, Antistasi Ultimate, ACE3, ACE No Medical, and Zeus Enhanced' },
+  { id: 'equipment', title: '2. RHS FACTIONS & MILITARY GEAR', description: 'RHSAFRF, RHSUSAF, RHSGREF, and RHSSAF military hardware' },
+  { id: 'realism', title: '3. MOVEMENT, ANIMATIONS & GUNPLAY', description: 'Enhanced Movement, Alternative Running, WBK animations, hit reactions, and recoil mechanics' },
+  { id: 'audio', title: '4. AUDIO & SOUNDSCAPES', description: 'JSRS Soundmod 2025, Enhanced Soundscape Plus, and Project SFX series' },
+  { id: 'visuals', title: '5. VISUALS, PARTICLES & BLOOD', description: 'Blastcore Murr, Advance Aero Effects, Improved Craters, D.I.R.T, and A3 Thermal' },
+  { id: 'qol', title: '6. HUD, LOGISTICS & QUALITY OF LIFE', description: 'Better Inventory, CH View Distance, Enhanced GPS, Dynamic Camo, and Simplex Tools' },
 ];
 
 export function ModList({
@@ -58,11 +57,10 @@ export function ModList({
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
     core: true,
     equipment: true,
-    realism: false,
+    realism: true,
     audio: false,
+    visuals: false,
     qol: false,
-    server: false,
-    terrain: false,
   });
 
   const [filterType, setFilterType] = useState<'all' | 'required' | 'optional'>('all');
@@ -164,7 +162,7 @@ export function ModList({
               [ADDON ARCHIVE]
             </span>
             <span className="text-arma-textMuted font-bold text-[11px] sm:text-xs">
-              {totalRequired} REQUIRED &bull; {totalOptional} OPTIONAL &bull; 30 TOTAL
+              {totalRequired} REQUIRED &bull; {totalOptional} OPTIONAL &bull; {mods.length} TOTAL
             </span>
           </div>
           <h2 className="text-xl sm:text-3xl font-black text-arma-text font-mono tracking-tight uppercase">
