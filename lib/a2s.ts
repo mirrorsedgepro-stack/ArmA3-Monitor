@@ -12,12 +12,13 @@ interface QueryResult {
  * Queries an Arma 3 server directly using Valve's A2S protocol over UDP.
  * Queries both A2S_INFO (server status, mission, map) and A2S_PLAYER (connected player list).
  */
-export async function queryA2SServer(host: string, port: number, timeoutMs = 2500): Promise<QueryResult> {
+export async function queryA2SServer(host: string, port: number, timeoutMs = 2500, gamePort?: number): Promise<QueryResult> {
   const socket = dgram.createSocket('udp4');
   let startTime = Date.now();
   let serverStats: Partial<ArmaServerStats> = {};
   let ping = 0;
   let hasInfo = false;
+  const resolvedGamePort = gamePort ?? (port === 2303 ? 2302 : port === 2403 ? 2402 : port - 1);
 
   return new Promise((resolve) => {
     let timer: NodeJS.Timeout;
@@ -42,7 +43,7 @@ export async function queryA2SServer(host: string, port: number, timeoutMs = 250
             ...serverStats,
             ping,
             ip: host,
-            port: port === 2303 ? 2302 : port,
+            port: resolvedGamePort,
             queryPort: port,
             status: 'online',
             querySource: 'direct_a2s',
@@ -124,7 +125,7 @@ export async function queryA2SServer(host: string, port: number, timeoutMs = 250
               ...serverStats,
               ping,
               ip: host,
-              port: port === 2303 ? 2302 : port,
+              port: resolvedGamePort,
               queryPort: port,
               status: 'online',
               querySource: 'direct_a2s',

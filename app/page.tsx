@@ -10,11 +10,17 @@ import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
 import { EventTracker } from '@/components/EventTracker';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
-import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
+import { MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, DEFAULT_SERVER_CONFIG, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { ArrowUp, Compass, Layers, Flame } from 'lucide-react';
 
 export default function Home() {
+  const [activeServerId, setActiveServerId] = useState<string>('antistasi');
+  const [serverConfig, setServerConfig] = useState<ServerDefinition>(SERVERS_LIST[0]);
+  const [allServerStats, setAllServerStats] = useState<Record<string, ArmaServerStats>>({
+    antistasi: MOCK_SERVER_DATA,
+    wasteland: MOCK_WASTELAND_DATA,
+  });
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
   const [mods, setMods] = useState<ArmaMod[]>(DEFAULT_MODS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -28,21 +34,6 @@ export default function Home() {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-
-  // Server configuration
-  const [serverConfig, setServerConfig] = useState<{
-    name: string;
-    ip: string;
-    port: number;
-    queryPort: number;
-    bmId?: string;
-  }>({
-    name: DEFAULT_SERVER_CONFIG.name,
-    ip: DEFAULT_SERVER_CONFIG.ip,
-    port: DEFAULT_SERVER_CONFIG.port,
-    queryPort: DEFAULT_SERVER_CONFIG.queryPort,
-    bmId: '',
-  });
 
   // Track scroll position for smooth floating mechanics
   useEffect(() => {
@@ -71,16 +62,18 @@ export default function Home() {
   // Check initial load
   useEffect(() => {
     try {
-      const savedConfig = localStorage.getItem('arma3_server_config');
-      if (savedConfig) {
-        const parsed = JSON.parse(savedConfig);
-        // Ensure name is valid and not corrupted or set to single letter "F"
-        if (parsed && (!parsed.name || parsed.name.trim().length <= 2)) {
-          parsed.name = DEFAULT_SERVER_CONFIG.name;
-          localStorage.setItem('arma3_server_config', JSON.stringify(parsed));
+      const savedServerId = localStorage.getItem('arma3_active_server_id');
+      if (savedServerId && SERVERS_LIST.some((s) => s.id === savedServerId)) {
+        setActiveServerId(savedServerId);
+        const target = SERVERS_LIST.find((s) => s.id === savedServerId);
+        if (target) {
+          setServerConfig(target);
+          if (savedServerId === 'wasteland') {
+            setStats(MOCK_WASTELAND_DATA);
+          }
         }
-        setServerConfig(parsed);
       }
+
       const savedMods = localStorage.getItem('arma3_custom_mods_v3');
       if (savedMods) {
         const parsed = JSON.parse(savedMods);
@@ -96,38 +89,84 @@ export default function Home() {
     }
   }, []);
 
+  const handleSelectServer = (serverId: string) => {
+    const target = SERVERS_LIST.find((s) => s.id === serverId);
+    if (!target) return;
+    setActiveServerId(serverId);
+    setServerConfig(target);
+    if (allServerStats[serverId]) {
+      setStats(allServerStats[serverId]);
+    } else if (serverId === 'wasteland') {
+      setStats(MOCK_WASTELAND_DATA);
+    } else {
+      setStats(MOCK_SERVER_DATA);
+    }
+    try {
+      localStorage.setItem('arma3_active_server_id', serverId);
+    } catch {
+      // ignore
+    }
+  };
+
   const fetchServerStats = useCallback(async () => {
     setIsLoading(true);
     try {
-      const params = new URLSearchParams({
-        ip: serverConfig.ip,
-        port: serverConfig.port.toString(),
-        queryPort: serverConfig.queryPort.toString(),
+      const fetchPromises = SERVERS_LIST.map(async (srv) => {
+        const isCurrentSelected = srv.id === activeServerId;
+        const targetConfig = isCurrentSelected ? serverConfig : srv;
+        const params = new URLSearchParams({
+          ip: targetConfig.ip,
+          port: targetConfig.port.toString(),
+          queryPort: targetConfig.queryPort.toString(),
+        });
+        if (targetConfig.bmId) {
+          params.append('bmId', targetConfig.bmId);
+        }
+
+        try {
+          const res = await fetch(`/api/server?${params.toString()}`);
+          if (res.ok) {
+            const data = await res.json();
+            const resolvedName = (targetConfig.name && targetConfig.name.trim().length > 2)
+              ? targetConfig.name
+              : (data.name && data.name.trim().length > 2 ? data.name : srv.name);
+
+            return {
+              id: srv.id,
+              data: {
+                ...data,
+                name: resolvedName,
+              },
+            };
+          }
+        } catch (e) {
+          console.warn(`Failed to fetch ${srv.id}:`, e);
+        }
+        return null;
       });
-      if (serverConfig.bmId) {
-        params.append('bmId', serverConfig.bmId);
-      }
 
-      const res = await fetch(`/api/server?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        const resolvedName = 
-          (serverConfig.name && serverConfig.name.trim().length > 2)
-            ? serverConfig.name
-            : (data.name && data.name.trim().length > 2 ? data.name : DEFAULT_SERVER_CONFIG.name);
+      const results = await Promise.all(fetchPromises);
+      const updatedStats: Record<string, ArmaServerStats> = {};
 
-        setStats((prev) => ({
-          ...prev,
-          ...data,
-          name: resolvedName,
-        }));
-      }
+      results.forEach((res) => {
+        if (res && res.id) {
+          updatedStats[res.id] = res.data;
+        }
+      });
+
+      setAllServerStats((prev) => {
+        const merged = { ...prev, ...updatedStats };
+        if (merged[activeServerId]) {
+          setStats(merged[activeServerId]);
+        }
+        return merged;
+      });
     } catch (err) {
       console.warn('Failed to fetch server stats:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [serverConfig]);
+  }, [activeServerId, serverConfig]);
 
   useEffect(() => {
     fetchServerStats();
@@ -135,7 +174,7 @@ export default function Home() {
     if (!autoRefresh) return;
     const interval = setInterval(() => {
       fetchServerStats();
-    }, 25000);
+    }, 20000);
 
     return () => clearInterval(interval);
   }, [fetchServerStats, autoRefresh]);
@@ -162,8 +201,26 @@ export default function Home() {
     }
   };
 
-  const handleSaveConfig = (newConfig: typeof serverConfig) => {
-    setServerConfig(newConfig);
+  const handleSaveConfig = (newConfig: {
+    name: string;
+    ip: string;
+    port: number;
+    queryPort: number;
+    bmId?: string;
+  }) => {
+    const matched = SERVERS_LIST.find((s) => s.port === newConfig.port || s.queryPort === newConfig.queryPort);
+    if (matched) {
+      setActiveServerId(matched.id);
+      setServerConfig({
+        ...matched,
+        ...newConfig,
+      });
+    } else {
+      setServerConfig((prev) => ({
+        ...prev,
+        ...newConfig,
+      }));
+    }
     try {
       localStorage.setItem('arma3_server_config', JSON.stringify(newConfig));
     } catch {
@@ -187,6 +244,9 @@ export default function Home() {
         {/* Tactical Command Bar */}
         <Header
           stats={stats}
+          servers={SERVERS_LIST}
+          activeServerId={activeServerId}
+          onSelectServer={handleSelectServer}
           onRefresh={fetchServerStats}
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
@@ -196,12 +256,16 @@ export default function Home() {
           setActiveSection={setActiveSection}
         />
 
-        {/* Tactical Dashboard Content - Responsive mobile & desktop spacing */}
+        {/* Dashboard Content - Responsive mobile & desktop spacing */}
         <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-14 space-y-8 sm:space-y-16 lg:space-y-20">
           
-          {/* Section 1: Operation Briefing & Technical Telemetry */}
+          {/* Section 1: Server Overview & Multi-Server Switcher */}
           <ServerOverview
             stats={stats}
+            servers={SERVERS_LIST}
+            activeServerId={activeServerId}
+            onSelectServer={handleSelectServer}
+            allServerStats={allServerStats}
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
             onOpenConfig={() => setIsConfigModalOpen(true)}
             onDownloadPreset={handleDownloadPreset}

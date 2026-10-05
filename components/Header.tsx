@@ -11,10 +11,13 @@ import {
   Crosshair,
   Flame
 } from 'lucide-react';
-import { ArmaServerStats } from '@/data/defaultServer';
+import { ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 
 interface HeaderProps {
   stats: ArmaServerStats;
+  servers?: ServerDefinition[];
+  activeServerId?: string;
+  onSelectServer?: (serverId: string) => void;
   onRefresh: () => void;
   isLoading: boolean;
   onOpenConfig: () => void;
@@ -26,6 +29,9 @@ interface HeaderProps {
 
 export function Header({
   stats,
+  servers,
+  activeServerId,
+  onSelectServer,
   onRefresh,
   isLoading,
   onOpenConfig,
@@ -49,13 +55,17 @@ export function Header({
     { id: 'mods', label: 'MODS (42)' },
   ];
 
+  const brandName = stats.name.toLowerCase().includes('wasteland') 
+    ? "Frenchy's A3Wasteland" 
+    : "Frenchy's Antistasi";
+
   return (
     <header className="border-b border-arma-border bg-arma-surface/95 backdrop-blur-md sticky top-0 z-50">
       {/* Main Command Bar with guaranteed space for brand and no letter clipping */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
           
-          {/* Left: Tactical Insignia and Brand Identity (shrink-0 guarantees it can NEVER be crushed into 'F') */}
+          {/* Left: Tactical Insignia and Brand Identity */}
           <div className="flex items-center gap-4 sm:gap-6 shrink-0">
             <div 
               className="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group shrink-0"
@@ -68,8 +78,8 @@ export function Header({
               <div className="shrink-0 flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-black text-xs sm:text-base text-arma-text uppercase tracking-wider font-mono whitespace-nowrap">
-                    <span className="sm:hidden">ARMA 3 &bull; PORTAL</span>
-                    <span className="hidden sm:inline">Frenchy&apos;s Antistasi</span>
+                    <span className="sm:hidden">ARMA 3 &bull; {stats.port}</span>
+                    <span className="hidden sm:inline">{brandName}</span>
                   </span>
                   <span 
                     className={`w-2 h-2 rounded-full shrink-0 ${isOnline ? 'bg-arma-green animate-pulse' : 'bg-red-500'}`} 
@@ -77,14 +87,33 @@ export function Header({
                   />
                 </div>
                 <div className="text-[9px] sm:text-[10px] text-arma-khaki font-mono uppercase tracking-widest mt-0.5 whitespace-nowrap">
-                  <span className="sm:hidden">24/7 &bull; {stats.ip}:{stats.port}</span>
-                  <span className="hidden sm:inline">24/7 Dedicated &bull; {stats.ip}:{stats.port}</span>
+                  <span>24/7 &bull; {stats.ip}:{stats.port}</span>
                 </div>
               </div>
             </div>
 
-            {/* Tactical Navigation Links (Desktop only) */}
-            <nav className="hidden lg:flex items-center space-x-2 pl-6 border-l border-arma-border text-xs font-mono shrink-0">
+            {/* Server Quick Switcher in Header (Desktop) */}
+            {servers && servers.length > 1 && (
+              <div className="hidden xl:flex items-center gap-1 p-1 rounded-lg bg-arma-card border border-arma-border text-xs font-mono">
+                {servers.map((srv) => (
+                  <button
+                    key={srv.id}
+                    onClick={() => onSelectServer?.(srv.id)}
+                    className={`px-2.5 py-1 rounded transition-all font-bold uppercase flex items-center gap-1.5 ${
+                      srv.id === activeServerId
+                        ? 'bg-arma-red text-white shadow-sm'
+                        : 'text-arma-textMuted hover:text-arma-text hover:bg-arma-surface'
+                    }`}
+                  >
+                    <span>{srv.id === 'antistasi' ? 'Antistasi' : 'Wasteland'}</span>
+                    <span className="text-[10px] font-normal opacity-75">:{srv.port}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Navigation Links (Desktop only) */}
+            <nav className="hidden lg:flex items-center space-x-2 pl-4 border-l border-arma-border text-xs font-mono shrink-0">
               {navLinks.map((link) => (
                 <button
                   key={link.id}

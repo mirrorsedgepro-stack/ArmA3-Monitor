@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryA2SServer } from '@/lib/a2s';
 import { queryBattleMetrics } from '@/lib/battlemetrics';
-import { DEFAULT_SERVER_CONFIG, MOCK_SERVER_DATA, ArmaServerStats } from '@/data/defaultServer';
+import { DEFAULT_SERVER_CONFIG, MOCK_SERVER_DATA, MOCK_WASTELAND_DATA, SERVERS_LIST, ArmaServerStats } from '@/data/defaultServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +13,11 @@ export async function GET(request: NextRequest) {
   const bmId = searchParams.get('bmId') || process.env.BATTLEMETRICS_SERVER_ID;
   const mockFallback = searchParams.get('mock') !== 'false';
 
+  const isWasteland = gamePort === 2402 || queryPort === 2403;
+  const baseMock = isWasteland ? MOCK_WASTELAND_DATA : MOCK_SERVER_DATA;
+
   let serverStats: ArmaServerStats = {
-    ...MOCK_SERVER_DATA,
+    ...baseMock,
     ip: host,
     port: gamePort,
     queryPort: queryPort,
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
 
   // Attempt 1: Direct UDP A2S query (fast timeout)
   try {
-    const a2sRes = await queryA2SServer(host, queryPort, 2000);
+    const a2sRes = await queryA2SServer(host, queryPort, 2000, gamePort);
     if (a2sRes.success && a2sRes.data) {
       serverStats = {
         ...serverStats,
