@@ -8,11 +8,12 @@ import { PlayerListModal } from '@/components/PlayerListModal';
 import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
+import { EventTracker } from '@/components/EventTracker';
 import { ServerRules } from '@/components/ServerRules';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { ArrowUp, Compass, Layers, Shield } from 'lucide-react';
+import { ArrowUp, Compass, Layers, Shield, Flame } from 'lucide-react';
 
 export default function Home() {
   const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
@@ -50,6 +51,7 @@ export default function Home() {
       setShowScrollTop(window.scrollY > 350);
 
       const overviewEl = document.getElementById('overview');
+      const eventsEl = document.getElementById('events');
       const modsEl = document.getElementById('mods');
       const rulesEl = document.getElementById('rules');
 
@@ -59,6 +61,8 @@ export default function Home() {
         setActiveSection('rules');
       } else if (modsEl && scrollPos >= modsEl.offsetTop) {
         setActiveSection('mods');
+      } else if (eventsEl && scrollPos >= eventsEl.offsetTop) {
+        setActiveSection('events');
       } else {
         setActiveSection('overview');
       }
@@ -206,7 +210,13 @@ export default function Home() {
             modCount={mods.length}
           />
 
-          {/* Section 2: Addon Loadout & Workshop Manifest */}
+          {/* Section 2: Tonight's Tactical Event Dispatch & Live Countdown */}
+          <EventTracker
+            onOpenConnect={() => setIsConnectModalOpen(true)}
+            onDownloadPreset={handleDownloadPreset}
+          />
+
+          {/* Section 3: Addon Loadout & Workshop Manifest */}
           <ModList
             mods={mods}
             serverName={serverConfig.name}
@@ -216,7 +226,7 @@ export default function Home() {
             setSearchQuery={setSearchQuery}
           />
 
-          {/* Section 3: Combat Directives & Keybinds */}
+          {/* Section 4: Combat Directives & Keybinds */}
           <ServerRules rules={stats.rulesOfEngagement} />
 
         </main>
@@ -239,6 +249,19 @@ export default function Home() {
           >
             <Compass className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">OVERVIEW</span>
+          </button>
+
+          <button
+            onClick={() => scrollToSection('events')}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              activeSection === 'events'
+                ? 'bg-arma-red text-white font-bold'
+                : 'text-arma-textMuted hover:text-arma-text'
+            }`}
+            title="Jump to Tonight's Operation"
+          >
+            <Flame className="w-3.5 h-3.5 text-arma-red" />
+            <span className="hidden sm:inline">OPERATIONS</span>
           </button>
 
           <button

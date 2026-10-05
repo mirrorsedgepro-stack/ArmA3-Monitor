@@ -8,7 +8,8 @@ import {
   RefreshCw, 
   Settings, 
   Terminal, 
-  Crosshair
+  Crosshair,
+  Flame
 } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
@@ -44,6 +45,7 @@ export function Header({
 
   const navLinks = [
     { id: 'overview', label: 'THEATER OVERVIEW' },
+    { id: 'events', label: 'OPERATIONS // 19:30' },
     { id: 'mods', label: 'ADDON MANIFEST' },
     { id: 'rules', label: 'COMBAT DIRECTIVES' },
   ];
