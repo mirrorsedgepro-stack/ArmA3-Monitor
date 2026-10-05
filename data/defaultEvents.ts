@@ -27,9 +27,9 @@ export interface TacticalEvent {
 
 export const TONIGHT_EVENT: TacticalEvent = {
   id: 'op-antistasi-01',
-  codeName: 'OP: GUERRILLA DAWN',
-  title: "Frenchy's Antistasi: Squad Campaign Joint Strike",
-  subtitle: "32-Player Cooperative Guerrilla Warfare & Logistics Seizure",
+  codeName: 'OP: LABOUR DAY',
+  title: 'Labour Day Event',
+  subtitle: 'Server is Online 24/7 • Special Community Campaign Event Tonight @ 19:30 AEDT',
   startTime: '2026-10-05T19:30:00+11:00', // Tonight at 7:30 PM AEDT (Sydney Local Time)
   durationHours: 3.5,
   theater: 'Altis (Mediterranean Theater)',
@@ -37,7 +37,7 @@ export const TONIGHT_EVENT: TacticalEvent = {
   host: 'Frenchy [Commander]',
   slotsMax: 32,
   initialAttendees: 14,
-  briefing: "Rebel forces will assemble at Rebel HQ on Altis. Primary tactical objectives: mobilize fireteams, complete Arsenal gear staging, synchronize radio frequencies, and launch coordinated assaults on enemy munitions depots and radar installations across western Altis.",
+  briefing: "The server runs 24/7 with persistent campaign progression—you can hop in and play anytime! Tonight at 19:30 AEDT, all squads mobilize for our official Labour Day Event: a coordinated multi-squad assault to capture hostile munitions depots, sabotage air search radar facilities, and liberate western Altis.",
   rules: [
     "Coordinate with squad lead on TFAR/in-game VOIP prior to weapons discharge.",
     "Positive identification on all targets; civilian casualties reduce town support.",

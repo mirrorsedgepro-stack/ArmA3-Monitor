@@ -81,6 +81,10 @@ export function ServerOverview({
               <span className="w-2 h-2 rounded-full bg-arma-red animate-pulse" />
               LIVE OPERATIONS ACTIVE
             </span>
+            <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-green border border-arma-green/40 flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
+              24/7 DEDICATED
+            </span>
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-khaki border border-arma-border flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs">
               <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-arma-red" />
               THEATER: {stats.map || 'ALTIS'}
@@ -106,7 +110,7 @@ export function ServerOverview({
               <span className="text-arma-border">&bull;</span>
               <span>ENDPOINT: <code className="text-arma-red font-bold">{stats.ip}:{stats.port}</code></span>
               <span className="text-arma-border hidden sm:inline">&bull;</span>
-              <span className="text-arma-green font-bold hidden sm:inline">SIGNATURES LEVEL 2</span>
+              <span className="text-arma-green font-bold hidden sm:inline">24/7 PERSISTENT DEPLOYMENT</span>
             </div>
           </div>
 

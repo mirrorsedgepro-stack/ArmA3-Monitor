@@ -165,7 +165,7 @@ export function EventTracker({
   };
 
   const handleShare = () => {
-    const shareText = `[ARMA 3 OPERATION] ${event.codeName} - ${event.title}\nTime: Tonight @ 19:30 AEDT (Sydney Time)\nDirect Connect: ${event.serverIp}:${event.serverPort}\nJoin the squad: ${window.location.origin}#events`;
+    const shareText = `[ARMA 3 EVENT] ${event.title}\nServer is 24/7 Dedicated (${event.serverIp}:${event.serverPort})\nSpecial Joint Squad Operation: Tonight @ 19:30 AEDT (Sydney Time)\nJoin the squad: ${window.location.origin}#events`;
     navigator.clipboard.writeText(shareText);
     setCopiedShare(true);
     setTimeout(() => setCopiedShare(false), 2500);
@@ -180,10 +180,10 @@ export function EventTracker({
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-arma-red font-bold uppercase tracking-widest">
             <Flame className="w-4 h-4 text-arma-red animate-pulse" />
-            <span>THEATER OPERATIONS &bull; LIVE DISPATCH</span>
+            <span>24/7 DEDICATED SERVER &bull; SPECIAL DISPATCH</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-arma-text uppercase font-mono tracking-tight mt-0.5">
-            Tonight&apos;s Combat Event
+            Labour Day Event &bull; Tonight @ 19:30 AEDT
           </h2>
         </div>
 
@@ -220,11 +220,15 @@ export function EventTracker({
                 <span className="px-2.5 py-1 rounded bg-arma-red text-white text-[11px] font-mono font-black uppercase tracking-wider shadow-sm">
                   {event.codeName}
                 </span>
+                <span className="px-2.5 py-1 rounded bg-arma-card border border-arma-green/40 text-arma-green text-[11px] font-mono font-bold uppercase flex items-center gap-1.5 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
+                  SERVER ONLINE 24/7
+                </span>
                 <span className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-khaki text-[11px] font-mono uppercase">
                   TONIGHT &bull; 19:30 AEDT
                 </span>
-                <span className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-green text-[11px] font-mono font-bold uppercase flex items-center gap-1">
-                  <Users className="w-3 h-3" />
+                <span className="px-2.5 py-1 rounded bg-arma-card border border-arma-border text-arma-textMuted text-[11px] font-mono font-bold uppercase flex items-center gap-1">
+                  <Users className="w-3 h-3 text-arma-red" />
                   {attendeeCount} / {event.slotsMax} OPERATORS
                 </span>
               </div>
@@ -473,7 +477,15 @@ export function EventTracker({
           </div>
 
           {/* Mandatory Equipment & Comms Manifest */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 text-xs font-mono">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 text-xs font-mono">
+            <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
+              <div className="text-[10px] text-arma-textMuted uppercase">SERVER PERSISTENCE</div>
+              <div className="font-bold text-arma-green mt-0.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
+                <span>24/7 (Hop in anytime)</span>
+              </div>
+            </div>
+
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
               <div className="text-[10px] text-arma-textMuted uppercase">RADIO COMMUNICATIONS</div>
               <div className="font-bold text-arma-text mt-0.5 truncate">{event.commsChannel}</div>
@@ -490,7 +502,7 @@ export function EventTracker({
             </div>
 
             <div className="p-3 rounded-lg bg-arma-surface/40 border border-arma-border">
-              <div className="text-[10px] text-arma-textMuted uppercase">SQUAD SLOTS AVAILABLE</div>
+              <div className="text-[10px] text-arma-textMuted uppercase">SLOTS AVAILABLE</div>
               <div className="font-bold text-arma-green mt-0.5">{event.slotsMax - attendeeCount} Remaining ({event.slotsMax} Total)</div>
             </div>
           </div>

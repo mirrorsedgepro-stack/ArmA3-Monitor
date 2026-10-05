@@ -45,7 +45,7 @@ export function Header({
 
   const navLinks = [
     { id: 'overview', label: 'THEATER OVERVIEW' },
-    { id: 'events', label: 'OPERATIONS // 19:30' },
+    { id: 'events', label: 'LABOUR DAY OP // 19:30' },
     { id: 'mods', label: 'ADDON MANIFEST' },
     { id: 'rules', label: 'COMBAT DIRECTIVES' },
   ];
@@ -78,8 +78,8 @@ export function Header({
                   />
                 </div>
                 <div className="text-[9px] sm:text-[10px] text-arma-khaki font-mono uppercase tracking-widest mt-0.5 whitespace-nowrap">
-                  <span className="sm:hidden">{stats.ip}:{stats.port}</span>
-                  <span className="hidden sm:inline">Dedicated &bull; {stats.ip}:{stats.port}</span>
+                  <span className="sm:hidden">24/7 &bull; {stats.ip}:{stats.port}</span>
+                  <span className="hidden sm:inline">24/7 Dedicated &bull; {stats.ip}:{stats.port}</span>
                 </div>
               </div>
             </div>
