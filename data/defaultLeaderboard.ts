@@ -1,0 +1,147 @@
+export interface LeaderboardPlayer {
+  id: string;
+  name: string;
+  rank: string;
+  role: string;
+  score: number;
+  playtimeHours: number;
+  missionsCompleted: number;
+  favoriteWeapon: string;
+  isOnline: boolean;
+  avatarInitials: string;
+  badge?: string;
+  kills?: number;
+  revives?: number;
+  lastSeen?: string;
+}
+
+export const DEFAULT_LEADERBOARD_PLAYERS: LeaderboardPlayer[] = [
+  {
+    id: 'p1',
+    name: 'Frenchy',
+    rank: 'Commander',
+    role: 'Server Host & Guerilla Lead',
+    score: 2840,
+    playtimeHours: 148.5,
+    missionsCompleted: 52,
+    favoriteWeapon: 'AK-74M Zenitco (5.45mm)',
+    isOnline: true,
+    avatarInitials: 'FR',
+    badge: 'HOST & COMMANDER',
+    kills: 342,
+    revives: 29,
+    lastSeen: 'Online Now',
+  },
+  {
+    id: 'p2',
+    name: 'GhostActual',
+    rank: 'Staff Sergeant',
+    role: 'Recon & Designated Marksman',
+    score: 2210,
+    playtimeHours: 112.0,
+    missionsCompleted: 44,
+    favoriteWeapon: 'M110 SASS Suppressed',
+    isOnline: false,
+    avatarInitials: 'GA',
+    badge: 'SHARPSHOOTER',
+    kills: 289,
+    revives: 14,
+    lastSeen: 'Yesterday 22:45',
+  },
+  {
+    id: 'p3',
+    name: 'DocMiller',
+    rank: 'Sergeant',
+    role: 'Lead Combat Medic',
+    score: 1980,
+    playtimeHours: 94.2,
+    missionsCompleted: 39,
+    favoriteWeapon: 'M4A1 Block II (5.56mm)',
+    isOnline: false,
+    avatarInitials: 'DM',
+    badge: 'LIFESAVER (118 REVIVES)',
+    kills: 114,
+    revives: 118,
+    lastSeen: 'Yesterday 21:30',
+  },
+  {
+    id: 'p4',
+    name: 'Hammer',
+    rank: 'Corporal',
+    role: 'Heavy Weapons & AT Specialist',
+    score: 1650,
+    playtimeHours: 76.8,
+    missionsCompleted: 31,
+    favoriteWeapon: 'RPG-7V2 & M249 SAW',
+    isOnline: false,
+    avatarInitials: 'HM',
+    badge: 'ARMOR BUSTER',
+    kills: 195,
+    revives: 8,
+    lastSeen: '2 days ago',
+  },
+  {
+    id: 'p5',
+    name: 'Wombat',
+    rank: 'Corporal',
+    role: 'Logistics & Supply Convoy Lead',
+    score: 1420,
+    playtimeHours: 68.4,
+    missionsCompleted: 28,
+    favoriteWeapon: 'AKMS & Ural Truck',
+    isOnline: false,
+    avatarInitials: 'WB',
+    badge: 'LOGISTICS MVP',
+    kills: 88,
+    revives: 22,
+    lastSeen: 'Yesterday 23:10',
+  },
+  {
+    id: 'p6',
+    name: 'Reaper-21',
+    rank: 'Specialist',
+    role: 'Rotary CAS & Extraction Pilot',
+    score: 1290,
+    playtimeHours: 58.0,
+    missionsCompleted: 25,
+    favoriteWeapon: 'UH-60M Miniguns',
+    isOnline: false,
+    avatarInitials: 'RP',
+    badge: 'ACE PILOT',
+    kills: 142,
+    revives: 12,
+    lastSeen: '3 days ago',
+  },
+  {
+    id: 'p7',
+    name: 'Outlaw',
+    rank: 'Specialist',
+    role: 'Assault & Breacher',
+    score: 1150,
+    playtimeHours: 51.5,
+    missionsCompleted: 22,
+    favoriteWeapon: 'HK416 CQB & M203',
+    isOnline: false,
+    avatarInitials: 'OL',
+    badge: 'FRONT-LINE OPERATOR',
+    kills: 168,
+    revives: 9,
+    lastSeen: 'Yesterday 20:15',
+  },
+  {
+    id: 'p8',
+    name: 'Spectre',
+    rank: 'Private First Class',
+    role: 'Sabotage & Infiltration',
+    score: 980,
+    playtimeHours: 42.0,
+    missionsCompleted: 18,
+    favoriteWeapon: 'AS Val Suppressed',
+    isOnline: false,
+    avatarInitials: 'SP',
+    badge: 'GHOST OPERATOR',
+    kills: 105,
+    revives: 5,
+    lastSeen: '4 days ago',
+  }
+];

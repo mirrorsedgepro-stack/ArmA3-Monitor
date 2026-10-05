@@ -44,6 +44,7 @@ export function Header({
 
   const navLinks = [
     { id: 'overview', label: 'OVERVIEW' },
+    { id: 'players', label: 'TOP PLAYERS' },
     { id: 'mods', label: 'MODS (42)' },
   ];
 

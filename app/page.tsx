@@ -8,10 +8,11 @@ import { PlayerListModal } from '@/components/PlayerListModal';
 import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
+import { TopPlayers } from '@/components/TopPlayers';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { ArrowUp, Compass, Layers } from 'lucide-react';
+import { ArrowUp, Compass, Layers, Trophy } from 'lucide-react';
 
 export default function Home() {
   const [serverConfig, setServerConfig] = useState<ServerDefinition>(SERVERS_LIST[0]);
@@ -35,12 +36,15 @@ export default function Home() {
       setShowScrollTop(window.scrollY > 350);
 
       const overviewEl = document.getElementById('overview');
+      const playersEl = document.getElementById('players');
       const modsEl = document.getElementById('mods');
 
       const scrollPos = window.scrollY + 200;
 
       if (modsEl && scrollPos >= modsEl.offsetTop) {
         setActiveSection('mods');
+      } else if (playersEl && scrollPos >= playersEl.offsetTop) {
+        setActiveSection('players');
       } else {
         setActiveSection('overview');
       }
@@ -196,7 +200,13 @@ export default function Home() {
             modCount={mods.length}
           />
 
-          {/* Section 2: Addon Loadout & Workshop Manifest */}
+          {/* Section 2: Top Players & Squadron Leaderboard */}
+          <TopPlayers
+            livePlayers={stats.playerList || []}
+            onOpenPlayerList={() => setIsPlayerModalOpen(true)}
+          />
+
+          {/* Section 3: Addon Loadout & Workshop Manifest */}
           <ModList
             mods={mods}
             serverName={serverConfig.name}
@@ -226,6 +236,19 @@ export default function Home() {
           >
             <Compass className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">OVERVIEW</span>
+          </button>
+
+          <button
+            onClick={() => scrollToSection('players')}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+              activeSection === 'players'
+                ? 'bg-arma-red text-white font-bold'
+                : 'text-arma-textMuted hover:text-arma-text'
+            }`}
+            title="Jump to Top Players"
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+            <span className="hidden sm:inline">PLAYERS</span>
           </button>
 
           <button
