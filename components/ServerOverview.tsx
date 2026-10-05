@@ -5,7 +5,6 @@ import {
   Users, 
   Activity, 
   ShieldCheck, 
-  MapPin, 
   Terminal, 
   Download, 
   Compass, 
@@ -22,8 +21,7 @@ import {
   Copy, 
   Check, 
   ArrowDown, 
-  Layers,
-  CheckCircle2
+  Layers
 } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 import { PlayerHistoryGraph } from '@/components/PlayerHistoryGraph';
@@ -69,9 +67,12 @@ export function ServerOverview({
     return `${mins}m`;
   };
 
+  const perf = stats.performance;
+  const cfg = stats.serverConfig;
+
   return (
     <div id="overview" className="space-y-6 sm:space-y-10">
-      {/* Server Hero Panel (Expansive & Mobile Responsive) */}
+      {/* Server Hero Panel */}
       <div className="rounded-xl bg-arma-surface border border-arma-border p-5 sm:p-8 lg:p-12 relative overflow-hidden shadow-xl">
         {/* Subtle Background Crimson Accent */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-arma-red/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
@@ -92,18 +93,18 @@ export function ServerOverview({
               MAP: {stats.map || 'ALTIS'}
             </span>
             <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-textMuted border border-arma-border uppercase font-semibold text-[11px] sm:text-xs">
-              MODE: {stats.gameType}
+              MODE: {stats.gameType || 'ANTISTASI ULTIMATE'}
             </span>
-            {stats.serverFps !== undefined && (
+            {stats.serverFps !== null && stats.serverFps !== undefined && (
               <span className="px-2.5 py-1 rounded-md bg-arma-card text-arma-green border border-arma-green/40 flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs shadow-sm">
                 <Activity className="w-3.5 h-3.5 text-arma-green animate-pulse" />
-                SERVER FPS: {stats.serverFps.toFixed(1)}
+                FPS: {stats.serverFps.toFixed(1)}
               </span>
             )}
             {stats.headlessClients && (
               <span className="px-2.5 py-1 rounded-md bg-arma-card text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5 font-bold uppercase text-[11px] sm:text-xs shadow-sm">
                 <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-                HCs: {stats.headlessClients.active}/{stats.headlessClients.total} ACTIVE
+                HCs: {stats.headlessClients.active}/{stats.headlessClients.expected} ACTIVE
               </span>
             )}
             {stats.location && (
@@ -117,7 +118,7 @@ export function ServerOverview({
           {/* Server Title & Address */}
           <div className="space-y-2 sm:space-y-3 max-w-4xl">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-arma-text font-mono tracking-tight uppercase leading-tight">
-              {stats.mission}
+              {stats.mission || 'Antistasi Ultimate - Altis'}
             </h1>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-arma-textMuted font-mono">
               <span>SERVER: <strong className="text-arma-text">{stats.name}</strong></span>
@@ -128,10 +129,10 @@ export function ServerOverview({
             </div>
           </div>
 
-          {/* Spread-out Action Command Center Buttons (Full-width on mobile, spacious grid on desktop) */}
+          {/* Action Command Buttons */}
           <div className="pt-2">
             <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch gap-3 sm:gap-4 lg:gap-5">
-              {/* Primary Direct Connect - Opens Deployment Guide Modal */}
+              {/* Primary Direct Connect */}
               <button
                 onClick={onOpenConnect}
                 className="flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg arma-btn-primary text-sm font-mono font-black shadow-arma-red tracking-wide transition-all hover:scale-[1.02] active:scale-[0.99] text-center w-full sm:w-auto cursor-pointer"
@@ -192,7 +193,7 @@ export function ServerOverview({
         </div>
       </div>
 
-      {/* 4 Technical Telemetry Data Panels (Responsive 2-col on mobile, 4-col on desktop) */}
+      {/* 4 Technical Telemetry Panels */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {/* Panel 1: Active Players */}
         <div 
@@ -231,12 +232,12 @@ export function ServerOverview({
           <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
             <span className="hidden sm:inline">ONLINE</span>
             <span className="text-arma-text font-bold truncate max-w-[120px]">
-              {stats.playerList && stats.playerList.length > 0 ? stats.playerList[0].name : "None online"}
+              {stats.playerList && stats.playerList.length > 0 ? stats.playerList[0].name : "None connected"}
             </span>
           </div>
         </div>
 
-        {/* Panel 2: Verified Addons / Game Mode */}
+        {/* Panel 2: Verified Addons */}
         <div 
           onClick={scrollToMods}
           className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-khaki/50 cursor-pointer group transition-all flex flex-col justify-between shadow-md"
@@ -274,7 +275,7 @@ export function ServerOverview({
           </div>
         </div>
 
-        {/* Panel 3: Direct Steam A2S Query */}
+        {/* Panel 3: Latency & Direct Query */}
         <div className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-borderHover transition-all flex flex-col justify-between shadow-md">
           <div>
             <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
@@ -290,7 +291,7 @@ export function ServerOverview({
 
             <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2 font-mono">
               <span className="text-2xl sm:text-4xl font-black text-arma-text tracking-tight">
-                {stats.ping || 28}
+                {stats.ping !== null && stats.ping !== undefined ? stats.ping : '--'}
               </span>
               <span className="text-xs sm:text-sm text-arma-textDim font-bold">
                 MS
@@ -303,12 +304,12 @@ export function ServerOverview({
           </div>
 
           <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
-            <span className="hidden sm:inline">PROTOCOL</span>
-            <span className="text-arma-text font-bold">VALVE A2S</span>
+            <span className="hidden sm:inline">QUERY PORT</span>
+            <span className="text-arma-text font-bold">UDP {stats.queryPort}</span>
           </div>
         </div>
 
-        {/* Panel 4: Security & Engine Version */}
+        {/* Panel 4: Engine Version & Security */}
         <div className="p-4 sm:p-6 rounded-xl bg-arma-surface border border-arma-border hover:border-arma-borderHover transition-all flex flex-col justify-between shadow-md">
           <div>
             <div className="flex items-center justify-between text-[11px] sm:text-xs text-arma-textMuted mb-1.5 font-mono uppercase tracking-wider">
@@ -323,30 +324,30 @@ export function ServerOverview({
 
             <div className="mt-2 sm:mt-3 font-mono">
               <div className="text-xl sm:text-3xl font-black text-arma-text tracking-tight truncate">
-                v{stats.version}
+                v{stats.version || '2.22'}
               </div>
             </div>
 
             <p className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-arma-textMuted font-mono truncate">
-              NO PASSWORD &bull; BATTLEYE
+              {stats.passwordProtected ? 'PASSWORD' : 'NO PASSWORD'} &bull; {stats.battleye ? 'BATTLEYE' : 'BE DISABLED'}
             </p>
           </div>
 
           <div className="mt-4 sm:mt-5 pt-2.5 sm:pt-3 border-t border-arma-border/60 flex items-center justify-between text-[11px] sm:text-xs font-mono text-arma-textMuted">
-            <span className="hidden sm:inline">OS</span>
-            <span className="text-arma-text font-bold">LINUX x64</span>
+            <span className="hidden sm:inline">DIFFICULTY</span>
+            <span className="text-arma-text font-bold">{cfg?.difficulty || 'Regular'}</span>
           </div>
         </div>
       </div>
 
-      {/* Player Population History & Telemetry Curve */}
+      {/* Player History Graph */}
       <PlayerHistoryGraph
         currentPlayers={stats.players}
         maxPlayers={stats.maxPlayers || 32}
         serverName={stats.name}
       />
 
-      {/* Expanded Detailed Server Diagnostics (Toggleable) */}
+      {/* Detailed Server Diagnostics Drawer */}
       <div className="rounded-xl bg-arma-surface border border-arma-border overflow-hidden shadow-md">
         <button
           onClick={() => setShowDiagnostics(!showDiagnostics)}
@@ -355,9 +356,11 @@ export function ServerOverview({
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <Server className="w-4 h-4 text-arma-red shrink-0" />
             <span className="font-bold text-arma-text uppercase tracking-wider text-xs sm:text-sm truncate">
-              SERVER DETAILS &amp; DIAGNOSTICS
+              AUTHENTIC SERVER DETAILS &amp; DIAGNOSTICS
             </span>
-            <span className="text-arma-textDim text-xs hidden md:inline">({stats.platform || 'Linux 64-bit'} &bull; Sydney, AU)</span>
+            <span className="text-arma-textDim text-xs hidden md:inline">
+              ({stats.platform || 'Linux dedicated'} &bull; Sydney, AU)
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 text-arma-red font-bold text-xs shrink-0 ml-2">
@@ -375,7 +378,7 @@ export function ServerOverview({
                   <Globe className="w-3.5 h-3.5 text-arma-khaki" />
                   LOCATION &amp; NETWORK
                 </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.location || 'Sydney, Australia'}</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.location || 'Sydney, New South Wales, Australia'}</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">{stats.isp || 'Aussie Fibre Pty Ltd (AS4764)'}</div>
               </div>
 
@@ -383,10 +386,12 @@ export function ServerOverview({
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Cpu className="w-3.5 h-3.5 text-arma-red" />
-                  SERVER SYSTEM
+                  SERVER PLATFORM
                 </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.platform || 'Linux Dedicated Server (x86_64)'}</div>
-                <div className="text-arma-textMuted text-[11px] sm:text-xs">Protocol: r222 &bull; Build: {stats.version}</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.platform || 'Linux aarch64 (Arma 3 x86_64 server)'}</div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  Uptime: {stats.uptimeSeconds ? `${Math.floor(stats.uptimeSeconds / 3600)}h ${Math.floor((stats.uptimeSeconds % 3600) / 60)}m` : 'Active'}
+                </div>
               </div>
 
               {/* Signature Security */}
@@ -395,8 +400,12 @@ export function ServerOverview({
                   <Key className="w-3.5 h-3.5 text-arma-green" />
                   SERVER SIGNATURES
                 </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">{stats.signatureVerification || 'Strict (checkSignatures = 2)'}</div>
-                <div className="text-arma-textMuted text-[11px] sm:text-xs">Only verified .bisign keys allowed</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">
+                  {cfg?.verifySignatures === 2 ? 'Strict (checkSignatures = 2)' : (cfg?.verifySignatures === 0 ? 'Disabled (checkSignatures = 0)' : 'Standard')}
+                </div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  {cfg?.verifySignatures === 0 ? 'Mod signature validation disabled' : 'Only signed mod keys allowed'}
+                </div>
               </div>
 
               {/* Voice Over Net */}
@@ -405,25 +414,49 @@ export function ServerOverview({
                   <Mic className="w-3.5 h-3.5 text-arma-red" />
                   IN-GAME VOICE (VON)
                 </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">Enabled (High Quality Codec)</div>
-                <div className="text-arma-textMuted text-[11px] sm:text-xs">In-game direct communication active</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">
+                  {cfg?.voiceEnabled ? 'Enabled (Opus Codec)' : (cfg?.voiceEnabled === false ? 'Disabled' : 'Enabled')}
+                </div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  {cfg?.voiceEnabled ? 'In-game direct communications active' : 'VoN disabled in configuration'}
+                </div>
               </div>
 
               {/* Perspective & Gameplay */}
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-arma-khaki" />
-                  CAMERA PERSPECTIVE
+                  DIFFICULTY &amp; PERSISTENCE
                 </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">1st &amp; 3rd Person View Allowed</div>
-                <div className="text-arma-textMuted text-[11px] sm:text-xs">Crosshair enabled &bull; JIP Allowed</div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">
+                  Difficulty: {cfg?.difficulty || 'Regular'}
+                </div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  Persistent: {cfg?.persistent ? 'Enabled (24/7 campaign)' : 'Standard'}
+                </div>
+              </div>
+
+              {/* Engine Performance */}
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
+                <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-arma-green" />
+                  ENGINE PERFORMANCE
+                </div>
+                <div className="text-arma-text font-bold text-xs sm:text-sm">
+                  {stats.serverFps !== null && stats.serverFps !== undefined
+                    ? `Live Tickrate: ${stats.serverFps.toFixed(1)} FPS`
+                    : (perf ? `Last Sample: ${perf.serverFps.toFixed(1)} FPS (Idle/Standby)` : 'Active')}
+                </div>
+                <div className="text-arma-textMuted text-[11px] sm:text-xs">
+                  AI Headless Clients: {stats.headlessClients ? `${stats.headlessClients.active}/${stats.headlessClients.expected} connected` : '3 expected'}
+                </div>
               </div>
 
               {/* Connected Player Detail */}
               <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <UserCheck className="w-3.5 h-3.5 text-arma-green" />
-                  CONNECTED PLAYER
+                  LIVE CONNECTED PLAYERS
                 </div>
                 {stats.playerList && stats.playerList.length > 0 ? (
                   <>
@@ -433,59 +466,42 @@ export function ServerOverview({
                     </div>
                   </>
                 ) : (
-                  <div className="text-arma-textMuted text-[11px] sm:text-xs">No players currently connected</div>
+                  <div className="text-arma-textMuted text-[11px] sm:text-xs">0 human players connected</div>
                 )}
               </div>
 
               {/* Network Parameters & Ports */}
-              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
+              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5 sm:col-span-2 lg:col-span-2">
                 <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5 text-arma-red" />
                   NETWORK &amp; PORTS
                 </div>
                 <div className="text-arma-text font-bold text-xs sm:text-sm">Direct Connect: {stats.ip}:{stats.port}</div>
                 <div className="text-arma-textMuted text-[11px] sm:text-xs">
-                  Steam Query Port: {stats.queryPort} &bull; Protocol: Valve A2S
+                  Steam Query Port: UDP {stats.queryPort} &bull; Bridge Port: TCP 2310 &bull; Protocol: Valve A2S
                 </div>
               </div>
 
-              {/* Server Performance & Headless Clients */}
-              <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5">
-                <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-arma-green" />
-                  ENGINE PERFORMANCE
-                </div>
-                <div className="text-arma-text font-bold text-xs sm:text-sm">
-                  Tickrate: {stats.serverFps ? `${stats.serverFps.toFixed(1)} FPS` : '50.0 FPS'}
-                </div>
-                <div className="text-arma-textMuted text-[11px] sm:text-xs">
-                  AI Headless Clients: {stats.headlessClients ? `${stats.headlessClients.active}/${stats.headlessClients.total} connected` : '3/3 connected'}
-                </div>
-              </div>
-
-              {/* Antistasi Campaign Telemetry (if present) */}
-              {stats.antistasi && (
+              {/* Antistasi Persistent War Telemetry (if available) */}
+              {perf && (
                 <div className="p-3.5 sm:p-4 rounded-lg bg-arma-card border border-arma-border space-y-1 sm:space-y-1.5 sm:col-span-2 lg:col-span-3">
-                  <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-arma-khaki" />
-                    ANTISTASI PERSISTENT WAR TELEMETRY
+                  <div className="flex items-center justify-between">
+                    <div className="text-arma-textDim text-[10px] font-bold uppercase flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-arma-khaki" />
+                      ANTISTASI CAMPAIGN WAR TELEMETRY
+                    </div>
+                    <div className="text-[10px] text-arma-textDim">
+                      Captured {perf.sampledAt ? new Date(perf.sampledAt).toLocaleTimeString() : ''} (active during player sessions)
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono pt-1">
-                    <div><span className="text-arma-textMuted">WAR LEVEL:</span> <strong className="text-arma-red">{stats.antistasi.warLevel ?? 2}</strong></div>
-                    <div><span className="text-arma-textMuted">REBEL FUNDS:</span> <strong className="text-arma-green">${stats.antistasi.factionCash?.toLocaleString() ?? '14,552'}</strong></div>
-                    <div><span className="text-arma-textMuted">REBEL HR:</span> <strong className="text-arma-text">{stats.antistasi.hr ?? 32}</strong></div>
-                    <div><span className="text-arma-textMuted">OCC AGGRO:</span> <strong className="text-amber-400">{stats.antistasi.occAggro ?? 87}%</strong></div>
+                    <div><span className="text-arma-textMuted">WAR LEVEL:</span> <strong className="text-arma-red">{perf.warLevel}</strong></div>
+                    <div><span className="text-arma-textMuted">REBEL FUNDS:</span> <strong className="text-arma-green">${perf.factionCash.toLocaleString()}</strong></div>
+                    <div><span className="text-arma-textMuted">REBEL HR:</span> <strong className="text-arma-text">{perf.hr}</strong></div>
+                    <div><span className="text-arma-textMuted">OCC AGGRO:</span> <strong className="text-amber-400">{perf.occAggro}%</strong></div>
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Raw Server Tag Matrix (break-all prevents horizontal mobile overflow) */}
-            <div className="pt-2 sm:pt-3 text-[10px] sm:text-[11px] text-arma-textDim flex flex-wrap items-center gap-2 border-t border-arma-border/50">
-              <span className="font-bold text-arma-textMuted">RAW BI ENGINE TAGS:</span>
-              <code className="bg-arma-surface px-2 py-0.5 rounded border border-arma-border text-arma-textMuted font-mono break-all">
-                {stats.serverTags || 'bf,r222,n0,s7,i1,mf,lf,vf,dt,tanti,g65545,h86f3694,f1,pl'}
-              </code>
             </div>
           </div>
         )}

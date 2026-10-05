@@ -1,481 +1,340 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Trophy, 
   Medal, 
-  Crown, 
   Users, 
   Search, 
   Clock, 
-  Target, 
   Shield, 
-  Heart, 
-  Crosshair, 
-  Sparkles,
-  ChevronDown,
-  ArrowUpDown,
-  Radio,
+  Radio, 
   Flame,
-  UserCheck
+  UserCheck,
+  RefreshCw
 } from 'lucide-react';
 import { ServerPlayer } from '@/data/defaultServer';
-import { LeaderboardPlayer, DEFAULT_LEADERBOARD_PLAYERS } from '@/data/defaultLeaderboard';
+
+export interface PlayerRecord {
+  name: string;
+  sessions: number;
+  totalSeconds: number;
+  firstSeen: string;
+  lastSeen: string;
+  online: boolean;
+}
 
 interface TopPlayersProps {
   livePlayers?: ServerPlayer[];
   onOpenPlayerList?: () => void;
 }
 
-type SortCriteria = 'score' | 'hours' | 'missions' | 'online';
+type SortCriteria = 'hours' | 'sessions' | 'online' | 'name';
 
 export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersProps) {
+  const [players, setPlayers] = useState<PlayerRecord[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<SortCriteria>('score');
+  const [sortBy, setSortBy] = useState<SortCriteria>('hours');
+  const [trackingSince, setTrackingSince] = useState<string | null>(null);
 
-  // Merge live players from A2S query with persistent leaderboard veterans
+  const fetchPlayers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/players');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.available && Array.isArray(data.players)) {
+          setPlayers(data.players);
+          setTrackingSince(data.trackingSince);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch players list:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPlayers();
+    const interval = setInterval(fetchPlayers, 30000);
+    return () => clearInterval(interval);
+  }, [fetchPlayers]);
+
+  // Merge live players from A2S query with persistent roster
   const mergedPlayers = useMemo(() => {
-    const list: LeaderboardPlayer[] = [...DEFAULT_LEADERBOARD_PLAYERS];
+    const list: PlayerRecord[] = players.map(p => ({ ...p }));
+    const liveNames = new Set(livePlayers.map(lp => lp.name.toLowerCase()));
 
-    // Check which veterans are currently online from live query
-    livePlayers.forEach((lp) => {
-      const existingIdx = list.findIndex(
-        (p) => p.name.toLowerCase() === lp.name.toLowerCase()
-      );
+    // Update online flags from live A2S
+    list.forEach(p => {
+      if (liveNames.has(p.name.toLowerCase())) {
+        p.online = true;
+      }
+    });
 
-      if (existingIdx !== -1) {
-        list[existingIdx] = {
-          ...list[existingIdx],
-          isOnline: true,
-          lastSeen: 'Online Now',
-          score: Math.max(list[existingIdx].score, lp.score),
-          playtimeHours: Math.round((list[existingIdx].playtimeHours + (lp.timePlayedSeconds / 3600)) * 10) / 10,
-        };
-      } else {
-        // Live player not in veteran roster - add them dynamically as an active combatant
+    // Add any connected player not yet in the session list
+    livePlayers.forEach(lp => {
+      const exists = list.some(p => p.name.toLowerCase() === lp.name.toLowerCase());
+      if (!exists && lp.name) {
         list.push({
-          id: `live-${lp.id || lp.name}`,
           name: lp.name,
-          rank: 'Operator',
-          role: 'Active Field Combatant',
-          score: lp.score || 150,
-          playtimeHours: Math.round((lp.timePlayedSeconds / 3600) * 10) / 10 || 1.2,
-          missionsCompleted: 1,
-          favoriteWeapon: 'Service Rifle',
-          isOnline: true,
-          avatarInitials: lp.name.slice(0, 2).toUpperCase(),
-          badge: 'ACTIVE SESSION',
-          lastSeen: 'Online Now',
+          sessions: 1,
+          totalSeconds: lp.timePlayedSeconds || 60,
+          firstSeen: new Date().toISOString(),
+          lastSeen: new Date().toISOString(),
+          online: true,
         });
       }
     });
 
     return list;
-  }, [livePlayers]);
+  }, [players, livePlayers]);
 
   // Filter and sort players
   const filteredPlayers = useMemo(() => {
     let result = mergedPlayers.filter((p) => {
       const q = search.toLowerCase().trim();
       if (!q) return true;
-      return (
-        p.name.toLowerCase().includes(q) ||
-        p.role.toLowerCase().includes(q) ||
-        p.rank.toLowerCase().includes(q) ||
-        p.favoriteWeapon.toLowerCase().includes(q)
-      );
+      return p.name.toLowerCase().includes(q);
     });
 
     result.sort((a, b) => {
       if (sortBy === 'online') {
-        if (a.isOnline === b.isOnline) return b.score - a.score;
-        return a.isOnline ? -1 : 1;
+        if (a.online === b.online) return b.totalSeconds - a.totalSeconds;
+        return a.online ? -1 : 1;
       }
-      if (sortBy === 'hours') return b.playtimeHours - a.playtimeHours;
-      if (sortBy === 'missions') return b.missionsCompleted - a.missionsCompleted;
-      return b.score - a.score;
+      if (sortBy === 'sessions') return b.sessions - a.sessions;
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      return b.totalSeconds - a.totalSeconds;
     });
 
     return result;
   }, [mergedPlayers, search, sortBy]);
 
-  // Podium (Top 3)
-  const topThree = useMemo(() => {
-    const sorted = [...mergedPlayers].sort((a, b) => b.score - a.score);
-    return {
-      first: sorted[0] || null,
-      second: sorted[1] || null,
-      third: sorted[2] || null,
-    };
+  const onlineCount = useMemo(() => {
+    return mergedPlayers.filter(p => p.online).length;
   }, [mergedPlayers]);
 
-  const activeOnlineCount = mergedPlayers.filter((p) => p.isOnline).length;
+  const formatHours = (seconds: number) => {
+    const hrs = seconds / 3600;
+    if (hrs < 0.1) return '<0.1h';
+    return `${hrs.toFixed(1)}h`;
+  };
+
+  const formatLastSeen = (isoStr: string, isOnline: boolean) => {
+    if (isOnline) return 'Online Now';
+    if (!isoStr) return 'Unknown';
+    try {
+      const d = new Date(isoStr);
+      const diffMs = Date.now() - d.getTime();
+      const diffMins = Math.floor(diffMs / (60 * 1000));
+      if (diffMins < 5) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHrs = Math.floor(diffMins / 60);
+      if (diffHrs < 24) return `${diffHrs}h ago`;
+      const diffDays = Math.floor(diffHrs / 24);
+      return `${diffDays}d ago`;
+    } catch {
+      return 'Recently';
+    }
+  };
+
+  const getRank = (idx: number, hours: number) => {
+    if (hours > 10) return 'Veteran';
+    if (hours > 3) return 'Regular';
+    if (idx === 0) return 'Lead';
+    return 'Operator';
+  };
 
   return (
-    <section id="players" className="scroll-mt-24 space-y-6 sm:space-y-8 font-mono">
-      {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-arma-border pb-4">
+    <section id="players" className="space-y-6 sm:space-y-8">
+      {/* Header & Controls */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-arma-border pb-4 sm:pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-arma-red/15 text-arma-red border border-arma-red/30 tracking-wider">
-              SQUADRON MERIT &amp; COMBAT TELEMETRY
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-arma-card text-arma-khaki border border-arma-border">
-              ANTISTASI VETERANS
-            </span>
+          <div className="flex items-center gap-2 text-xs font-mono text-arma-khaki font-bold uppercase tracking-wider mb-1">
+            <Trophy className="w-4 h-4 text-arma-red" />
+            <span>AUTHENTIC COMBAT ROSTER</span>
           </div>
-
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-arma-text uppercase tracking-tight flex items-center gap-2.5">
-            <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500 shrink-0" />
-            <span>TOP OPERATORS &amp; LEADERBOARD</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-arma-text font-mono uppercase tracking-tight">
+            SERVER PLAYERS &amp; ACTIVITY
           </h2>
-          <p className="text-xs sm:text-sm text-arma-textMuted mt-1">
-            Campaign combat ratings, accumulated flight/field hours, and active combat personnel.
+          <p className="text-xs sm:text-sm text-arma-textMuted font-mono mt-1">
+            Real session records derived directly from server connection logs.
+            {trackingSince && (
+              <span className="text-arma-textDim ml-1">
+                (Recorded since {new Date(trackingSince).toLocaleDateString()})
+              </span>
+            )}
           </p>
         </div>
 
-        {/* Quick Online Player Trigger */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Live status badge & filter controls */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-xs">
+          <span className="px-3 py-1.5 rounded-lg bg-arma-card border border-arma-border text-arma-text flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${onlineCount > 0 ? 'bg-arma-green animate-pulse' : 'bg-gray-500'}`} />
+            <span><strong>{onlineCount}</strong> ONLINE NOW</span>
+          </span>
+
           <button
-            onClick={onOpenPlayerList}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-arma-card hover:bg-arma-surface border border-arma-border text-xs text-arma-textMuted hover:text-arma-text transition-colors"
+            onClick={fetchPlayers}
+            className="p-1.5 sm:p-2 rounded-lg bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text transition-colors"
+            title="Refresh player list"
           >
-            <Users className="w-3.5 h-3.5 text-arma-red" />
-            <span>CONNECTED ROSTER:</span>
-            <strong className="text-arma-green">{activeOnlineCount} ONLINE</strong>
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* Top 3 Podium Spotlight Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 items-stretch">
-        {/* 2nd Place: Silver */}
-        {topThree.second && (
-          <div className="order-2 md:order-1 rounded-xl bg-arma-surface/90 border border-slate-400/40 p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden shadow-md group hover:border-slate-300 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-slate-400/5 rounded-full blur-2xl pointer-events-none" />
+      {/* Search & Sort Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 font-mono text-xs">
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-arma-textMuted" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by player callsign..."
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-arma-surface border border-arma-border text-arma-text placeholder-arma-textDim focus:outline-none focus:border-arma-red text-xs"
+          />
+        </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-slate-300/15 border border-slate-300/40 flex items-center justify-center text-slate-300 font-black text-xs">
-                    #2
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                    SILVER OPERATOR
-                  </span>
-                </div>
-                <Medal className="w-5 h-5 text-slate-300" />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-[#141820] border border-slate-400/40 flex items-center justify-center text-sm font-black text-slate-200">
-                  {topThree.second.avatarInitials}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-base font-bold text-arma-text uppercase truncate">
-                      {topThree.second.name}
-                    </h3>
-                    {topThree.second.isOnline && (
-                      <span className="w-2 h-2 rounded-full bg-arma-green animate-pulse" title="Online" />
-                    )}
-                  </div>
-                  <div className="text-[11px] text-slate-400 truncate">{topThree.second.role}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 mt-4 text-xs">
-                <div className="p-2 rounded bg-arma-card border border-arma-border/60">
-                  <div className="text-[10px] text-arma-textDim uppercase">SCORE</div>
-                  <div className="text-sm font-black text-arma-text">{topThree.second.score.toLocaleString()}</div>
-                </div>
-                <div className="p-2 rounded bg-arma-card border border-arma-border/60">
-                  <div className="text-[10px] text-arma-textDim uppercase">HOURS</div>
-                  <div className="text-sm font-black text-arma-khaki">{topThree.second.playtimeHours}h</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-2.5 border-t border-arma-border/60 text-[10px] text-arma-textMuted flex items-center justify-between">
-              <span className="truncate">{topThree.second.favoriteWeapon}</span>
-              <span className="text-slate-300 font-bold">{topThree.second.missionsCompleted} Ops</span>
-            </div>
+        {/* Sort selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-arma-textDim hidden sm:inline">SORT BY:</span>
+          <div className="grid grid-cols-3 sm:flex gap-1.5 w-full sm:w-auto">
+            <button
+              onClick={() => setSortBy('hours')}
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                sortBy === 'hours'
+                  ? 'bg-arma-red text-white font-bold'
+                  : 'bg-arma-surface hover:bg-arma-card border border-arma-border text-arma-textMuted'
+              }`}
+            >
+              TIME PLAYED
+            </button>
+            <button
+              onClick={() => setSortBy('sessions')}
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                sortBy === 'sessions'
+                  ? 'bg-arma-red text-white font-bold'
+                  : 'bg-arma-surface hover:bg-arma-card border border-arma-border text-arma-textMuted'
+              }`}
+            >
+              SESSIONS
+            </button>
+            <button
+              onClick={() => setSortBy('online')}
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                sortBy === 'online'
+                  ? 'bg-arma-red text-white font-bold'
+                  : 'bg-arma-surface hover:bg-arma-card border border-arma-border text-arma-textMuted'
+              }`}
+            >
+              STATUS
+            </button>
           </div>
-        )}
-
-        {/* 1st Place: Gold Champion Spotlight */}
-        {topThree.first && (
-          <div className="order-1 md:order-2 rounded-xl bg-gradient-to-b from-amber-500/10 via-arma-surface to-arma-surface border-2 border-amber-500/60 p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-xl group hover:border-amber-400 transition-all md:-translate-y-1">
-            <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
-
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/60 flex items-center justify-center text-amber-400 font-black text-sm shadow-sm">
-                    #1
-                  </div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
-                    <Crown className="w-3.5 h-3.5" />
-                    CAMPAIGN CHAMPION
-                  </span>
-                </div>
-                <Trophy className="w-6 h-6 text-amber-400 animate-bounce" />
-              </div>
-
-              <div className="flex items-center gap-3.5">
-                <div className="w-14 h-14 rounded-lg bg-[#141820] border-2 border-amber-500/60 flex items-center justify-center text-base font-black text-amber-400 shadow-inner">
-                  {topThree.first.avatarInitials}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-black text-arma-text uppercase truncate">
-                      {topThree.first.name}
-                    </h3>
-                    {topThree.first.isOnline && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-arma-green/20 text-arma-green border border-arma-green/40 font-bold uppercase flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
-                        LIVE
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-amber-400/90 font-bold truncate">{topThree.first.role}</div>
-                  <div className="text-[10px] text-arma-textMuted uppercase mt-0.5">{topThree.first.badge}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 mt-4 text-xs">
-                <div className="p-2 rounded bg-arma-card border border-amber-500/30">
-                  <div className="text-[9px] text-arma-textDim uppercase">SCORE</div>
-                  <div className="text-sm font-black text-amber-400">{topThree.first.score.toLocaleString()}</div>
-                </div>
-                <div className="p-2 rounded bg-arma-card border border-amber-500/30">
-                  <div className="text-[9px] text-arma-textDim uppercase">HOURS</div>
-                  <div className="text-sm font-black text-arma-khaki">{topThree.first.playtimeHours}h</div>
-                </div>
-                <div className="p-2 rounded bg-arma-card border border-amber-500/30">
-                  <div className="text-[9px] text-arma-textDim uppercase">OPS</div>
-                  <div className="text-sm font-black text-arma-text">{topThree.first.missionsCompleted}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-amber-500/30 text-[11px] text-arma-textMuted flex items-center justify-between">
-              <span className="truncate text-arma-text font-semibold">{topThree.first.favoriteWeapon}</span>
-              <span className="text-amber-400 font-bold">{topThree.first.kills} Kills</span>
-            </div>
-          </div>
-        )}
-
-        {/* 3rd Place: Bronze */}
-        {topThree.third && (
-          <div className="order-3 md:order-3 rounded-xl bg-arma-surface/90 border border-amber-700/40 p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden shadow-md group hover:border-amber-600 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-700/5 rounded-full blur-2xl pointer-events-none" />
-
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-amber-700/15 border border-amber-700/40 flex items-center justify-center text-amber-600 font-black text-xs">
-                    #3
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">
-                    BRONZE OPERATOR
-                  </span>
-                </div>
-                <Medal className="w-5 h-5 text-amber-600" />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-[#141820] border border-amber-700/40 flex items-center justify-center text-sm font-black text-amber-600">
-                  {topThree.third.avatarInitials}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-base font-bold text-arma-text uppercase truncate">
-                      {topThree.third.name}
-                    </h3>
-                    {topThree.third.isOnline && (
-                      <span className="w-2 h-2 rounded-full bg-arma-green animate-pulse" title="Online" />
-                    )}
-                  </div>
-                  <div className="text-[11px] text-amber-600/90 truncate">{topThree.third.role}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 mt-4 text-xs">
-                <div className="p-2 rounded bg-arma-card border border-arma-border/60">
-                  <div className="text-[10px] text-arma-textDim uppercase">SCORE</div>
-                  <div className="text-sm font-black text-arma-text">{topThree.third.score.toLocaleString()}</div>
-                </div>
-                <div className="p-2 rounded bg-arma-card border border-arma-border/60">
-                  <div className="text-[10px] text-arma-textDim uppercase">HOURS</div>
-                  <div className="text-sm font-black text-arma-khaki">{topThree.third.playtimeHours}h</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-2.5 border-t border-arma-border/60 text-[10px] text-arma-textMuted flex items-center justify-between">
-              <span className="truncate">{topThree.third.favoriteWeapon}</span>
-              <span className="text-amber-600 font-bold">{topThree.third.missionsCompleted} Ops</span>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Leaderboard Table Controls & Search */}
-      <div className="p-3.5 sm:p-4 rounded-xl bg-arma-surface border border-arma-border space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Search box */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-arma-textDim" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="SEARCH OPERATOR, ROLE, OR WEAPON..."
-              className="w-full pl-9 pr-3.5 py-2 rounded-lg bg-arma-card border border-arma-border text-arma-text placeholder-arma-textDim text-xs focus:outline-none focus:border-arma-red uppercase"
-            />
+      {/* Players Grid / Table */}
+      {filteredPlayers.length === 0 ? (
+        <div className="rounded-xl bg-arma-surface border border-arma-border p-8 sm:p-12 text-center font-mono space-y-3">
+          <Users className="w-10 h-10 text-arma-textDim mx-auto" />
+          <div className="text-sm sm:text-base font-bold text-arma-text uppercase">
+            {search ? 'No Players Found' : 'No Player Records Yet'}
           </div>
+          <p className="text-xs text-arma-textMuted max-w-md mx-auto">
+            {search
+              ? `No registered players matching "${search}".`
+              : 'Player sessions will appear here as players connect to the dedicated server.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {filteredPlayers.map((player, idx) => {
+            const initials = player.name.slice(0, 2).toUpperCase();
+            const rank = getRank(idx, player.totalSeconds / 3600);
 
-          {/* Sort Buttons */}
-          <div className="flex items-center gap-1.5 flex-wrap text-xs">
-            <span className="text-[11px] text-arma-textDim uppercase mr-1 flex items-center gap-1">
-              <ArrowUpDown className="w-3 h-3" />
-              SORT:
-            </span>
-            {(
-              [
-                { id: 'score', label: 'SCORE' },
-                { id: 'hours', label: 'HOURS' },
-                { id: 'missions', label: 'MISSIONS' },
-                { id: 'online', label: 'ONLINE' },
-              ] as Array<{ id: SortCriteria; label: string }>
-            ).map((btn) => (
-              <button
-                key={btn.id}
-                onClick={() => setSortBy(btn.id)}
-                className={`px-3 py-1.5 rounded text-[11px] font-bold uppercase transition-all ${
-                  sortBy === btn.id
-                    ? 'bg-arma-red text-white shadow-sm'
-                    : 'bg-arma-card text-arma-textMuted hover:text-arma-text hover:bg-arma-cardHover border border-arma-border'
+            return (
+              <div
+                key={player.name}
+                className={`p-4 sm:p-5 rounded-xl bg-arma-surface border transition-all flex flex-col justify-between shadow-md ${
+                  player.online
+                    ? 'border-arma-green/60 ring-1 ring-arma-green/20'
+                    : 'border-arma-border hover:border-arma-borderHover'
                 }`}
               >
-                {btn.label}
-              </button>
-            ))}
-          </div>
-        </div>
+                <div>
+                  {/* Top info row */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Avatar */}
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono font-black text-sm shrink-0 border ${
+                        player.online
+                          ? 'bg-arma-green/10 text-arma-green border-arma-green/40'
+                          : 'bg-arma-card text-arma-textDim border-arma-border'
+                      }`}>
+                        {initials}
+                      </div>
 
-        {/* Full Roster List */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-arma-border text-arma-textDim uppercase text-[10px] tracking-wider">
-                <th className="py-2.5 px-3">RANK</th>
-                <th className="py-2.5 px-3">OPERATOR &amp; ROLE</th>
-                <th className="py-2.5 px-3 text-right">SCORE</th>
-                <th className="py-2.5 px-3 text-right">PLAYTIME</th>
-                <th className="py-2.5 px-3 text-right hidden sm:table-cell">OPS COMPLETED</th>
-                <th className="py-2.5 px-3 hidden md:table-cell">FAVORITE WEAPON</th>
-                <th className="py-2.5 px-3 text-right">STATUS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-arma-border/50">
-              {filteredPlayers.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-arma-textDim">
-                    NO OPERATORS MATCHING &quot;{search}&quot;
-                  </td>
-                </tr>
-              ) : (
-                filteredPlayers.map((player, idx) => {
-                  const isTopThree = idx < 3 && !search;
-                  return (
-                    <tr
-                      key={player.id}
-                      className="hover:bg-arma-card/50 transition-colors group"
-                    >
-                      {/* Rank Index */}
-                      <td className="py-3 px-3 whitespace-nowrap">
-                        <span
-                          className={`font-black ${
-                            idx === 0
-                              ? 'text-amber-400'
-                              : idx === 1
-                              ? 'text-slate-300'
-                              : idx === 2
-                              ? 'text-amber-600'
-                              : 'text-arma-textMuted'
-                          }`}
-                        >
-                          #{idx + 1}
-                        </span>
-                      </td>
-
-                      {/* Operator Details */}
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded bg-arma-card border border-arma-border flex items-center justify-center text-[11px] font-bold text-arma-text shrink-0">
-                            {player.avatarInitials}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-arma-text group-hover:text-arma-red transition-colors uppercase">
-                                {player.name}
-                              </span>
-                              {player.badge && (
-                                <span className="hidden lg:inline text-[9px] px-1.5 py-0.2 rounded bg-arma-card text-arma-khaki border border-arma-border">
-                                  {player.badge}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-[10px] text-arma-textMuted truncate">
-                              {player.rank} &bull; {player.role}
-                            </div>
-                          </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-black text-sm sm:text-base text-arma-text truncate">
+                            {player.name}
+                          </span>
                         </div>
-                      </td>
+                        <div className="text-[11px] font-mono text-arma-khaki font-semibold">
+                          {rank}
+                        </div>
+                      </div>
+                    </div>
 
-                      {/* Score */}
-                      <td className="py-3 px-3 text-right font-black text-arma-text whitespace-nowrap">
-                        {player.score.toLocaleString()}
-                      </td>
+                    {/* Online status badge */}
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 border ${
+                      player.online
+                        ? 'bg-arma-green/15 text-arma-green border-arma-green/40'
+                        : 'bg-arma-card text-arma-textDim border-arma-border'
+                    }`}>
+                      {player.online ? 'ONLINE NOW' : formatLastSeen(player.lastSeen, false)}
+                    </span>
+                  </div>
 
-                      {/* Playtime */}
-                      <td className="py-3 px-3 text-right text-arma-khaki font-bold whitespace-nowrap">
-                        {player.playtimeHours}h
-                      </td>
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-arma-border/60 text-xs font-mono">
+                    <div className="p-2 rounded bg-[#0b0d11] border border-arma-border/50">
+                      <div className="text-[10px] text-arma-textDim flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-arma-khaki" />
+                        TIME PLAYED
+                      </div>
+                      <div className="text-sm font-bold text-arma-text mt-0.5">
+                        {formatHours(player.totalSeconds)}
+                      </div>
+                    </div>
 
-                      {/* Missions */}
-                      <td className="py-3 px-3 text-right text-arma-textMuted hidden sm:table-cell whitespace-nowrap">
-                        {player.missionsCompleted} Ops
-                      </td>
+                    <div className="p-2 rounded bg-[#0b0d11] border border-arma-border/50">
+                      <div className="text-[10px] text-arma-textDim flex items-center gap-1">
+                        <Flame className="w-3 h-3 text-arma-red" />
+                        SESSIONS
+                      </div>
+                      <div className="text-sm font-bold text-arma-text mt-0.5">
+                        {player.sessions}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                      {/* Primary Gear */}
-                      <td className="py-3 px-3 text-arma-textDim text-[11px] hidden md:table-cell truncate max-w-[180px]">
-                        {player.favoriteWeapon}
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3 px-3 text-right whitespace-nowrap">
-                        {player.isOnline ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-arma-green/15 text-arma-green border border-arma-green/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
-                            ONLINE
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-arma-textDim">
-                            {player.lastSeen || 'Offline'}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                {/* Footer timestamp */}
+                <div className="mt-3 pt-2 text-[10px] font-mono text-arma-textDim flex items-center justify-between">
+                  <span>First joined:</span>
+                  <span>{player.firstSeen ? new Date(player.firstSeen).toLocaleDateString() : 'N/A'}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </section>
   );
 }

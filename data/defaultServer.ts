@@ -5,13 +5,39 @@ export interface ServerPlayer {
   timePlayedSeconds: number;
 }
 
+/** Antistasi A3A_fnc_logPerformance sample. Only logged while players are connected. */
+export interface PerformanceSample {
+  serverFps: number;
+  connectedClientsInclHCs: number;
+  deadUnits: number;
+  allUnits: number;
+  allVehicles: number;
+  factionCash: number;
+  hr: number;
+  occAggro: number;
+  invAggro: number;
+  warLevel: number;
+  sampledAt: string;
+  ageSeconds: number;
+}
+
+/** Facts parsed from the server's configs/main.cfg by the telemetry bridge. */
+export interface ServerConfigFacts {
+  battlEye: number | null;
+  verifySignatures: number | null;
+  maxPlayers: number | null;
+  voiceEnabled: boolean | null;
+  persistent: boolean | null;
+  difficulty: string | null;
+}
+
 export interface ArmaServerStats {
   name: string;
   ip: string;
   port: number;
   queryPort: number;
   status: 'online' | 'offline' | 'loading' | 'unreachable';
-  ping: number;
+  ping: number | null;
   players: number;
   maxPlayers: number;
   playerList: ServerPlayer[];
@@ -19,43 +45,29 @@ export interface ArmaServerStats {
   mission: string;
   gameType: string;
   version: string;
-  battleye: boolean;
-  passwordProtected: boolean;
-  difficulty: string;
-  timeOfDay: string;
-  uptime: string;
-  querySource: 'direct_a2s' | 'battlemetrics' | 'mock_active' | 'telemetry_bridge';
+  battleye: boolean | null;
+  passwordProtected: boolean | null;
+  querySource: 'direct_a2s' | 'battlemetrics' | 'telemetry_bridge' | 'none';
   lastUpdated: string;
   discordUrl?: string;
   teamspeakUrl?: string;
-  rulesOfEngagement?: string[];
-  // Extended Server Details
+  // Verified static facts about the host (ipinfo for 180.181.238.103)
   location?: string;
   countryCode?: string;
   isp?: string;
-  platform?: string;
+  // Optional protocol & tag facts
   signatureVerification?: string;
   vonEnabled?: boolean;
   thirdPerson?: boolean;
   joinInProgress?: boolean;
   serverTags?: string;
-  serverFps?: number;
-  headlessClients?: {
-    total: number;
-    active: number;
-    names: string[];
-  };
-  antistasi?: {
-    serverFps?: number;
-    players?: number;
-    deadUnits?: number;
-    allUnits?: number;
-    factionCash?: number;
-    hr?: number;
-    occAggro?: number;
-    invAggro?: number;
-    warLevel?: number;
-  } | null;
+  // Only available through the telemetry bridge (null/undefined = unknown)
+  platform?: string;
+  uptimeSeconds?: number | null;
+  serverFps?: number | null;
+  performance?: PerformanceSample | null;
+  headlessClients?: { expected: number; active: number; updatedAt: string | null } | null;
+  serverConfig?: ServerConfigFacts | null;
 }
 
 export interface ServerDefinition {
@@ -86,66 +98,41 @@ export const SERVERS_LIST: ServerDefinition[] = [
     mission: "Antistasi Ultimate - Altis",
     map: "Altis",
     hasModpack: true,
-    tagline: "24/7 Persistent Guerilla Campaign (40 Mods)",
+    tagline: "Persistent Guerilla Campaign (40 Mods)",
     maxPlayers: 32,
   },
 ];
 
 export const DEFAULT_SERVER_CONFIG = {
   ...SERVERS_LIST[0],
-  discordUrl: process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.gg/arma3",
+  discordUrl: process.env.NEXT_PUBLIC_DISCORD_URL || "",
   teamspeakUrl: process.env.NEXT_PUBLIC_TS3_URL || "",
 };
 
-export const MOCK_SERVER_DATA: ArmaServerStats = {
+/**
+ * Placeholder shown before the first real query returns.
+ * Contains no players and no telemetry - never display it as live data.
+ */
+export const INITIAL_SERVER_STATS: ArmaServerStats = {
   name: SERVERS_LIST[0].name,
   ip: SERVERS_LIST[0].ip,
   port: SERVERS_LIST[0].port,
   queryPort: SERVERS_LIST[0].queryPort,
-  status: "online",
-  ping: 28,
-  players: 1,
-  maxPlayers: 32,
-  map: "Altis",
-  mission: "Antistasi Ultimate - Altis",
-  gameType: "Antistasi Ultimate",
-  version: "2.22.154089",
-  battleye: true,
-  passwordProtected: false,
-  difficulty: "Custom",
-  timeOfDay: "08:30 (In-Game)",
-  uptime: "6h 15m",
-  querySource: "direct_a2s",
-  lastUpdated: new Date().toISOString(),
+  status: 'loading',
+  ping: null,
+  players: 0,
+  maxPlayers: SERVERS_LIST[0].maxPlayers || 32,
+  playerList: [],
+  map: SERVERS_LIST[0].map,
+  mission: SERVERS_LIST[0].mission,
+  gameType: SERVERS_LIST[0].mode,
+  version: '',
+  battleye: null,
+  passwordProtected: null,
+  querySource: 'none',
+  lastUpdated: new Date(0).toISOString(),
   discordUrl: DEFAULT_SERVER_CONFIG.discordUrl,
   teamspeakUrl: DEFAULT_SERVER_CONFIG.teamspeakUrl,
-  location: "Sydney, New South Wales, Australia",
-  countryCode: "AU",
-  isp: "Aussie Fibre Pty Ltd (AS4764)",
-  platform: "Linux Dedicated Server (x86_64)",
-  signatureVerification: "Strict (checkSignatures = 2)",
-  vonEnabled: true,
-  thirdPerson: true,
-  joinInProgress: true,
-  serverTags: "bf,r222,n0,s7,i1,mf,lf,vf,dt,tanti,g65545,h86f3694,f1,pl",
-  serverFps: 50.0,
-  headlessClients: {
-    total: 3,
-    active: 3,
-    names: ["antistasi_server-hc-0", "antistasi_server-hc-1", "antistasi_server-hc-2"],
-  },
-  antistasi: {
-    serverFps: 50.0,
-    players: 1,
-    deadUnits: 75,
-    allUnits: 47,
-    factionCash: 14552,
-    hr: 32,
-    occAggro: 87,
-    invAggro: 0,
-    warLevel: 2,
-  },
-  playerList: [
-    { id: 1, name: "Frenchy", score: 0, timePlayedSeconds: 2160 }
-  ]
+  location: 'Sydney, New South Wales, Australia',
+  isp: 'Aussie Fibre Pty Ltd (AS4764)',
 };

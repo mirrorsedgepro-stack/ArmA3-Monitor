@@ -10,13 +10,13 @@ import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
 import { TopPlayers } from '@/components/TopPlayers';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
-import { MOCK_SERVER_DATA, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
+import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { ArrowUp, Compass, Layers, Trophy } from 'lucide-react';
 
 export default function Home() {
   const [serverConfig, setServerConfig] = useState<ServerDefinition>(SERVERS_LIST[0]);
-  const [stats, setStats] = useState<ArmaServerStats>(MOCK_SERVER_DATA);
+  const [stats, setStats] = useState<ArmaServerStats>(INITIAL_SERVER_STATS);
   const [mods, setMods] = useState<ArmaMod[]>(DEFAULT_MODS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);

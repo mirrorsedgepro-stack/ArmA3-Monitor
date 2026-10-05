@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
   Users, 
   TrendingUp, 
@@ -8,7 +8,7 @@ import {
   Activity, 
   Calendar,
   Sparkles,
-  Award
+  RefreshCw
 } from 'lucide-react';
 
 interface HistoryPoint {
@@ -27,172 +27,115 @@ interface PlayerHistoryGraphProps {
 
 type TimeRange = '6h' | '12h' | '24h';
 
-// Deterministic synthetic baseline generator for the 24h timeline
-function generateBaselineHistory(currentCount: number): HistoryPoint[] {
-  const points: HistoryPoint[] = [];
-  const now = Date.now();
-  const totalIntervals = 48; // 48 * 30 min = 24 hours
-
-  for (let i = totalIntervals - 1; i >= 0; i--) {
-    const t = now - i * 30 * 60 * 1000;
-    const d = new Date(t);
-    const hours = d.getHours();
-    const minutes = d.getMinutes();
-    const timeLabel = `${hours.toString().padStart(2, '0')}:${minutes < 30 ? '00' : '30'}`;
-    const fullDateLabel = d.toLocaleDateString(undefined, {
-      weekday: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    let simulatedCount: number;
-
-    if (i === 0) {
-      simulatedCount = currentCount;
-    } else {
-      // Natural diurnal curve for Australian Arma 3 server:
-      // Prime hours: 19:00 - 23:00 (Peak ~18-24 players)
-      // Afternoon: 14:00 - 18:30 (5-12 players)
-      // Late night: 23:30 - 02:00 (4-10 players)
-      // Deep night / early morning: 02:30 - 08:30 (0-3 players)
-      // Morning / lunch: 09:00 - 13:30 (2-6 players)
-      if (hours >= 19 && hours <= 22) {
-        // Evening Prime / Event Peak
-        const base = 18;
-        const offset = Math.sin((hours - 19) * 0.8) * 5;
-        simulatedCount = Math.round(base + offset + ((t % 7) - 3) * 0.4);
-      } else if (hours >= 15 && hours < 19) {
-        // Afternoon squad grouping
-        simulatedCount = Math.round(6 + (hours - 15) * 2.8 + ((t % 5) - 2) * 0.5);
-      } else if (hours >= 23 || hours < 2) {
-        // Post-event late patrol
-        simulatedCount = Math.round(11 - (hours >= 23 ? 0 : hours + 1) * 2.5 + ((t % 4) - 2) * 0.5);
-      } else if (hours >= 2 && hours < 9) {
-        // Quiet night hours
-        simulatedCount = Math.max(0, Math.round(1 + ((t % 3) === 0 ? 1 : 0)));
-      } else {
-        // 9 AM to 3 PM
-        simulatedCount = Math.round(3 + (hours - 9) * 0.5 + ((t % 4) - 1) * 0.3);
-      }
-    }
-
-    points.push({
-      timestamp: t,
-      timeLabel,
-      fullDateLabel,
-      count: Math.max(0, Math.min(32, simulatedCount)),
-      isLive: i === 0,
-    });
-  }
-
-  return points;
-}
-
 export function PlayerHistoryGraph({
   currentPlayers,
   maxPlayers = 32,
   serverName = "Frenchy's Antistasi Ultimate",
 }: PlayerHistoryGraphProps) {
-  const [history, setHistory] = useState<HistoryPoint[]>([]);
+  const [points, setPoints] = useState<{ t: string; players: number }[]>([]);
+  const [trackingSince, setTrackingSince] = useState<string | null>(null);
   const [selectedRange, setSelectedRange] = useState<TimeRange>('24h');
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize and persist player count history
-  useEffect(() => {
+  const hoursForRange: Record<TimeRange, number> = {
+    '6h': 6,
+    '12h': 12,
+    '24h': 24,
+  };
+
+  const fetchHistory = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const stored = localStorage.getItem('arma3_player_activity_history_v2');
-      let data: HistoryPoint[] = [];
-
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length >= 10) {
-          data = parsed;
+      const hours = hoursForRange[selectedRange];
+      const bucket = selectedRange === '6h' ? 15 : (selectedRange === '12h' ? 30 : 60);
+      const res = await fetch(`/api/history?hours=${hours}&bucket=${bucket}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.available && Array.isArray(data.points)) {
+          setPoints(data.points);
+          setTrackingSince(data.trackingSince);
         }
       }
-
-      if (data.length === 0) {
-        data = generateBaselineHistory(currentPlayers);
-      } else {
-        // Append or update current point
-        const now = Date.now();
-        const last = data[data.length - 1];
-        if (now - last.timestamp > 15 * 60 * 1000) {
-          // More than 15 mins since last point, add new point
-          const d = new Date(now);
-          const timeLabel = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-          const fullDateLabel = d.toLocaleDateString(undefined, {
-            weekday: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
-          });
-          data.push({
-            timestamp: now,
-            timeLabel,
-            fullDateLabel,
-            count: currentPlayers,
-            isLive: true,
-          });
-          // Retain max 48 points (24h)
-          if (data.length > 48) {
-            data = data.slice(data.length - 48);
-          }
-        } else {
-          // Update last point with live stats
-          data[data.length - 1] = {
-            ...last,
-            count: currentPlayers,
-            isLive: true,
-          };
-        }
-      }
-
-      setHistory(data);
-      localStorage.setItem('arma3_player_activity_history_v2', JSON.stringify(data));
-    } catch {
-      setHistory(generateBaselineHistory(currentPlayers));
+    } catch (err) {
+      console.warn('Failed to fetch player history:', err);
+    } finally {
+      setIsLoading(false);
     }
-  }, [currentPlayers]);
+  }, [selectedRange]);
 
-  // Filter history based on selected time range
-  const filteredPoints = useMemo(() => {
-    if (!history || history.length === 0) return [];
-    if (selectedRange === '6h') return history.slice(-12);
-    if (selectedRange === '12h') return history.slice(-24);
-    return history;
-  }, [history, selectedRange]);
+  useEffect(() => {
+    fetchHistory();
+    const interval = setInterval(fetchHistory, 60000);
+    return () => clearInterval(interval);
+  }, [fetchHistory]);
 
-  // Calculate telemetry summary statistics
-  const { peakCount, peakPoint, avgCount, minCount } = useMemo<{
-    peakCount: number;
-    peakPoint: HistoryPoint | null;
-    avgCount: number;
-    minCount: number;
-  }>(() => {
-    if (filteredPoints.length === 0) {
-      return { peakCount: currentPlayers, peakPoint: null, avgCount: currentPlayers, minCount: currentPlayers };
+  // Convert raw points into HistoryPoint list including live active point
+  const history: HistoryPoint[] = useMemo(() => {
+    const list: HistoryPoint[] = points.map((p) => {
+      const d = new Date(p.t);
+      const hours = d.getHours();
+      const minutes = d.getMinutes();
+      const timeLabel = `${hours.toString().padStart(2, '0')}:${minutes < 30 ? '00' : '30'}`;
+      const fullDateLabel = d.toLocaleDateString(undefined, {
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      return {
+        timestamp: d.getTime(),
+        timeLabel,
+        fullDateLabel,
+        count: Math.max(0, p.players),
+        isLive: false,
+      };
+    });
+
+    // Add current live point at the end
+    const now = Date.now();
+    const dNow = new Date(now);
+    const timeLabel = `${dNow.getHours().toString().padStart(2, '0')}:${dNow.getMinutes().toString().padStart(2, '0')}`;
+    const fullDateLabel = dNow.toLocaleDateString(undefined, {
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    list.push({
+      timestamp: now,
+      timeLabel,
+      fullDateLabel,
+      count: currentPlayers,
+      isLive: true,
+    });
+
+    return list;
+  }, [points, currentPlayers]);
+
+  // Calculate summary statistics
+  const { peakCount, peakPoint, avgCount } = useMemo(() => {
+    if (history.length === 0) {
+      return { peakCount: currentPlayers, peakPoint: null, avgCount: currentPlayers };
     }
-    let max = -1;
-    let min = 999;
+    let max = 0;
     let sum = 0;
     let peakPt: HistoryPoint | null = null;
 
-    filteredPoints.forEach((pt) => {
-      if (pt.count > max) {
+    history.forEach((pt) => {
+      if (pt.count >= max) {
         max = pt.count;
         peakPt = pt;
       }
-      if (pt.count < min) min = pt.count;
       sum += pt.count;
     });
 
     return {
       peakCount: max,
       peakPoint: peakPt,
-      avgCount: Math.round((sum / filteredPoints.length) * 10) / 10,
-      minCount: min,
+      avgCount: Math.round((sum / history.length) * 10) / 10,
     };
-  }, [filteredPoints, currentPlayers]);
+  }, [history, currentPlayers]);
 
   // SVG Geometry Calculation
   const svgWidth = 800;
@@ -204,23 +147,29 @@ export function PlayerHistoryGraph({
 
   const chartW = svgWidth - padLeft - padRight;
   const chartH = svgHeight - padTop - padBottom;
-  const maxY = Math.max(maxPlayers, 32);
+  const maxY = Math.max(maxPlayers, Math.max(peakCount + 2, 4));
 
   // Compute coordinate mapping
   const coords = useMemo(() => {
-    if (filteredPoints.length <= 1) return [];
-    return filteredPoints.map((pt, idx) => {
-      const x = padLeft + (idx / (filteredPoints.length - 1)) * chartW;
+    if (history.length <= 1) return [];
+    return history.map((pt, idx) => {
+      const x = padLeft + (idx / (history.length - 1)) * chartW;
       const y = padTop + (1 - pt.count / maxY) * chartH;
       return { x, y, pt, idx };
     });
-  }, [filteredPoints, chartW, chartH, maxY, padLeft, padTop]);
+  }, [history, chartW, chartH, maxY, padLeft, padTop]);
 
   // Generate SVG Path for line and gradient area
   const { linePath, areaPath } = useMemo(() => {
     if (coords.length === 0) return { linePath: '', areaPath: '' };
+    if (coords.length === 1) {
+      const y = coords[0].y;
+      return {
+        linePath: `M ${padLeft} ${y} L ${padLeft + chartW} ${y}`,
+        areaPath: `M ${padLeft} ${y} L ${padLeft + chartW} ${y} L ${padLeft + chartW} ${padTop + chartH} L ${padLeft} ${padTop + chartH} Z`,
+      };
+    }
 
-    // Build smooth cubic bezier curve
     let d = `M ${coords[0].x} ${coords[0].y}`;
     for (let i = 0; i < coords.length - 1; i++) {
       const current = coords[i];
@@ -232,240 +181,146 @@ export function PlayerHistoryGraph({
       d += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
     }
 
-    const baselineY = padTop + chartH;
-    const area = `${d} L ${coords[coords.length - 1].x} ${baselineY} L ${coords[0].x} ${baselineY} Z`;
+    const firstX = coords[0].x;
+    const lastX = coords[coords.length - 1].x;
+    const bottomY = padTop + chartH;
+    const a = `${d} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
 
-    return { linePath: d, areaPath: area };
-  }, [coords, padTop, chartH]);
+    return { linePath: d, areaPath: a };
+  }, [coords, chartH, chartW, padLeft, padTop]);
 
-  // Handle interactive mouse/touch tracking
-  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (!containerRef.current || coords.length === 0) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const relX = (mouseX / rect.width) * svgWidth;
-
-    // Find nearest point
-    let closestIdx = 0;
-    let minDiff = Infinity;
-    coords.forEach((c, idx) => {
-      const diff = Math.abs(c.x - relX);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closestIdx = idx;
-      }
-    });
-
-    setHoverIndex(closestIdx);
-  };
-
-  const handleMouseLeave = () => {
-    setHoverIndex(null);
-  };
-
-  const activeCoord = hoverIndex !== null && coords[hoverIndex] ? coords[hoverIndex] : null;
-
-  // Grid levels for Y axis (0, 8, 16, 24, 32)
-  const yLevels = [0, 8, 16, 24, 32];
-
-  // X axis labels (approx 5 to 6 labels)
-  const xLabels = useMemo(() => {
-    if (coords.length <= 1) return [];
-    const step = Math.max(1, Math.floor(coords.length / 5));
-    const labels: Array<{ x: number; label: string }> = [];
-    for (let i = 0; i < coords.length; i += step) {
-      labels.push({ x: coords[i].x, label: coords[i].pt.timeLabel });
-    }
-    // Ensure final label ("NOW") is visible
-    const lastCoord = coords[coords.length - 1];
-    if (labels.length > 0 && Math.abs(labels[labels.length - 1].x - lastCoord.x) > 40) {
-      labels.push({ x: lastCoord.x, label: 'NOW' });
-    }
-    return labels;
-  }, [coords]);
+  const activeHoverPoint = hoverIndex !== null && coords[hoverIndex] ? coords[hoverIndex] : null;
 
   return (
-    <div className="rounded-xl bg-arma-surface border border-arma-border p-4 sm:p-6 lg:p-7 space-y-5 shadow-lg relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-arma-red/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
-      {/* Top Header & Range Selectors */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10 border-b border-arma-border/70 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-red shrink-0 shadow-inner">
-            <Activity className="w-5 h-5 text-arma-red" />
+    <div className="rounded-xl bg-arma-surface border border-arma-border p-5 sm:p-7 shadow-xl space-y-5">
+      {/* Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-arma-border/80 pb-4">
+        <div>
+          <div className="flex items-center gap-2 text-[11px] font-mono text-arma-khaki font-bold uppercase tracking-wider">
+            <Activity className="w-3.5 h-3.5 text-arma-red" />
+            <span>AUTHENTIC ACTIVITY TIMELINE</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm sm:text-base font-black text-arma-text uppercase font-mono tracking-wider">
-                PLAYER ACTIVITY &amp; POPULATION HISTORY
-              </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-arma-card text-arma-green border border-arma-green/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
-                LIVE SYNC
+          <h3 className="text-lg sm:text-xl font-black text-arma-text font-mono uppercase tracking-tight mt-0.5">
+            PLAYER POPULATION HISTORY
+          </h3>
+          <p className="text-xs text-arma-textMuted font-mono mt-0.5">
+            Live telemetry &amp; historical connection records
+            {trackingSince && (
+              <span className="text-arma-textDim ml-1">
+                (tracked since {new Date(trackingSince).toLocaleDateString()})
               </span>
-            </div>
-            <p className="text-[11px] sm:text-xs text-arma-textMuted font-mono">
-              Server concurrency tracking &bull; 30-minute intervals
-            </p>
-          </div>
+            )}
+          </p>
         </div>
 
-        {/* Time Window Switcher */}
-        <div className="flex items-center gap-1 bg-arma-card p-1 rounded-lg border border-arma-border self-start sm:self-auto font-mono text-xs">
+        {/* Time Range Selector */}
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-arma-card border border-arma-border font-mono text-xs self-start sm:self-auto">
           {(['6h', '12h', '24h'] as TimeRange[]).map((range) => (
             <button
               key={range}
               onClick={() => setSelectedRange(range)}
-              className={`px-3 py-1 rounded transition-all font-bold uppercase text-[11px] ${
+              className={`px-3 py-1 rounded font-bold uppercase transition-all ${
                 selectedRange === range
                   ? 'bg-arma-red text-white shadow-sm'
-                  : 'text-arma-textMuted hover:text-arma-text hover:bg-arma-surface'
+                  : 'text-arma-textMuted hover:text-arma-text'
               }`}
             >
-              {range.toUpperCase()}
+              {range}
             </button>
           ))}
+          <button
+            onClick={fetchHistory}
+            className="p-1 text-arma-textMuted hover:text-arma-text ml-1"
+            title="Refresh history"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* Quick Summary Stat Badges */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 font-mono">
-        <div className="p-3 rounded-lg bg-arma-card/80 border border-arma-border/70 flex flex-col justify-between">
-          <span className="text-[10px] sm:text-[11px] text-arma-textMuted uppercase flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-arma-red" />
-            CURRENT PLAYERS
-          </span>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl sm:text-2xl font-black text-arma-text">
-              {currentPlayers}
-            </span>
-            <span className="text-xs text-arma-textDim font-bold">/ {maxPlayers}</span>
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 font-mono">
+        <div className="p-3 sm:p-4 rounded-lg bg-arma-card border border-arma-border">
+          <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
+            <Users className="w-3.5 h-3.5 text-arma-green" />
+            CURRENT
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-arma-text mt-1">
+            {currentPlayers}
+            <span className="text-xs text-arma-textDim font-normal ml-1">/ {maxPlayers}</span>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-arma-card/80 border border-arma-border/70 flex flex-col justify-between">
-          <span className="text-[10px] sm:text-[11px] text-arma-textMuted uppercase flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-arma-green" />
-            PEAK CONCURRENCY
-          </span>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl sm:text-2xl font-black text-arma-green">
-              {peakCount}
-            </span>
-            <span className="text-[10px] text-arma-khaki font-semibold truncate">
-              {peakPoint ? `@ ${peakPoint.timeLabel}` : 'PLAYERS'}
-            </span>
+        <div className="p-3 sm:p-4 rounded-lg bg-arma-card border border-arma-border">
+          <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
+            <TrendingUp className="w-3.5 h-3.5 text-arma-red" />
+            PERIOD PEAK
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-arma-text mt-1">
+            {peakCount}
+            <span className="text-xs text-arma-textDim font-normal ml-1">players</span>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-arma-card/80 border border-arma-border/70 flex flex-col justify-between">
-          <span className="text-[10px] sm:text-[11px] text-arma-textMuted uppercase flex items-center gap-1.5">
+        <div className="p-3 sm:p-4 rounded-lg bg-arma-card border border-arma-border">
+          <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 text-arma-khaki" />
-            WINDOW AVERAGE
-          </span>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl sm:text-2xl font-black text-arma-khaki">
-              {avgCount}
-            </span>
-            <span className="text-[10px] text-arma-textDim uppercase">AVG PLAYERS</span>
+            AVERAGE
           </div>
-        </div>
-
-        <div className="p-3 rounded-lg bg-arma-card/80 border border-arma-border/70 flex flex-col justify-between">
-          <span className="text-[10px] sm:text-[11px] text-arma-textMuted uppercase flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-blue-400" />
-            SERVER UPTIME
-          </span>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-sm sm:text-base font-black text-arma-text uppercase truncate">
-              24/7 DEDICATED
-            </span>
+          <div className="text-xl sm:text-2xl font-black text-arma-text mt-1">
+            {avgCount}
+            <span className="text-xs text-arma-textDim font-normal ml-1">avg</span>
           </div>
         </div>
       </div>
 
-      {/* SVG Interactive Chart Canvas */}
-      <div 
-        ref={containerRef}
-        className="relative rounded-lg bg-[#0a0c10] border border-arma-border p-2 sm:p-4 select-none"
-      >
+      {/* Interactive SVG Graph Area */}
+      <div ref={containerRef} className="relative w-full overflow-hidden bg-[#07090c] rounded-lg border border-arma-border p-2 sm:p-4">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="w-full h-48 sm:h-64 overflow-visible cursor-crosshair"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
+          className="w-full h-44 sm:h-56"
+          preserveAspectRatio="none"
         >
           <defs>
-            {/* Crimson Red Area Gradient */}
-            <linearGradient id="playerAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#dc2626" stopOpacity="0.38" />
-              <stop offset="60%" stopColor="#dc2626" stopOpacity="0.12" />
+            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#dc2626" stopOpacity="0.35" />
               <stop offset="100%" stopColor="#dc2626" stopOpacity="0.0" />
             </linearGradient>
-
-            {/* Glowing filter for current active point */}
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
-            </filter>
           </defs>
 
-          {/* Horizontal Gridlines and Y Labels */}
-          {yLevels.map((lvl) => {
-            const y = padTop + (1 - lvl / maxY) * chartH;
-            const isZero = lvl === 0;
-            const isMax = lvl === 32;
-
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const y = padTop + (1 - ratio) * chartH;
+            const val = Math.round(ratio * maxY);
             return (
-              <g key={lvl}>
+              <g key={ratio}>
                 <line
                   x1={padLeft}
                   y1={y}
-                  x2={svgWidth - padRight}
+                  x2={padLeft + chartW}
                   y2={y}
-                  stroke={isZero ? '#2a3240' : isMax ? '#dc2626' : '#1e2430'}
-                  strokeDasharray={isMax ? '3 3' : isZero ? 'none' : '2 2'}
-                  strokeWidth={isZero ? 1.5 : 1}
+                  stroke="#1f242e"
+                  strokeDasharray="3 3"
+                  strokeWidth="1"
                 />
                 <text
                   x={padLeft - 8}
-                  y={y + 3.5}
-                  fill={isMax ? '#dc2626' : '#64748b'}
+                  y={y + 4}
+                  fill="#5c6370"
                   fontSize="10"
                   fontFamily="monospace"
                   textAnchor="end"
-                  fontWeight={isMax ? 'bold' : 'normal'}
                 >
-                  {lvl}
+                  {val}
                 </text>
               </g>
             );
           })}
 
-          {/* X Axis Time Labels */}
-          {xLabels.map((lbl, idx) => (
-            <text
-              key={idx}
-              x={lbl.x}
-              y={svgHeight - 10}
-              fill="#64748b"
-              fontSize="10"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              {lbl.label}
-            </text>
-          ))}
-
           {/* Area Fill */}
-          {areaPath && (
-            <path
-              d={areaPath}
-              fill="url(#playerAreaGrad)"
-            />
-          )}
+          {areaPath && <path d={areaPath} fill="url(#areaGradient)" />}
 
-          {/* Line Stroke */}
+          {/* Line */}
           {linePath && (
             <path
               d={linePath}
@@ -477,127 +332,51 @@ export function PlayerHistoryGraph({
             />
           )}
 
-          {/* Live pulsing dot at the very end of curve */}
-          {coords.length > 0 && (
-            <g>
-              <circle
-                cx={coords[coords.length - 1].x}
-                cy={coords[coords.length - 1].y}
-                r="7"
-                fill="#dc2626"
-                opacity="0.3"
-                className="animate-ping"
-              />
-              <circle
-                cx={coords[coords.length - 1].x}
-                cy={coords[coords.length - 1].y}
-                r="4.5"
-                fill="#dc2626"
-                stroke="#ffffff"
-                strokeWidth="2"
-              />
-            </g>
-          )}
+          {/* Coordinate points */}
+          {coords.map((c, i) => {
+            const isHovered = hoverIndex === i;
+            const isLast = i === coords.length - 1;
 
-          {/* Peak Indicator Badge on Graph */}
-          {peakPoint && coords.length > 0 && (
-            (() => {
-              const peakCoord = coords.find((c) => c.pt === peakPoint);
-              if (!peakCoord) return null;
-              return (
-                <g>
-                  <circle
-                    cx={peakCoord.x}
-                    cy={peakCoord.y}
-                    r="4"
-                    fill="#22c55e"
-                    stroke="#0a0c10"
-                    strokeWidth="1.5"
-                  />
-                  <text
-                    x={peakCoord.x}
-                    y={Math.max(16, peakCoord.y - 10)}
-                    fill="#22c55e"
-                    fontSize="9"
-                    fontFamily="monospace"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                  >
-                    PEAK ({peakPoint.count})
-                  </text>
-                </g>
-              );
-            })()
-          )}
-
-          {/* Active Hover Scrubbing Guide & Point */}
-          {activeCoord && (
-            <g>
-              {/* Vertical tracking dashed line */}
-              <line
-                x1={activeCoord.x}
-                y1={padTop}
-                x2={activeCoord.x}
-                y2={padTop + chartH}
-                stroke="#ef4444"
-                strokeDasharray="3 3"
-                strokeWidth="1.5"
-              />
-
-              {/* Highlight circle on line */}
-              <circle
-                cx={activeCoord.x}
-                cy={activeCoord.y}
-                r="6"
-                fill="#dc2626"
-                stroke="#ffffff"
-                strokeWidth="2"
-              />
-            </g>
-          )}
+            return (
+              <g key={i}>
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r={isHovered ? 5 : isLast ? 4 : 2.5}
+                  fill={isLast ? '#22c55e' : isHovered ? '#ffffff' : '#dc2626'}
+                  stroke="#07090c"
+                  strokeWidth="1.5"
+                  className="transition-all cursor-pointer"
+                  onMouseEnter={() => setHoverIndex(i)}
+                  onMouseLeave={() => setHoverIndex(null)}
+                />
+              </g>
+            );
+          })}
         </svg>
 
-        {/* Floating Tooltip Box */}
-        {activeCoord && (
+        {/* Hover Tooltip Overlay */}
+        {activeHoverPoint && (
           <div
-            className="absolute z-20 pointer-events-none p-2.5 rounded-lg bg-arma-surface/95 border border-arma-red/60 shadow-2xl backdrop-blur-md font-mono text-xs text-arma-text min-w-[150px] transition-transform duration-75"
+            className="absolute z-20 pointer-events-none p-2.5 rounded-lg bg-arma-surface/95 border border-arma-red/60 text-xs font-mono shadow-2xl backdrop-blur-md"
             style={{
-              left: `${Math.min(
-                Math.max(12, (activeCoord.x / svgWidth) * 100),
-                78
-              )}%`,
-              top: `${Math.max(10, ((activeCoord.y - 75) / svgHeight) * 100)}%`,
+              left: `${(activeHoverPoint.x / svgWidth) * 100}%`,
+              top: `${Math.max(10, (activeHoverPoint.y / svgHeight) * 100 - 30)}%`,
               transform: 'translate(-50%, -100%)',
             }}
           >
-            <div className="flex items-center justify-between gap-3 text-[10px] text-arma-textMuted border-b border-arma-border pb-1">
-              <span>{activeCoord.pt.fullDateLabel}</span>
-              {activeCoord.pt.isLive && (
-                <span className="text-arma-green font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-arma-green animate-pulse" />
-                  LIVE
-                </span>
+            <div className="text-[10px] text-arma-textDim font-bold">
+              {activeHoverPoint.pt.fullDateLabel}
+            </div>
+            <div className="text-sm font-black text-arma-text mt-0.5 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-arma-red" />
+              <span>{activeHoverPoint.pt.count} Players</span>
+              {activeHoverPoint.pt.isLive && (
+                <span className="text-[10px] text-arma-green font-bold uppercase">(LIVE)</span>
               )}
-            </div>
-
-            <div className="mt-1.5 flex items-baseline justify-between gap-2">
-              <span className="text-arma-khaki font-bold">PLAYERS:</span>
-              <span className="text-sm font-black text-arma-text">
-                {activeCoord.pt.count} <span className="text-[10px] text-arma-textDim font-normal">/ {maxPlayers}</span>
-              </span>
-            </div>
-
-            <div className="text-[10px] text-arma-textMuted mt-0.5">
-              Capacity: <span className="text-arma-red font-bold">{Math.round((activeCoord.pt.count / maxPlayers) * 100)}%</span>
             </div>
           </div>
         )}
-      </div>
-
-      {/* Footer Info Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-arma-textDim pt-1">
-        <span>&bull; Peak traffic typically occurs 19:30 &ndash; 22:30 AEDT nightly</span>
-        <span>A2S Telemetry Engine &bull; Historical Buffer: 24h</span>
       </div>
     </div>
   );

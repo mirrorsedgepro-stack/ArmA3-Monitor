@@ -1,129 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryA2SServer } from '@/lib/a2s';
 import { queryBattleMetrics } from '@/lib/battlemetrics';
-import { DEFAULT_SERVER_CONFIG, MOCK_SERVER_DATA, SERVERS_LIST, ArmaServerStats } from '@/data/defaultServer';
+import { DEFAULT_SERVER_CONFIG, INITIAL_SERVER_STATS, ArmaServerStats } from '@/data/defaultServer';
+import { bridgeFetch } from '@/lib/bridge';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Live server status. Sources, in order:
+ *   1. Telemetry bridge on the game host (A2S + log-derived FPS/HC/config facts)
+ *   2. Direct UDP A2S from this function
+ *   3. BattleMetrics
+ * No mock fallback: if every source fails the server is reported offline.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const host = searchParams.get('ip') || DEFAULT_SERVER_CONFIG.ip;
   const gamePort = parseInt(searchParams.get('port') || `${DEFAULT_SERVER_CONFIG.port}`, 10);
   const queryPort = parseInt(searchParams.get('queryPort') || `${DEFAULT_SERVER_CONFIG.queryPort}`, 10);
-  const telemetryPort = parseInt(searchParams.get('telemetryPort') || process.env.TELEMETRY_PORT || '2310', 10);
   const bmId = searchParams.get('bmId') || process.env.BATTLEMETRICS_SERVER_ID;
-  const mockFallback = searchParams.get('mock') !== 'false';
 
-  let serverStats: ArmaServerStats = {
-    ...MOCK_SERVER_DATA,
+  // Static, verified facts only - no players, no telemetry.
+  const base: ArmaServerStats = {
+    ...INITIAL_SERVER_STATS,
     ip: host,
     port: gamePort,
-    queryPort: queryPort,
+    queryPort,
+    status: 'offline',
+    lastUpdated: new Date().toISOString(),
   };
 
-  // Attempt 1: HTTP Telemetry Bridge (works reliably in cloud serverless / Vercel without UDP block)
-  try {
-    const bridgeUrl = process.env.TELEMETRY_BRIDGE_URL || `http://${host}:${telemetryPort}/api/telemetry`;
-    const headers: Record<string, string> = {};
-    if (process.env.TELEMETRY_API_KEY) {
-      headers['x-api-key'] = process.env.TELEMETRY_API_KEY;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-    const bridgeRes = await fetch(bridgeUrl, {
-      signal: controller.signal,
-      headers,
-      cache: 'no-store',
+  const json = (body: ArmaServerStats, maxAge: number) =>
+    NextResponse.json(body, {
+      headers: { 'Cache-Control': `public, s-maxage=${maxAge}, stale-while-revalidate=${maxAge * 2}` },
     });
-    clearTimeout(timeoutId);
 
-    if (bridgeRes.ok) {
-      const bridgeData = await bridgeRes.json();
-      if (bridgeData && bridgeData.name) {
-        serverStats = {
-          ...serverStats,
-          ...bridgeData,
-          querySource: 'telemetry_bridge',
-          lastUpdated: new Date().toISOString(),
-        };
-        return NextResponse.json(serverStats, {
-          headers: {
-            'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=15',
-          },
-        });
-      }
+  // 1. Telemetry bridge (only meaningful for the default host)
+  if (host === DEFAULT_SERVER_CONFIG.ip) {
+    const bridge = await bridgeFetch<Partial<ArmaServerStats>>('/api/telemetry');
+    if (bridge && bridge.status) {
+      return json({ ...base, ...bridge, querySource: 'telemetry_bridge', lastUpdated: new Date().toISOString() } as ArmaServerStats, 5);
     }
-  } catch (bridgeErr) {
-    console.warn('Telemetry bridge query failed, attempting A2S fallback:', bridgeErr);
   }
 
-  // Attempt 2: Direct UDP A2S query (fast timeout)
+  // 2. Direct A2S
   try {
-    const a2sRes = await queryA2SServer(host, queryPort, 2000, gamePort);
-    if (a2sRes.success && a2sRes.data) {
-      serverStats = {
-        ...serverStats,
-        ...a2sRes.data,
+    const a2s = await queryA2SServer(host, queryPort, 2000, gamePort);
+    if (a2s.success && a2s.data) {
+      return json({
+        ...base,
+        ...a2s.data,
         status: 'online',
-        ping: a2sRes.ping,
+        ping: a2s.ping,
         querySource: 'direct_a2s',
         lastUpdated: new Date().toISOString(),
-      };
-      return NextResponse.json(serverStats, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30',
-        },
-      });
+      }, 10);
     }
   } catch (err) {
-    console.warn('A2S query attempted and failed:', err);
+    console.warn('A2S query failed:', err);
   }
 
-  // Attempt 2: BattleMetrics API lookup (works through restrictive serverless cloud UDP firewalls)
+  // 3. BattleMetrics
   try {
-    const target = bmId || host;
-    const bmRes = await queryBattleMetrics(target, gamePort);
-    if (bmRes) {
-      serverStats = {
-        ...serverStats,
-        ...bmRes,
+    const bm = await queryBattleMetrics(bmId || host, gamePort);
+    if (bm) {
+      return json({
+        ...base,
+        ...bm,
         status: 'online',
         querySource: 'battlemetrics',
         lastUpdated: new Date().toISOString(),
-      };
-      return NextResponse.json(serverStats, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=45',
-        },
-      });
+      }, 15);
     }
   } catch (err) {
-    console.warn('BattleMetrics fallback failed:', err);
+    console.warn('BattleMetrics query failed:', err);
   }
 
-  // Attempt 3: If mockFallback is allowed, return simulated active server telemetry
-  // (Ideal for local testing, initial preview before deploying live server config)
-  if (mockFallback) {
-    return NextResponse.json({
-      ...serverStats,
-      querySource: 'mock_active',
-      lastUpdated: new Date().toISOString(),
-    }, {
-      headers: {
-        'Cache-Control': 'public, s-maxage=5',
-      },
-    });
-  }
-
-  // Server truly offline or unreachable
-  return NextResponse.json({
-    ...serverStats,
-    status: 'offline',
-    players: 0,
-    playerList: [],
-    ping: 0,
-    lastUpdated: new Date().toISOString(),
-  });
+  return json({ ...base, status: 'offline', players: 0, playerList: [], ping: null }, 5);
 }
