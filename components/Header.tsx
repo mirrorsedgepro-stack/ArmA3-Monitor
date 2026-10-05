@@ -18,6 +18,7 @@ interface HeaderProps {
   isLoading: boolean;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
+  onOpenConnect: () => void;
   activeSection: string;
   setActiveSection: (sec: string) => void;
 }
@@ -28,6 +29,7 @@ export function Header({
   isLoading,
   onOpenConfig,
   onDownloadPreset,
+  onOpenConnect,
   activeSection,
   setActiveSection,
 }: HeaderProps) {
@@ -133,16 +135,16 @@ export function Header({
               <span>PRESET (.HTML)</span>
             </button>
 
-            {/* Direct Connect (Primary Red CTA) */}
-            <a
-              href={`steam://connect/${stats.ip}:${stats.port}`}
-              className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded arma-btn-primary text-xs font-mono font-bold shadow-arma-red transition-all shrink-0"
-              title="Launch Arma 3 and connect automatically"
+            {/* Direct Connect (Primary Red CTA) - Opens deployment dispatch modal */}
+            <button
+              onClick={onOpenConnect}
+              className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded arma-btn-primary text-xs font-mono font-bold shadow-arma-red transition-all shrink-0 hover:scale-105 active:scale-95 cursor-pointer"
+              title="Open Direct Connect & Deployment Guide"
             >
               <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               <span className="hidden sm:inline">DIRECT JOIN</span>
               <span className="sm:hidden">JOIN</span>
-            </a>
+            </button>
 
             {/* Utilities: Refresh (desktop) & Settings */}
             <div className="flex items-center gap-1 sm:gap-1.5 pl-1.5 sm:pl-2 border-l border-arma-border shrink-0">

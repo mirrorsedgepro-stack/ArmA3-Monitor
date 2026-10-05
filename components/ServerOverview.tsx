@@ -31,6 +31,7 @@ interface ServerOverviewProps {
   onOpenPlayerList: () => void;
   onOpenConfig: () => void;
   onDownloadPreset: () => void;
+  onOpenConnect: () => void;
   modCount: number;
 }
 
@@ -39,6 +40,7 @@ export function ServerOverview({
   onOpenPlayerList,
   onOpenConfig,
   onDownloadPreset,
+  onOpenConnect,
   modCount,
 }: ServerOverviewProps) {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
@@ -111,14 +113,14 @@ export function ServerOverview({
           {/* Spread-out Action Command Center Buttons (Full-width on mobile, spacious grid on desktop) */}
           <div className="pt-2">
             <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch gap-3 sm:gap-4 lg:gap-5">
-              {/* Primary Direct Connect */}
-              <a
-                href={`steam://connect/${stats.ip}:${stats.port}`}
-                className="flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg arma-btn-primary text-sm font-mono font-black shadow-arma-red tracking-wide transition-all hover:scale-[1.02] active:scale-[0.99] text-center w-full sm:w-auto"
+              {/* Primary Direct Connect - Opens Deployment Guide Modal */}
+              <button
+                onClick={onOpenConnect}
+                className="flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-lg arma-btn-primary text-sm font-mono font-black shadow-arma-red tracking-wide transition-all hover:scale-[1.02] active:scale-[0.99] text-center w-full sm:w-auto cursor-pointer"
               >
                 <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 <span>LAUNCH ARMA 3 &amp; CONNECT</span>
-              </a>
+              </button>
 
               {/* Copy IP */}
               <button

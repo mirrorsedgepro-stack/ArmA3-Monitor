@@ -7,6 +7,7 @@ import { ModList } from '@/components/ModList';
 import { PlayerListModal } from '@/components/PlayerListModal';
 import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
+import { ConnectModal } from '@/components/ConnectModal';
 import { ServerRules } from '@/components/ServerRules';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { MOCK_SERVER_DATA, DEFAULT_SERVER_CONFIG, ArmaServerStats } from '@/data/defaultServer';
@@ -25,6 +26,7 @@ export default function Home() {
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState<boolean>(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
   // Server configuration
@@ -186,6 +188,7 @@ export default function Home() {
           isLoading={isLoading}
           onOpenConfig={() => setIsConfigModalOpen(true)}
           onDownloadPreset={handleDownloadPreset}
+          onOpenConnect={() => setIsConnectModalOpen(true)}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
         />
@@ -199,6 +202,7 @@ export default function Home() {
             onOpenPlayerList={() => setIsPlayerModalOpen(true)}
             onOpenConfig={() => setIsConfigModalOpen(true)}
             onDownloadPreset={handleDownloadPreset}
+            onOpenConnect={() => setIsConnectModalOpen(true)}
             modCount={mods.length}
           />
 
@@ -316,6 +320,13 @@ export default function Home() {
         serverName={serverConfig.name}
         currentMods={mods}
         onApplyCustomMods={handleApplyCustomMods}
+      />
+
+      <ConnectModal
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+        stats={stats}
+        onDownloadPreset={handleDownloadPreset}
       />
 
       <ServerConfigModal
