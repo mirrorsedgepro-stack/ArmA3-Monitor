@@ -1,25 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  Search, 
-  ExternalLink, 
-  Download, 
-  Copy, 
-  Check, 
-  Folder, 
-  FolderOpen, 
-  ChevronDown, 
-  ChevronUp, 
-  ArrowUpRight, 
-  Filter, 
-  HardDrive, 
-  CheckCircle2, 
-  Info,
-  Maximize2,
-  Minimize2
-} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Check, ChevronDown, Copy, Download, ExternalLink, FileUp, Search, X } from 'lucide-react';
 import { ArmaMod } from '@/data/defaultMods';
+import type { ModsResponse, WorkshopDetails } from '@/app/api/mods/route';
+import { formatBytes, formatNumber, formatSince } from '@/lib/format';
+import { StatBlock } from '@/components/dash/StatBlock';
 
 interface ModListProps {
   mods: ArmaMod[];
@@ -30,494 +16,208 @@ interface ModListProps {
   setSearchQuery: (q: string) => void;
 }
 
-interface CategoryFolder {
-  id: ArmaMod['category'];
-  title: string;
-  description: string;
-}
-
-const CATEGORY_FOLDERS: CategoryFolder[] = [
-  { id: 'core', title: '1. CORE FRAMEWORK & MISSIONS', description: 'Foundation frameworks, Antistasi Ultimate, ACE3, ACE No Medical, and Zeus Enhanced' },
-  { id: 'equipment', title: '2. RHS FACTIONS & MILITARY GEAR', description: 'RHSAFRF, RHSUSAF, RHSGREF, and RHSSAF military hardware' },
-  { id: 'realism', title: '3. MOVEMENT, ANIMATIONS & GUNPLAY', description: 'Enhanced Movement, Alternative Running, WBK animations, hit reactions, and recoil mechanics' },
-  { id: 'audio', title: '4. AUDIO & SOUNDSCAPES', description: 'JSRS Soundmod 2025, Enhanced Soundscape Plus, and Project SFX series' },
-  { id: 'visuals', title: '5. VISUALS, PARTICLES & BLOOD', description: 'Blastcore Murr, Advance Aero Effects, Improved Craters, D.I.R.T, and A3 Thermal' },
-  { id: 'qol', title: '6. HUD, LOGISTICS & QUALITY OF LIFE', description: 'Better Inventory, CH View Distance, Enhanced GPS, Dynamic Camo, and Simplex Tools' },
+// Display grouping chosen by the server operator (not data from Steam).
+const CATEGORIES: { id: ArmaMod['category']; title: string }[] = [
+  { id: 'core', title: 'Core & mission' },
+  { id: 'equipment', title: 'RHS factions & gear' },
+  { id: 'realism', title: 'Movement, animation & gunplay' },
+  { id: 'audio', title: 'Audio' },
+  { id: 'visuals', title: 'Visual effects' },
+  { id: 'qol', title: 'HUD, logistics & quality of life' },
+  { id: 'terrain', title: 'Terrains' },
+  { id: 'server', title: 'Server & admin' },
 ];
 
-export function ModList({
-  mods,
-  serverName,
-  onDownloadPreset,
-  onOpenPresetModal,
-  searchQuery,
-  setSearchQuery,
-}: ModListProps) {
-  // Folders expansion state
-  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
-    core: true,
-    equipment: true,
-    realism: true,
-    audio: false,
-    visuals: false,
-    qol: false,
-  });
-
+export function ModList({ mods, onDownloadPreset, onOpenPresetModal, searchQuery, setSearchQuery }: ModListProps) {
+  const [details, setDetails] = useState<Record<string, WorkshopDetails>>({});
+  const [open, setOpen] = useState<Record<string, boolean>>({ core: true });
   const [filterType, setFilterType] = useState<'all' | 'required' | 'optional'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [expandedModId, setExpandedModId] = useState<string | null>(null);
 
-  // When search query changes, auto-expand folders that contain matches
   useEffect(() => {
-    if (searchQuery.trim().length > 0) {
-      const q = searchQuery.toLowerCase().trim();
-      const updated: Record<string, boolean> = { ...openFolders };
-      CATEGORY_FOLDERS.forEach((f) => {
-        const matches = mods.some((m) => 
-          m.category === f.id && (
-            m.name.toLowerCase().includes(q) ||
-            m.id.includes(q) ||
-            m.author?.toLowerCase().includes(q) ||
-            m.tags?.some((t) => t.toLowerCase().includes(q))
-          )
-        );
-        if (matches) {
-          updated[f.id] = true;
-        }
-      });
-      setOpenFolders(updated);
-    }
-  }, [searchQuery, mods]);
+    fetch('/api/mods')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: ModsResponse | null) => {
+        if (d?.available) setDetails(d.details);
+      })
+      .catch(() => {});
+  }, []);
 
-  const toggleFolder = (folderId: string) => {
-    setOpenFolders((prev) => ({
-      ...prev,
-      [folderId]: !prev[folderId],
-    }));
+  const q = searchQuery.toLowerCase().trim();
+  const filtered = useMemo(
+    () =>
+      mods.filter((m) => {
+        if (filterType === 'required' && !m.required) return false;
+        if (filterType === 'optional' && m.required) return false;
+        if (!q) return true;
+        return m.name.toLowerCase().includes(q) || m.id.includes(q) || details[m.id]?.title.toLowerCase().includes(q);
+      }),
+    [mods, filterType, q, details],
+  );
+
+  const groups = CATEGORIES.map((c) => ({ ...c, mods: filtered.filter((m) => m.category === c.id) })).filter(
+    (g) => g.mods.length > 0,
+  );
+
+  const required = mods.filter((m) => m.required).length;
+  const optional = mods.length - required;
+  const sizeOf = (list: ArmaMod[]) => {
+    // Only report a total when Steam returned a size for every mod in the list.
+    if (!list.every((m) => details[m.id]?.fileSize)) return null;
+    return list.reduce((sum, m) => sum + details[m.id].fileSize, 0);
   };
+  const totalSize = sizeOf(mods.filter((m) => m.required));
+  const allOpen = groups.length > 0 && groups.every((g) => open[g.id]);
 
-  const expandAll = () => {
-    const allOpen: Record<string, boolean> = {};
-    CATEGORY_FOLDERS.forEach((f) => {
-      allOpen[f.id] = true;
-    });
-    setOpenFolders(allOpen);
-  };
-
-  const collapseAll = () => {
-    const allClosed: Record<string, boolean> = {};
-    CATEGORY_FOLDERS.forEach((f) => {
-      allClosed[f.id] = false;
-    });
-    setOpenFolders(allClosed);
-  };
-
-  const copyId = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(id);
+  const copyId = (id: string) => {
+    navigator.clipboard?.writeText(id).catch(() => {});
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1800);
+    setTimeout(() => setCopiedId(null), 1500);
   };
-
-  const filteredMods = useMemo(() => {
-    return mods.filter((mod) => {
-      if (filterType === 'required' && !mod.required) return false;
-      if (filterType === 'optional' && mod.required) return false;
-
-      const q = searchQuery.toLowerCase().trim();
-      if (!q) return true;
-
-      return (
-        mod.name.toLowerCase().includes(q) ||
-        mod.id.includes(q) ||
-        mod.author?.toLowerCase().includes(q) ||
-        mod.description?.toLowerCase().includes(q) ||
-        mod.tags?.some((t) => t.toLowerCase().includes(q))
-      );
-    });
-  }, [mods, filterType, searchQuery]);
-
-  // Group mods by category
-  const groupedMods = useMemo(() => {
-    const map: Record<string, ArmaMod[]> = {};
-    for (const mod of filteredMods) {
-      if (!map[mod.category]) {
-        map[mod.category] = [];
-      }
-      map[mod.category].push(mod);
-    }
-    return map;
-  }, [filteredMods]);
-
-  const totalRequired = mods.filter((m) => m.required).length;
-  const totalOptional = mods.length - totalRequired;
 
   return (
-    <section id="mods" className="space-y-4 sm:space-y-8 scroll-mt-20 sm:scroll-mt-24">
-      {/* Manifest Master Control Bar */}
-      <div id="manifest-header" className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 p-5 sm:p-8 hp-card shadow-lg">
-        <div className="space-y-1.5 sm:space-y-2">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
-            <span className="px-2.5 py-0.5 sm:py-1 rounded-md bg-arma-card text-arma-red border border-arma-border font-bold text-[11px] sm:text-xs">
-              Addons
-            </span>
-            <span className="text-arma-textMuted font-bold text-[11px] sm:text-xs">
-              {totalRequired} REQUIRED &bull; {totalOptional} OPTIONAL &bull; {mods.length} TOTAL
-            </span>
-          </div>
-          <h2 className="text-base sm:text-lg font-medium text-arma-text">
-            Server Addons ({filteredMods.length} Visible)
-          </h2>
-          <p className="text-xs sm:text-sm text-arma-textMuted leading-relaxed max-w-2xl">
-            Collapsible category directories. Tap folders to review details or export the full Bohemia Launcher preset (.html).
-          </p>
+    <section id="mods" className="scroll-mt-6 space-y-3">
+      {/* Summary + actions */}
+      <div className="hp-card flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-1.5">
+          <StatBlock label="Mods" value={mods.length} />
+          {optional > 0 && <StatBlock label="Required" value={required} />}
+          {totalSize != null && <StatBlock label="Size" value={formatBytes(totalSize)} title="Total size of the required mods on Steam Workshop" />}
         </div>
-
-        {/* Global Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
-          <button
-            onClick={expandAll}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md arma-btn-secondary text-xs hover:bg-arma-cardHover"
-            title="Expand all category folders"
-          >
-            <Maximize2 className="w-3.5 h-3.5 text-arma-red" />
-            <span>EXPAND</span>
-          </button>
-
-          <button
-            onClick={collapseAll}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md arma-btn-secondary text-xs hover:bg-arma-cardHover"
-            title="Collapse all category folders"
-          >
-            <Minimize2 className="w-3.5 h-3.5 text-arma-textDim" />
-            <span>COLLAPSE</span>
-          </button>
-
+        <div className="grid grid-cols-2 gap-1.5 sm:flex">
           <button
             onClick={onDownloadPreset}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-md arma-btn-primary font-bold shadow-arma-red text-xs transition-all "
+            className="flex items-center justify-center gap-1.5 rounded px-3 py-2 text-xs arma-btn-primary"
           >
-            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-            <span>EXPORT PRESET</span>
+            <Download className="h-3.5 w-3.5" />
+            Download preset
           </button>
-
           <button
             onClick={onOpenPresetModal}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md arma-btn-secondary text-xs hover:bg-arma-cardHover"
+            className="flex items-center justify-center gap-1.5 rounded px-3 py-2 text-xs arma-btn-secondary"
           >
-            <Filter className="w-3.5 h-3.5 text-arma-khaki" />
-            <span>IMPORT</span>
+            <FileUp className="h-3.5 w-3.5" />
+            Import preset
           </button>
         </div>
       </div>
 
-      {/* Filter and Search Navigation Bar */}
-      <div id="manifest-search" className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 text-xs">
-        {/* Status Filters - Mobile touch scrollable */}
-        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-          <button
-            onClick={() => setFilterType('all')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs font-bold transition-all border whitespace-nowrap ${
-              filterType === 'all'
-                ? 'bg-arma-red text-white border-arma-red shadow-sm'
-                : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
-            }`}
-          >
-            ALL ({mods.length})
-          </button>
-          <button
-            onClick={() => setFilterType('required')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs font-bold transition-all border whitespace-nowrap ${
-              filterType === 'required'
-                ? 'bg-arma-red text-white border-arma-red shadow-sm'
-                : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
-            }`}
-          >
-            REQUIRED ({totalRequired})
-          </button>
-          <button
-            onClick={() => setFilterType('optional')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs font-bold transition-all border whitespace-nowrap ${
-              filterType === 'optional'
-                ? 'bg-arma-red text-white border-arma-red shadow-sm'
-                : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
-            }`}
-          >
-            OPTIONAL ({totalOptional})
-          </button>
-        </div>
-
-        {/* Search Box */}
-        <div className="relative flex-1 md:max-w-md">
-          <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-arma-textDim" />
+      {/* Search + filters */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           <input
-            type="text"
-            placeholder="SEARCH ADDON NAME, ID, TAG..."
+            type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 sm:pl-11 pr-8 py-2.5 sm:py-3 hp-card text-arma-text placeholder-arma-textDim text-xs sm:text-sm focus:outline-none focus:border-arma-red transition-colors shadow-inner"
+            placeholder="Search mods by name or Workshop ID"
+            className="w-full rounded-md bg-white/5 py-2 pl-9 pr-9 text-base text-slate-200 ring-1 ring-white/10 placeholder:text-slate-500 focus:outline-none focus:ring-white/25 sm:text-sm"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-arma-textDim hover:text-arma-text"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300"
+              aria-label="Clear search"
             >
-              &times;
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
+        <div className="flex gap-1.5">
+          {optional > 0 &&
+            (['all', 'required', 'optional'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilterType(f)}
+                className={`rounded px-3 py-2 text-xs capitalize ${filterType === f ? 'bg-white/15 text-white' : 'arma-btn-secondary'}`}
+              >
+                {f}
+              </button>
+            ))}
+          <button
+            onClick={() => setOpen(allOpen ? {} : Object.fromEntries(groups.map((g) => [g.id, true])))}
+            className="rounded px-3 py-2 text-xs arma-btn-secondary whitespace-nowrap"
+          >
+            {allOpen ? 'Collapse all' : 'Expand all'}
+          </button>
+        </div>
       </div>
 
-      {/* Collapsible Category Folders */}
-      <div className="space-y-3 sm:space-y-4">
-        {CATEGORY_FOLDERS.map((folder) => {
-          const folderMods = groupedMods[folder.id] || [];
-          if (folderMods.length === 0 && searchQuery) return null;
-          if (folderMods.length === 0 && !searchQuery) return null;
+      {groups.length === 0 && <p className="py-6 text-center text-sm text-slate-500">No mods match “{searchQuery}”.</p>}
 
-          const isOpen = openFolders[folder.id] || false;
-          const reqCount = folderMods.filter((m) => m.required).length;
-
+      {/* Category groups */}
+      <div className="space-y-2">
+        {groups.map((g) => {
+          const isOpen = !!q || !!open[g.id];
+          const groupSize = sizeOf(g.mods);
           return (
-            <div
-              key={folder.id}
-              className="hp-card overflow-hidden transition-all shadow-md"
-            >
-              {/* Folder Header (Click to Toggle) */}
+            <div key={g.id} className="hp-card overflow-hidden">
               <button
-                onClick={() => toggleFolder(folder.id)}
-                className="w-full p-3.5 sm:p-5 bg-arma-surface hover:bg-arma-card flex items-center justify-between transition-colors text-left"
+                onClick={() => setOpen((o) => ({ ...o, [g.id]: !o[g.id] }))}
+                className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-white/5"
+                aria-expanded={isOpen}
               >
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="text-arma-red shrink-0 p-1.5 sm:p-2 rounded-md bg-black/20 ring-1 ring-white/5">
-                    {isOpen ? <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-arma-red" /> : <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-arma-khaki" />}
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
-                      <span className="text-xs sm:text-base font-bold text-arma-text uppercase tracking-wide truncate">
-                        {folder.title}
-                      </span>
-                      <span className="text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded bg-arma-card text-arma-red border border-arma-border shrink-0">
-                        {folderMods.length} MODS
-                      </span>
-                      {reqCount > 0 && (
-                        <span className="text-[10px] sm:text-xs text-arma-khaki hidden sm:inline">
-                          ({reqCount} REQ)
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] sm:text-xs text-arma-textMuted truncate mt-0.5 sm:mt-1">
-                      {folder.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 sm:gap-3 text-arma-textDim text-xs shrink-0 ml-2 sm:ml-4">
-                  <span className="text-xs font-bold hidden md:inline">
-                    {isOpen ? 'COLLAPSE' : 'EXPAND'}
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-slate-200">{g.title}</span>
+                  <span className="text-xs text-slate-500">
+                    {g.mods.length} mod{g.mods.length === 1 ? '' : 's'}
+                    {groupSize != null && ` · ${formatBytes(groupSize)}`}
                   </span>
-                  {isOpen ? <ChevronUp className="w-4 h-4 text-arma-red" /> : <ChevronDown className="w-4 h-4" />}
-                </div>
+                </span>
+                <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Folder Contents */}
               {isOpen && (
-                <div className="border-t border-arma-border bg-black/20">
-                  {/* Desktop Table View (>= md) */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="border-b border-arma-border bg-black/20 text-[11px] text-arma-textDim uppercase tracking-wider">
-                          <th className="py-3 px-5 w-16 text-center">TYPE</th>
-                          <th className="py-3 px-5">ADDON NAME &amp; DETAILS</th>
-                          <th className="py-3 px-5 w-32">EST. SIZE</th>
-                          <th className="py-3 px-5 w-40">STEAM WORKSHOP ID</th>
-                          <th className="py-3 px-5 w-32 text-right">ACTIONS</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-arma-border/60">
-                        {folderMods.map((mod) => {
-                          const isExpanded = expandedModId === mod.id;
-                          return (
-                            <React.Fragment key={mod.id}>
-                              <tr 
-                                className={`hover:bg-arma-surface transition-colors cursor-pointer ${
-                                  isExpanded ? 'bg-arma-card' : ''
-                                }`}
-                                onClick={() => setExpandedModId(isExpanded ? null : mod.id)}
-                              >
-                                {/* Type: REQ vs OPT */}
-                                <td className="py-3.5 px-5 text-center">
-                                  {mod.required ? (
-                                    <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40">
-                                      REQ
-                                    </span>
-                                  ) : (
-                                    <span className="text-[10px] font-bold text-arma-textDim">
-                                      OPT
-                                    </span>
-                                  )}
-                                </td>
-
-                                {/* Mod Name & Author */}
-                                <td className="py-3.5 px-5">
-                                  <div className="font-bold text-arma-text hover:text-arma-red transition-colors flex items-center gap-2 text-sm">
-                                    <span>{mod.name}</span>
-                                    {mod.tags && mod.tags.length > 0 && (
-                                      <span className="text-[10px] text-arma-textDim font-normal hidden lg:inline bg-arma-card px-1.5 py-0.5 rounded border border-arma-border">
-                                        #{mod.tags[0]}
-                                      </span>
-                                    )}
-                                  </div>
-                                  {mod.author && (
-                                    <div className="text-[11px] text-arma-textDim mt-0.5">
-                                      Author: {mod.author} {mod.version ? `(v${mod.version})` : ''}
-                                    </div>
-                                  )}
-                                </td>
-
-                                {/* Size */}
-                                <td className="py-3.5 px-5 text-arma-textMuted text-xs">
-                                  {mod.size || '—'}
-                                </td>
-
-                                {/* Workshop ID */}
-                                <td className="py-3.5 px-5">
-                                  <button
-                                    onClick={(e) => copyId(mod.id, e)}
-                                    className="text-arma-khaki hover:text-arma-red flex items-center gap-1.5 text-xs"
-                                    title="Click to copy Steam ID"
-                                  >
-                                    <span>{mod.id}</span>
-                                    {copiedId === mod.id ? (
-                                      <Check className="w-3.5 h-3.5 text-arma-green" />
-                                    ) : (
-                                      <Copy className="w-3.5 h-3.5 text-arma-textDim opacity-60" />
-                                    )}
-                                  </button>
-                                </td>
-
-                                {/* Actions */}
-                                <td className="py-3.5 px-5 text-right" onClick={(e) => e.stopPropagation()}>
-                                  <div className="inline-flex items-center gap-2">
-                                    <a
-                                      href={`steam://url/CommunityFilePage/${mod.id}`}
-                                      className="p-1.5 rounded-md bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text border border-arma-border transition-colors"
-                                      title="Open directly in Steam App"
-                                    >
-                                      <ArrowUpRight className="w-3.5 h-3.5" />
-                                    </a>
-                                    <a
-                                      href={mod.steamUrl || `https://steamcommunity.com/sharedfiles/filedetails/?id=${mod.id}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="px-2.5 py-1 rounded-md bg-arma-card hover:bg-arma-red hover:text-white text-arma-text font-bold text-xs inline-flex items-center gap-1 border border-arma-border transition-colors"
-                                    >
-                                      <span>WEB</span>
-                                      <ExternalLink className="w-3 h-3" />
-                                    </a>
-                                  </div>
-                                </td>
-                              </tr>
-
-                              {/* Description Row */}
-                              {isExpanded && mod.description && (
-                                <tr className="bg-black/20 text-xs">
-                                  <td colSpan={5} className="py-4 px-8 text-arma-textMuted border-b border-arma-border/80">
-                                    <div className="flex items-start gap-3">
-                                      <Info className="w-4 h-4 text-arma-red shrink-0 mt-0.5" />
-                                      <div className="space-y-2">
-                                        <p className="leading-relaxed text-arma-text text-xs sm:text-sm">{mod.description}</p>
-                                        {mod.tags && (
-                                          <div className="flex flex-wrap gap-1.5 pt-1">
-                                            {mod.tags.map((t, idx) => (
-                                              <span key={idx} className="text-[10px] text-arma-textDim bg-arma-card px-2 py-0.5 rounded border border-arma-border">
-                                                #{t}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Mobile Optimized Card View (< md) - Clean, touch friendly */}
-                  <div className="md:hidden divide-y divide-arma-border/60">
-                    {folderMods.map((mod) => {
-                      const isExpanded = expandedModId === mod.id;
-                      return (
-                        <div 
-                          key={mod.id} 
-                          className="p-3.5 space-y-2.5"
-                          onClick={() => setExpandedModId(isExpanded ? null : mod.id)}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              {mod.required ? (
-                                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40 shrink-0">
-                                  REQ
-                                </span>
-                              ) : (
-                                <span className="text-[9px] font-bold text-arma-textDim px-1.5 py-0.5 rounded bg-arma-card border border-arma-border shrink-0">
-                                  OPT
-                                </span>
-                              )}
-                              <span className="font-bold text-arma-text text-xs leading-snug">
-                                {mod.name}
-                              </span>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <a
-                                href={`steam://url/CommunityFilePage/${mod.id}`}
-                                className="p-1.5 rounded bg-arma-card text-arma-textMuted hover:text-arma-text border border-arma-border"
-                                title="Open in Steam App"
-                              >
-                                <ArrowUpRight className="w-3.5 h-3.5" />
-                              </a>
-                              <a
-                                href={mod.steamUrl || `https://steamcommunity.com/sharedfiles/filedetails/?id=${mod.id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-2 py-1 rounded bg-arma-card hover:bg-arma-red hover:text-white text-arma-text font-bold text-[10px] inline-flex items-center gap-1 border border-arma-border"
-                              >
-                                <span>WEB</span>
-                                <ExternalLink className="w-2.5 h-2.5" />
-                              </a>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between text-[11px] text-arma-textMuted">
-                            <button
-                              onClick={(e) => copyId(mod.id, e)}
-                              className="text-arma-khaki hover:text-arma-red flex items-center gap-1"
-                            >
-                              <span>ID: {mod.id}</span>
-                              {copiedId === mod.id ? <Check className="w-3 h-3 text-arma-green" /> : <Copy className="w-3 h-3 opacity-60" />}
-                            </button>
-                            <span>{mod.size || '—'}</span>
-                          </div>
-
-                          {isExpanded && mod.description && (
-                            <div className="pt-2 text-[11px] text-arma-textMuted border-t border-arma-border/50">
-                              <p className="leading-relaxed">{mod.description}</p>
+                <ul className="divide-y divide-white/5 border-t border-white/5">
+                  {g.mods.map((m) => {
+                    const d = details[m.id];
+                    const meta = [
+                      d?.fileSize ? formatBytes(d.fileSize) : null,
+                      d?.updatedAt ? `updated ${formatSince(d.updatedAt)}` : null,
+                      d?.subscriptions != null ? `${formatNumber(d.subscriptions)} subs` : null,
+                    ].filter(Boolean);
+                    return (
+                      <li key={m.id} className="flex items-center gap-2 px-3 py-2">
+                        <div className="min-w-0 flex-1">
+                          <a
+                            href={m.steamUrl || `https://steamcommunity.com/sharedfiles/filedetails/?id=${m.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1.5 text-sm text-slate-200 hover:text-white"
+                          >
+                            <span className="truncate">{m.name}</span>
+                            {!m.required && (
+                              <span className="shrink-0 rounded bg-white/10 px-1 text-[10px] uppercase text-slate-400">opt</span>
+                            )}
+                            <ExternalLink className="h-3 w-3 shrink-0 text-slate-500" />
+                          </a>
+                          {meta.length > 0 && (
+                            <div className="flex flex-wrap gap-x-2 text-xs text-slate-500">
+                              {meta.map((t) => (
+                                <span key={t as string}>{t}</span>
+                              ))}
                             </div>
                           )}
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        <button
+                          onClick={() => copyId(m.id)}
+                          className="flex shrink-0 items-center gap-1 rounded px-2 py-1.5 text-[11px] tabular-nums text-slate-400 arma-btn-secondary"
+                          title="Copy Workshop ID"
+                        >
+                          {copiedId === m.id ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                          <span className="hidden sm:inline">{m.id}</span>
+                        </button>
+                        <a
+                          href={`steam://url/CommunityFilePage/${m.id}`}
+                          className="shrink-0 rounded px-2 py-1.5 text-[11px] arma-btn-secondary"
+                          title="Open in the Steam app"
+                        >
+                          Steam
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
             </div>
           );

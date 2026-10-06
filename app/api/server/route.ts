@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
     queryPort,
     status: 'offline',
     lastUpdated: new Date().toISOString(),
+    // The verified host location only applies to our own server.
+    ...(host === DEFAULT_SERVER_CONFIG.ip ? {} : { location: undefined, countryCode: undefined, isp: undefined }),
   };
 
   const json = (body: ArmaServerStats, maxAge: number) =>
@@ -67,7 +69,6 @@ export async function GET(request: NextRequest) {
       return json({
         ...base,
         ...bm,
-        status: 'online',
         querySource: 'battlemetrics',
         lastUpdated: new Date().toISOString(),
       }, 15);

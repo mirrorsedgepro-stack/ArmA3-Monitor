@@ -1,57 +1,44 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  Trophy, 
-  Medal, 
-  Users, 
-  Search, 
-  Clock, 
-  Shield, 
-  Radio, 
-  Flame,
-  UserCheck,
-  RefreshCw
-} from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
 import { ServerPlayer } from '@/data/defaultServer';
-
-export interface PlayerRecord {
-  name: string;
-  sessions: number;
-  totalSeconds: number;
-  firstSeen: string;
-  lastSeen: string;
-  online: boolean;
-}
+import type { PlayerRecord, PlayersResponse } from '@/app/api/players/route';
+import { StatBlock, StatRow } from '@/components/dash/StatBlock';
+import { formatSince, formatUptime } from '@/lib/format';
 
 interface TopPlayersProps {
   livePlayers?: ServerPlayer[];
-  onOpenPlayerList?: () => void;
+  /** Latest Antistasi rank per player, from promotion events. */
+  ranks?: Record<string, string>;
 }
 
-type SortCriteria = 'hours' | 'sessions' | 'online' | 'name';
+type SortCriteria = 'hours' | 'sessions' | 'deaths' | 'recent';
 
-export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersProps) {
+const SORTS: { id: SortCriteria; label: string }[] = [
+  { id: 'hours', label: 'Time played' },
+  { id: 'sessions', label: 'Sessions' },
+  { id: 'deaths', label: 'Deaths' },
+  { id: 'recent', label: 'Last seen' },
+];
+
+/**
+ * Player leaderboard built only from sessions recorded in the server log.
+ * Renders nothing until the bridge has returned at least one player.
+ */
+export function TopPlayers({ livePlayers = [], ranks = {} }: TopPlayersProps) {
   const [players, setPlayers] = useState<PlayerRecord[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortCriteria>('hours');
-  const [trackingSince, setTrackingSince] = useState<string | null>(null);
 
   const fetchPlayers = useCallback(async () => {
     try {
       const res = await fetch('/api/players');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.available && Array.isArray(data.players)) {
-          setPlayers(data.players);
-          setTrackingSince(data.trackingSince);
-        }
-      }
-    } catch (err) {
-      console.warn('Failed to fetch players list:', err);
-    } finally {
-      setIsLoading(false);
+      if (!res.ok) return;
+      const data: PlayersResponse = await res.json();
+      if (data.available && Array.isArray(data.players)) setPlayers(data.players);
+    } catch {
+      // Keep the last good list.
     }
   }, []);
 
@@ -61,280 +48,88 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
     return () => clearInterval(interval);
   }, [fetchPlayers]);
 
-  // Merge live players from A2S query with persistent roster
-  const mergedPlayers = useMemo(() => {
-    const list: PlayerRecord[] = players.map(p => ({ ...p }));
-    const liveNames = new Set(livePlayers.map(lp => lp.name.toLowerCase()));
+  const hasDeaths = players.some((p) => typeof p.deaths === 'number');
+  const live = useMemo(() => new Set(livePlayers.map((p) => p.name.toLowerCase())), [livePlayers]);
 
-    // Update online flags from live A2S
-    list.forEach(p => {
-      if (liveNames.has(p.name.toLowerCase())) {
-        p.online = true;
-      }
-    });
-
-    // Add any connected player not yet in the session list
-    livePlayers.forEach(lp => {
-      const exists = list.some(p => p.name.toLowerCase() === lp.name.toLowerCase());
-      if (!exists && lp.name) {
-        list.push({
-          name: lp.name,
-          sessions: 1,
-          totalSeconds: lp.timePlayedSeconds || 60,
-          firstSeen: new Date().toISOString(),
-          lastSeen: new Date().toISOString(),
-          online: true,
-        });
-      }
-    });
-
-    return list;
-  }, [players, livePlayers]);
-
-  // Filter and sort players
-  const filteredPlayers = useMemo(() => {
-    let result = mergedPlayers.filter((p) => {
-      const q = search.toLowerCase().trim();
-      if (!q) return true;
-      return p.name.toLowerCase().includes(q);
-    });
-
-    result.sort((a, b) => {
-      if (sortBy === 'online') {
-        if (a.online === b.online) return b.totalSeconds - a.totalSeconds;
-        return a.online ? -1 : 1;
-      }
+  const shown = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    const list = players
+      .map((p) => ({ ...p, online: p.online || live.has(p.name.toLowerCase()) }))
+      .filter((p) => !q || p.name.toLowerCase().includes(q));
+    list.sort((a, b) => {
       if (sortBy === 'sessions') return b.sessions - a.sessions;
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'deaths') return (b.deaths ?? 0) - (a.deaths ?? 0);
+      if (sortBy === 'recent') return Number(b.online) - Number(a.online) || b.lastSeen.localeCompare(a.lastSeen);
       return b.totalSeconds - a.totalSeconds;
     });
+    return list;
+  }, [players, live, search, sortBy]);
 
-    return result;
-  }, [mergedPlayers, search, sortBy]);
-
-  const onlineCount = useMemo(() => {
-    return mergedPlayers.filter(p => p.online).length;
-  }, [mergedPlayers]);
-
-  const formatHours = (seconds: number) => {
-    const hrs = seconds / 3600;
-    if (hrs < 0.1) return '<0.1h';
-    return `${hrs.toFixed(1)}h`;
-  };
-
-  const formatLastSeen = (isoStr: string, isOnline: boolean) => {
-    if (isOnline) return 'Online Now';
-    if (!isoStr) return 'Unknown';
-    try {
-      const d = new Date(isoStr);
-      const diffMs = Date.now() - d.getTime();
-      const diffMins = Math.floor(diffMs / (60 * 1000));
-      if (diffMins < 5) return 'Just now';
-      if (diffMins < 60) return `${diffMins}m ago`;
-      const diffHrs = Math.floor(diffMins / 60);
-      if (diffHrs < 24) return `${diffHrs}h ago`;
-      const diffDays = Math.floor(diffHrs / 24);
-      return `${diffDays}d ago`;
-    } catch {
-      return 'Recently';
-    }
-  };
-
-  const getRank = (idx: number, hours: number) => {
-    if (hours > 10) return 'Veteran';
-    if (hours > 3) return 'Regular';
-    if (idx === 0) return 'Lead';
-    return 'Operator';
-  };
+  if (players.length === 0) return null;
 
   return (
-    <section id="players" className="space-y-6 sm:space-y-8">
-      {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-arma-border pb-4 sm:pb-6">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-arma-khaki font-bold uppercase tracking-wider mb-1">
-            <Trophy className="w-4 h-4 text-arma-red" />
-            <span>Session records</span>
-          </div>
-          <h2 className="text-base sm:text-lg font-medium text-arma-text">
-            Top players
-          </h2>
-          <p className="text-xs sm:text-sm text-arma-textMuted mt-1">
-            Real session records derived directly from server connection logs.
-            {trackingSince && (
-              <span className="text-arma-textDim ml-1">
-                (Recorded since {new Date(trackingSince).toLocaleDateString()})
-              </span>
-            )}
-          </p>
-        </div>
-
-        {/* Live status badge & filter controls */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
-          <span className="px-3 py-1.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${onlineCount > 0 ? 'bg-arma-green animate-pulse' : 'bg-gray-500'}`} />
-            <span><strong>{onlineCount}</strong> ONLINE NOW</span>
-          </span>
-
-          <button
-            onClick={fetchPlayers}
-            className="p-1.5 sm:p-2 rounded-md bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text transition-colors"
-            title="Refresh player list"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </div>
-
-      {/* Search & Sort Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-arma-textMuted" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by player callsign..."
-            className="w-full pl-9 pr-4 py-2 hp-card text-arma-text placeholder-arma-textDim focus:outline-none focus:border-arma-red text-xs"
-          />
-        </div>
-
-        {/* Sort selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-arma-textDim hidden sm:inline">SORT BY:</span>
-          <div className="grid grid-cols-3 sm:flex gap-1.5 w-full sm:w-auto">
-            <button
-              onClick={() => setSortBy('hours')}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                sortBy === 'hours'
-                  ? 'bg-arma-red text-white font-bold'
-                  : 'bg-arma-surface hover:bg-arma-card border border-arma-border text-arma-textMuted'
-              }`}
-            >
-              TIME PLAYED
-            </button>
-            <button
-              onClick={() => setSortBy('sessions')}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                sortBy === 'sessions'
-                  ? 'bg-arma-red text-white font-bold'
-                  : 'bg-arma-surface hover:bg-arma-card border border-arma-border text-arma-textMuted'
-              }`}
-            >
-              SESSIONS
-            </button>
-            <button
-              onClick={() => setSortBy('online')}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                sortBy === 'online'
-                  ? 'bg-arma-red text-white font-bold'
-                  : 'bg-arma-surface hover:bg-arma-card border border-arma-border text-arma-textMuted'
-              }`}
-            >
-              STATUS
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Players Grid / Table */}
-      {filteredPlayers.length === 0 ? (
-        <div className="hp-card p-8 sm:p-12 text-center space-y-3">
-          <Users className="w-10 h-10 text-arma-textDim mx-auto" />
-          <div className="text-sm sm:text-base font-bold text-arma-text uppercase">
-            {search ? 'No Players Found' : 'No Player Records Yet'}
-          </div>
-          <p className="text-xs text-arma-textMuted max-w-md mx-auto">
-            {search
-              ? `No registered players matching "${search}".`
-              : 'Player sessions will appear here as players connect to the dedicated server.'}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {filteredPlayers.map((player, idx) => {
-            const initials = player.name.slice(0, 2).toUpperCase();
-            const rank = getRank(idx, player.totalSeconds / 3600);
-
-            return (
-              <div
-                key={player.name}
-                className={`p-4 sm:p-5 rounded-md bg-arma-surface border transition-all flex flex-col justify-between shadow-md ${
-                  player.online
-                    ? 'border-arma-green/60 ring-1 ring-arma-green/20'
-                    : 'border-arma-border hover:border-arma-borderHover'
-                }`}
+    <div id="players" className="space-y-2 scroll-mt-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm font-medium text-slate-200">Players</span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {players.length > 6 && (
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Find a player"
+                className="w-full rounded bg-white/5 py-1.5 pl-8 pr-2 text-base text-slate-200 ring-1 ring-white/10 placeholder:text-slate-500 focus:outline-none sm:w-44 sm:text-xs"
+              />
+            </div>
+          )}
+          <div className="flex gap-1 overflow-x-auto">
+            {SORTS.filter((s) => s.id !== 'deaths' || hasDeaths).map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSortBy(s.id)}
+                className={`whitespace-nowrap rounded px-2 py-1 text-[11px] ${sortBy === s.id ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-slate-200'}`}
               >
-                <div>
-                  {/* Top info row */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* Avatar */}
-                      <div className={`w-10 h-10 rounded-md flex items-center justify-center font-medium text-sm shrink-0 border ${
-                        player.online
-                          ? 'bg-arma-green/10 text-arma-green border-arma-green/40'
-                          : 'bg-arma-card text-arma-textDim border-arma-border'
-                      }`}>
-                        {initials}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-medium text-sm sm:text-base text-arma-text truncate">
-                            {player.name}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-arma-khaki font-semibold">
-                          {rank}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Online status badge */}
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 border ${
-                      player.online
-                        ? 'bg-arma-green/15 text-arma-green border-arma-green/40'
-                        : 'bg-arma-card text-arma-textDim border-arma-border'
-                    }`}>
-                      {player.online ? 'ONLINE NOW' : formatLastSeen(player.lastSeen, false)}
-                    </span>
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-arma-border/60 text-xs">
-                    <div className="p-2 rounded bg-black/20 border border-arma-border/50">
-                      <div className="text-[10px] text-arma-textDim flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-arma-khaki" />
-                        TIME PLAYED
-                      </div>
-                      <div className="text-sm font-bold text-arma-text mt-0.5">
-                        {formatHours(player.totalSeconds)}
-                      </div>
-                    </div>
-
-                    <div className="p-2 rounded bg-black/20 border border-arma-border/50">
-                      <div className="text-[10px] text-arma-textDim flex items-center gap-1">
-                        <Flame className="w-3 h-3 text-arma-red" />
-                        SESSIONS
-                      </div>
-                      <div className="text-sm font-bold text-arma-text mt-0.5">
-                        {player.sessions}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer timestamp */}
-                <div className="mt-3 pt-2 text-[10px] text-arma-textDim flex items-center justify-between">
-                  <span>First joined:</span>
-                  <span>{player.firstSeen ? new Date(player.firstSeen).toLocaleDateString() : 'N/A'}</span>
-                </div>
-              </div>
-            );
-          })}
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-    </section>
+      </div>
+
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((p, idx) => {
+          const rank = ranks[p.name];
+          return (
+            <li key={p.name} className="hp-card list-none">
+              <div className="flex items-center gap-2.5 px-3 py-2.5">
+                <span className="w-5 shrink-0 text-center text-xs tabular-nums text-slate-500">{idx + 1}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-slate-200">{p.name}</div>
+                  {rank && <div className="text-xs text-slate-400">{rank}</div>}
+                </div>
+                {p.online ? (
+                  <span className="flex shrink-0 items-center gap-1 rounded bg-black/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    ONLINE
+                  </span>
+                ) : (
+                  <span className="shrink-0 text-[11px] text-slate-500" title={new Date(p.lastSeen).toLocaleString()}>
+                    {formatSince(p.lastSeen)}
+                  </span>
+                )}
+              </div>
+              <StatRow>
+                <StatBlock label="Played" value={formatUptime(p.totalSeconds)} />
+                <StatBlock label="Sessions" value={p.sessions} />
+                {typeof p.deaths === 'number' && <StatBlock label="Deaths" value={p.deaths} />}
+              </StatRow>
+            </li>
+          );
+        })}
+      </ul>
+      {shown.length === 0 && <p className="py-4 text-center text-xs text-slate-500">No players match “{search}”.</p>}
+    </div>
   );
 }

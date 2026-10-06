@@ -191,8 +191,6 @@ function parseA2SInfoResponse(buf: Buffer): Partial<ArmaServerStats> {
   offset += Buffer.byteLength(version, 'utf8') + 1;
 
   let tags = '';
-  let mission = game || 'Arma 3 Operation';
-
   if (offset < buf.length) {
     const edf = buf.readUInt8(offset++);
     if (edf & 0x80) offset += 2;
@@ -204,33 +202,32 @@ function parseA2SInfoResponse(buf: Buffer): Partial<ArmaServerStats> {
     }
     if (edf & 0x20 && offset < buf.length) {
       tags = readNullTerminatedString(buf, offset);
-      if (tags) {
-        mission = parseArmaTags(tags, map) || mission;
-      }
     }
   }
+
+  // Arma 3 server tags: one-letter key + value, comma separated,
+  // e.g. "bf,r222,n0,s7,i1,mf,lf,vf,dt,tanti,...,pl,...".
+  const tag = parseArmaTags(tags);
+  const bool = (v: string | undefined) => (v === 't' ? true : v === 'f' ? false : null);
 
   return {
     name: serverName,
     map: formatMapName(map),
-    mission: mission || game,
+    mission: game || undefined,
     players,
     maxPlayers,
     version,
-    battleye: tags.includes('b,') || tags.startsWith('b') || vac === 1,
+    battleye: bool(tag.b),
     passwordProtected: visibility === 1,
-    gameType: extractGameType(tags, game),
-    platform: tags.includes('pl') || environment === 'l' ? 'Linux Dedicated Server (x86_64)' : 'Windows Dedicated Server',
-    signatureVerification: tags.includes('s7') ? 'Strict (checkSignatures = 2)' : 'Standard Verification',
-    vonEnabled: tags.includes('vf'),
-    thirdPerson: tags.includes('f1'),
-    joinInProgress: tags.includes('j0'),
-    serverTags: tags,
-    location: 'Sydney, New South Wales, Australia',
-    countryCode: 'AU',
-    isp: 'Aussie Fibre Pty Ltd (AS4764)',
+    gameType: tag.t || undefined,
+    platform: tag.p === 'l' ? 'Linux' : tag.p === 'w' ? 'Windows' : environment === 'l' ? 'Linux' : environment === 'w' ? 'Windows' : undefined,
+    signaturesVerified: bool(tag.v),
+    difficulty: tag.i != null ? DIFFICULTIES[tag.i] ?? null : null,
+    serverTags: tags || undefined,
   };
 }
+
+const DIFFICULTIES: Record<string, string> = { '0': 'Recruit', '1': 'Regular', '2': 'Veteran', '3': 'Custom' };
 
 function parseA2SPlayerResponse(buf: Buffer): ServerPlayer[] {
   const count = buf.readUInt8(5);
@@ -269,27 +266,16 @@ function readNullTerminatedString(buf: Buffer, offset: number): string {
   return buf.subarray(offset, end).toString('utf8');
 }
 
-function parseArmaTags(tags: string, defaultMap: string): string {
-  const parts = tags.split(',');
-  for (const part of parts) {
-    if (part.startsWith('m') && part.length > 1) {
-      return part.substring(1);
-    }
+function parseArmaTags(tags: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const part of tags.split(',')) {
+    if (part.length > 0 && !(part[0] in out)) out[part[0]] = part.slice(1);
   }
-  return '';
-}
-
-function extractGameType(tags: string, gameName = ''): string {
-  if (gameName.toLowerCase().includes('antistasi') || tags.includes('tanti')) return 'Antistasi (Guerrilla Warfare)';
-  if (tags.includes('tcoop') || tags.includes('coop')) return 'COOP';
-  if (tags.includes('tvt') || tags.includes('pvp')) return 'PvP';
-  if (tags.includes('tkoth') || tags.includes('koth')) return 'King of the Hill';
-  if (tags.includes('twarlords')) return 'Warlords';
-  return 'Tactical Realism';
+  return out;
 }
 
 function formatMapName(rawMap: string): string {
-  if (!rawMap) return 'Altis';
+  if (!rawMap) return '';
   if (rawMap.includes('Everon')) return 'Everon';
   const clean = rawMap.toLowerCase().trim();
   const mapDictionary: Record<string, string> = {

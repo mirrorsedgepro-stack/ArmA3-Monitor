@@ -29,7 +29,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs font-mono">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs">
       <div 
         className="w-full max-w-xl rounded-md bg-slate-800 ring-1 ring-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
@@ -103,7 +103,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
 
                   <div className="flex items-center gap-2.5 text-xs text-arma-textMuted shrink-0 ml-2">
                     {player.score > 0 && (
-                      <span className="text-arma-khaki font-bold hidden xs:inline">{player.score} PTS</span>
+                      <span className="text-arma-khaki font-bold">{player.score} PTS</span>
                     )}
                     <span className="flex items-center gap-1 text-[11px]">
                       <Clock className="w-3 h-3 text-arma-textDim" />

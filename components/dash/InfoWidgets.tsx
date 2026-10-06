@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Crosshair, Cpu, RefreshCw, Server, Settings, Timer, Users } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
-import { formatNumber, formatUptime, UNKNOWN } from '@/lib/format';
+import { formatNumber, formatUptime } from '@/lib/format';
 
 interface ResourceProps {
   icon: React.ReactNode;
@@ -57,7 +57,9 @@ export function InfoWidgets({ stats, isLoading, autoRefresh, onToggleAutoRefresh
   const now = useClock();
   const online = stats.status === 'online';
   const max = stats.maxPlayers || 32;
-  const fps = online ? stats.serverFps ?? stats.performance?.serverFps ?? null : null;
+  // serverFps is null once Antistasi's last sample is older than 90 s.
+  const fps = online ? stats.serverFps ?? null : null;
+  const uptime = online ? stats.uptimeSeconds ?? null : null;
   const hc = online ? stats.headlessClients : null;
   // "Name | 32-Player Dedicated" -> heading "Name", the rest as subtitle.
   const [title, ...rest] = stats.name.split('|').map((s) => s.trim());
@@ -74,12 +76,12 @@ export function InfoWidgets({ stats, isLoading, autoRefresh, onToggleAutoRefresh
         <div className="min-w-0">
           <h1 className="truncate text-base font-medium text-slate-200 sm:text-lg" title={stats.name}>{title}</h1>
           <p className="truncate text-xs text-slate-400">
-            {[subtitle, `${stats.ip}:${stats.port}`, stats.map || UNKNOWN].filter(Boolean).join(' · ')}
+            {[subtitle, `${stats.ip}:${stats.port}`, stats.map].filter(Boolean).join(' · ')}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div className="grid grid-cols-2 items-center gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-6">
         <Resource
           icon={<Server className="h-4 w-4" />}
           value={stats.status === 'loading' ? '…' : online ? 'Online' : 'Offline'}
@@ -87,32 +89,34 @@ export function InfoWidgets({ stats, isLoading, autoRefresh, onToggleAutoRefresh
           percent={stats.status === 'loading' ? null : 100}
           barClass={online ? 'bg-emerald-500' : 'bg-red-500'}
         />
-        <Resource
-          icon={<Users className="h-4 w-4" />}
-          value={online ? `${stats.players}/${max}` : `–/${max}`}
-          label="players"
-          percent={online ? (stats.players / max) * 100 : null}
-          barClass="bg-sky-500"
-        />
-        <Resource
-          icon={<Cpu className="h-4 w-4" />}
-          value={formatNumber(fps, 1)}
-          label="server fps"
-          percent={fps == null ? null : (fps / 50) * 100}
-          barClass={fpsBar}
-        />
-        <Resource
-          icon={<Cpu className="h-4 w-4" />}
-          value={hc ? `${hc.active}/${hc.expected}` : UNKNOWN}
-          label="HCs"
-          percent={hc && hc.expected ? (hc.active / hc.expected) * 100 : null}
-          barClass={hc && hc.active < hc.expected ? 'bg-amber-500' : 'bg-emerald-500'}
-        />
-        <Resource
-          icon={<Timer className="h-4 w-4" />}
-          value={online ? formatUptime(stats.uptimeSeconds) : UNKNOWN}
-          label="uptime"
-        />
+        {online && (
+          <Resource
+            icon={<Users className="h-4 w-4" />}
+            value={`${stats.players}/${max}`}
+            label="players"
+            percent={(stats.players / max) * 100}
+            barClass="bg-sky-500"
+          />
+        )}
+        {fps != null && (
+          <Resource
+            icon={<Cpu className="h-4 w-4" />}
+            value={formatNumber(fps, 1)}
+            label="server fps"
+            percent={(fps / 50) * 100}
+            barClass={fpsBar}
+          />
+        )}
+        {hc && (
+          <Resource
+            icon={<Cpu className="h-4 w-4" />}
+            value={`${hc.active}/${hc.expected}`}
+            label="HCs"
+            percent={hc.expected ? (hc.active / hc.expected) * 100 : null}
+            barClass={hc.active < hc.expected ? 'bg-amber-500' : 'bg-emerald-500'}
+          />
+        )}
+        {uptime != null && <Resource icon={<Timer className="h-4 w-4" />} value={formatUptime(uptime)} label="uptime" />}
 
         <div className="hidden text-right sm:block" suppressHydrationWarning>
           <div className="text-xl font-light tabular-nums text-slate-200">
@@ -123,7 +127,7 @@ export function InfoWidgets({ stats, isLoading, autoRefresh, onToggleAutoRefresh
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="col-span-2 flex items-center justify-end gap-1 sm:col-span-1">
           <button
             type="button"
             onClick={onToggleAutoRefresh}

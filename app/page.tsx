@@ -14,10 +14,13 @@ import { ServiceCard } from '@/components/dash/ServiceCard';
 import { StatBlock, StatRow } from '@/components/dash/StatBlock';
 import { StatusDot } from '@/components/dash/StatusDot';
 import { Bookmarks, Bookmark } from '@/components/dash/Bookmarks';
+import { ActivitySection } from '@/components/dash/ActivitySection';
+import { EventFeed } from '@/components/EventFeed';
+import type { CampaignEvent, EventsResponse } from '@/app/api/events/route';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { formatAge, formatBool, formatNumber, formatUptime, UNKNOWN } from '@/lib/format';
+import { formatAge, formatBool, formatNumber, formatUptime, has } from '@/lib/format';
 import {
   Check,
   Copy,
@@ -30,7 +33,6 @@ import {
   Mic,
   Play,
   Swords,
-  Users,
 } from 'lucide-react';
 
 /** Antistasi logs performance every 30 s while players are on; older than this is stale. */
@@ -44,6 +46,7 @@ export default function Home() {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+  const [events, setEvents] = useState<CampaignEvent[]>([]);
 
   // Modals state
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
@@ -119,6 +122,23 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [fetchServerStats, autoRefresh]);
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/events?limit=300');
+        if (!res.ok) return;
+        const data: EventsResponse = await res.json();
+        if (data.available) setEvents(data.events);
+      } catch {
+        // Keep the last good feed.
+      }
+    };
+    load();
+    if (!autoRefresh) return;
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
+
   const handleDownloadPreset = () => {
     const html = generateArma3PresetHtml('FAS', mods);
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
@@ -173,17 +193,39 @@ export default function Home() {
   };
 
   const online = stats.status === 'online';
+  const loaded = stats.status !== 'loading';
   const maxPlayers = stats.maxPlayers || 32;
-  const fps = online ? stats.serverFps ?? stats.performance?.serverFps ?? null : null;
-  const hc = online ? stats.headlessClients : null;
+  const fps = online ? stats.serverFps ?? null : null;
+  const hc = online ? stats.headlessClients ?? null : null;
   const cfg = stats.serverConfig;
-  const perf = stats.performance;
-  const perfStale = !perf || perf.ageSeconds > STALE_SAMPLE_SECONDS;
+  const perf = stats.performance ?? null;
+  const perfStale = !!perf && perf.ageSeconds > STALE_SAMPLE_SECONDS;
   const address = `${stats.ip}:${stats.port}`;
+  const uptime = online && has(stats.uptimeSeconds) ? stats.uptimeSeconds : null;
 
   const fpsTone = fps == null ? 'default' : fps >= 35 ? 'good' : fps >= 20 ? 'warn' : 'bad';
   const hcTone = !hc ? 'default' : hc.active >= hc.expected ? 'good' : hc.active > 0 ? 'warn' : 'bad';
   const iconClass = 'h-7 w-7';
+
+  // Latest Antistasi rank per player (events are newest first).
+  const ranks: Record<string, string> = {};
+  for (const e of events) {
+    if (e.type === 'promotion' && e.player && e.rank && !ranks[e.player]) ranks[e.player] = e.rank;
+  }
+
+  // Bridge config facts first, then what the Steam query tags report.
+  const difficulty = cfg?.difficulty ?? stats.difficulty ?? null;
+  const signatures = has(cfg?.verifySignatures)
+    ? cfg!.verifySignatures! > 0 ? `v${cfg!.verifySignatures}` : 'Off'
+    : has(stats.signaturesVerified) ? formatBool(stats.signaturesVerified) : null;
+
+  const hostBlocks = [
+    has(difficulty) && <StatBlock key="d" label="Difficulty" value={difficulty} />,
+    has(stats.battleye) && <StatBlock key="b" label="BattlEye" value={formatBool(stats.battleye)} />,
+    has(signatures) && <StatBlock key="s" label="Signatures" value={signatures} />,
+    has(cfg?.voiceEnabled) && <StatBlock key="v" label="Voice" value={formatBool(cfg!.voiceEnabled)} />,
+    has(cfg?.persistent) && <StatBlock key="p" label="Persistent" value={formatBool(cfg!.persistent, 'Yes', 'No')} />,
+  ].filter(Boolean);
 
   const bookmarks: Bookmark[] = [
     { abbr: 'A3', name: 'Arma 3 Launcher', description: 'steam://run/107410', href: 'steam://run/107410' },
@@ -195,9 +237,11 @@ export default function Home() {
     ...(stats.teamspeakUrl ? [{ abbr: 'TS', name: 'TeamSpeak', description: 'Voice', href: stats.teamspeakUrl }] : []),
   ];
 
+  const serverDescription = [stats.map, stats.version && `v${stats.version}`, address].filter(has).join(' · ');
+
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="mx-auto w-full max-w-7xl flex-1 space-y-8 px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-6 px-4 py-4 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8">
         <InfoWidgets
           stats={stats}
           isLoading={isLoading}
@@ -207,45 +251,42 @@ export default function Home() {
           onOpenConfig={() => setIsConfigModalOpen(true)}
         />
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2">
           <ServiceGroup id="overview" title="Server" columns="grid-cols-1">
             <ServiceCard
               icon={<Crosshair className={`${iconClass} text-arma-red`} />}
               name={stats.mission || 'Antistasi Ultimate'}
-              description={`${stats.map || UNKNOWN} · ${stats.version ? `v${stats.version}` : 'version unknown'} · ${address}`}
+              description={serverDescription}
               status={<StatusDot status={stats.status} ping={stats.ping} />}
-              onClick={() => setIsPlayerModalOpen(true)}
-              title="Show who's online"
+              onClick={online && stats.playerList?.length ? () => setIsPlayerModalOpen(true) : undefined}
+              title={online && stats.playerList?.length ? "Show who's online" : undefined}
             >
-              <StatRow>
-                <StatBlock label="Players" value={online ? `${stats.players}/${maxPlayers}` : UNKNOWN} />
-                <StatBlock
-                  label="Server FPS"
-                  value={formatNumber(fps, 1)}
-                  tone={fpsTone}
-                  title={perf ? `Sampled ${formatAge(perf.ageSeconds)}` : 'Antistasi only logs FPS while players are online'}
-                />
-                <StatBlock label="HCs" value={hc ? `${hc.active}/${hc.expected}` : UNKNOWN} tone={hcTone} />
-                <StatBlock label="Uptime" value={online ? formatUptime(stats.uptimeSeconds) : UNKNOWN} />
-              </StatRow>
+              {online && (
+                <StatRow>
+                  <StatBlock label="Players" value={`${stats.players}/${maxPlayers}`} />
+                  {fps != null && (
+                    <StatBlock
+                      label="FPS"
+                      value={formatNumber(fps, 1)}
+                      tone={fpsTone}
+                      title={perf ? `Sampled ${formatAge(perf.ageSeconds)}` : undefined}
+                    />
+                  )}
+                  {hc && <StatBlock label="HCs" value={`${hc.active}/${hc.expected}`} tone={hcTone} />}
+                  {uptime != null && <StatBlock label="Uptime" value={formatUptime(uptime)} />}
+                </StatRow>
+              )}
             </ServiceCard>
 
-            <ServiceCard
-              icon={<HardDrive className={iconClass} />}
-              name="Host"
-              description={stats.platform || stats.location || UNKNOWN}
-            >
-              <StatRow>
-                <StatBlock label="Difficulty" value={cfg?.difficulty ?? UNKNOWN} />
-                <StatBlock label="BattlEye" value={formatBool(stats.battleye)} />
-                <StatBlock
-                  label="Signatures"
-                  value={cfg?.verifySignatures == null ? UNKNOWN : cfg.verifySignatures > 0 ? `v${cfg.verifySignatures}` : 'Off'}
-                />
-                <StatBlock label="Voice" value={formatBool(cfg?.voiceEnabled ?? null)} />
-                <StatBlock label="Persistent" value={formatBool(cfg?.persistent ?? null, 'Yes', 'No')} />
-              </StatRow>
-            </ServiceCard>
+            {(hostBlocks.length > 0 || has(stats.platform)) && (
+              <ServiceCard
+                icon={<HardDrive className={iconClass} />}
+                name="Host"
+                description={[stats.platform, stats.location].filter(has).join(' · ')}
+              >
+                {hostBlocks.length > 0 && <StatRow>{hostBlocks}</StatRow>}
+              </ServiceCard>
+            )}
           </ServiceGroup>
 
           <ServiceGroup id="join" title="Join" columns="grid-cols-1 sm:grid-cols-2">
@@ -255,13 +296,14 @@ export default function Home() {
               description="Step-by-step join guide"
               onClick={() => setIsConnectModalOpen(true)}
             >
-              <StatRow>
-                <StatBlock
-                  label="Password"
-                  value={stats.passwordProtected == null ? UNKNOWN : stats.passwordProtected ? 'Required' : 'None'}
-                />
-                <StatBlock label="Slots free" value={online ? Math.max(0, maxPlayers - stats.players) : UNKNOWN} />
-              </StatRow>
+              {online && (
+                <StatRow>
+                  {has(stats.passwordProtected) && (
+                    <StatBlock label="Password" value={stats.passwordProtected ? 'Required' : 'None'} />
+                  )}
+                  <StatBlock label="Slots free" value={Math.max(0, maxPlayers - stats.players)} />
+                </StatRow>
+              )}
             </ServiceCard>
 
             <ServiceCard
@@ -270,25 +312,15 @@ export default function Home() {
               description={address}
               onClick={copyAddress}
               title="Copy IP:port for Direct Connect"
-            >
-              <StatRow>
-                <StatBlock label="Game port" value={stats.port} />
-                <StatBlock label="Query port" value={stats.queryPort} />
-              </StatRow>
-            </ServiceCard>
+            />
 
             <ServiceCard
               icon={<Download className={iconClass} />}
               name="Mod preset"
-              description="Launcher → Mods → Preset → Import"
+              description={`${mods.length} mods · Launcher → Mods → Preset → Import`}
               onClick={handleDownloadPreset}
               title="Download the Arma 3 Launcher preset (.html)"
-            >
-              <StatRow>
-                <StatBlock label="Mods" value={mods.length} />
-                <StatBlock label="Required" value={mods.filter((m) => m.required).length} />
-              </StatRow>
-            </ServiceCard>
+            />
 
             {stats.discordUrl ? (
               <ServiceCard
@@ -311,44 +343,43 @@ export default function Home() {
           </ServiceGroup>
         </div>
 
-        <ServiceGroup id="campaign" title="Campaign" columns="grid-cols-1 lg:grid-cols-2">
-          <ServiceCard
-            icon={<Flag className={iconClass} />}
-            name="Rebel faction"
-            description={
-              perf
-                ? `Sampled ${formatAge(perf.ageSeconds)}${perfStale ? ' · stale' : ''}`
-                : 'No sample yet: Antistasi only logs while players are online'
-            }
-          >
-            <StatRow>
-              <StatBlock label="War level" value={perf ? perf.warLevel : UNKNOWN} />
-              <StatBlock label="HR" value={perf ? perf.hr : UNKNOWN} />
-              <StatBlock label="Money" value={perf ? `€${formatNumber(perf.factionCash)}` : UNKNOWN} />
-              <StatBlock label="Occ. aggro" value={perf ? perf.occAggro : UNKNOWN} />
-              <StatBlock label="Inv. aggro" value={perf ? perf.invAggro : UNKNOWN} />
-            </StatRow>
-          </ServiceCard>
-          <ServiceCard
-            icon={<Swords className={iconClass} />}
-            name="World"
-            description="Simulation load on the server"
-          >
-            <StatRow>
-              <StatBlock label="Units" value={perf ? perf.allUnits : UNKNOWN} />
-              <StatBlock label="Dead" value={perf ? perf.deadUnits : UNKNOWN} />
-              <StatBlock label="Vehicles" value={perf ? perf.allVehicles : UNKNOWN} />
-              <StatBlock label="Clients" value={perf ? perf.connectedClientsInclHCs : UNKNOWN} title="Including headless clients" />
-            </StatRow>
-          </ServiceCard>
-        </ServiceGroup>
+        {perf && (
+          <ServiceGroup id="campaign" title="Campaign" columns="grid-cols-1 lg:grid-cols-2">
+            <ServiceCard
+              icon={<Flag className={iconClass} />}
+              name="Rebel faction"
+              description={`Sampled ${formatAge(perf.ageSeconds)}${perfStale ? ' · last values while players were online' : ''}`}
+            >
+              <StatRow>
+                <StatBlock label="War level" value={perf.warLevel} />
+                <StatBlock label="HR" value={perf.hr} />
+                <StatBlock label="Money" value={`€${formatNumber(perf.factionCash)}`} />
+                <StatBlock label="Occ. aggro" value={perf.occAggro} />
+                <StatBlock label="Inv. aggro" value={perf.invAggro} />
+              </StatRow>
+            </ServiceCard>
+            <ServiceCard icon={<Swords className={iconClass} />} name="World" description="Simulation load on the server">
+              <StatRow>
+                <StatBlock label="Units" value={perf.allUnits} />
+                <StatBlock label="Dead" value={perf.deadUnits} />
+                <StatBlock label="Vehicles" value={perf.allVehicles} />
+                <StatBlock label="Clients" value={perf.connectedClientsInclHCs} title="Including headless clients" />
+              </StatRow>
+            </ServiceCard>
+          </ServiceGroup>
+        )}
 
-        <ServiceGroup title="Activity" icon={<Users className="h-5 w-5 text-slate-400" />} className="space-y-4">
-          <div className="space-y-6">
-            <PlayerHistoryGraph currentPlayers={stats.players} maxPlayers={maxPlayers} serverName={stats.name} />
-            <TopPlayers livePlayers={stats.playerList || []} onOpenPlayerList={() => setIsPlayerModalOpen(true)} />
+        <ActivitySection>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
+            <div className="space-y-3 lg:col-span-3">
+              <PlayerHistoryGraph currentPlayers={online ? stats.players : null} maxPlayers={maxPlayers} serverName={stats.name} />
+              <TopPlayers livePlayers={stats.playerList || []} ranks={ranks} />
+            </div>
+            <div className="lg:col-span-2">
+              <EventFeed events={events} />
+            </div>
           </div>
-        </ServiceGroup>
+        </ActivitySection>
 
         <ServiceGroup title="Mods" icon={<Layers className="h-5 w-5 text-slate-400" />}>
           <ModList
@@ -364,13 +395,15 @@ export default function Home() {
         <Bookmarks title="Bookmarks" items={bookmarks} />
       </main>
 
-      <footer className="mt-8 border-t border-white/5 py-4 text-center text-[11px] text-slate-500">
-        {online ? 'Live' : 'Last known'} data via {stats.querySource.replace('_', ' ')} · updated{' '}
-        {stats.status === 'loading' ? '…' : new Date(stats.lastUpdated).toLocaleTimeString()} · layout inspired by{' '}
-        <a href="https://github.com/gethomepage/homepage" target="_blank" rel="noreferrer" className="underline hover:text-slate-300">
-          homepage
-        </a>
-      </footer>
+      {loaded && (
+        <footer className="mt-8 border-t border-white/5 px-4 py-4 text-center text-[11px] text-slate-500">
+          {online ? 'Live' : 'Server not answering'} · updated {new Date(stats.lastUpdated).toLocaleTimeString()} · layout
+          inspired by{' '}
+          <a href="https://github.com/gethomepage/homepage" target="_blank" rel="noreferrer" className="underline hover:text-slate-300">
+            homepage
+          </a>
+        </footer>
+      )}
 
       {/* Modals */}
       <PlayerListModal

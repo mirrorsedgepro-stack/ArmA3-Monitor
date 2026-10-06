@@ -97,7 +97,7 @@ export function PresetModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs font-mono">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs">
       <div 
         className="w-full max-w-xl rounded-md bg-slate-800 ring-1 ring-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}

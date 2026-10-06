@@ -1,20 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { 
-  X, 
-  Copy, 
-  Check, 
-  Terminal, 
-  Download, 
-  AlertTriangle, 
-  ExternalLink, 
-  Play, 
-  CheckCircle2, 
-  Layers,
-  HelpCircle,
-  FileCode
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Copy, Check, ChevronDown, Download, Play, HelpCircle, FileCode } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
 interface ConnectModalProps {
@@ -34,6 +21,13 @@ export function ConnectModal({
   const [copiedIpOnly, setCopiedIpOnly] = useState(false);
   const [copiedPortOnly, setCopiedPortOnly] = useState(false);
   const [showTroubleshoot, setShowTroubleshoot] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -94,244 +88,145 @@ pause
     URL.revokeObjectURL(url);
   };
 
-  return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm overflow-y-auto animate-fadeIn"
-      onClick={onClose}
+  const Copyable = ({ label, value, copied, onCopy }: { label: string; value: string; copied: boolean; onCopy: () => void }) => (
+    <button
+      onClick={onCopy}
+      className="flex w-full min-w-0 items-center justify-between gap-2 rounded-sm bg-black/20 px-3 py-2 text-left hover:bg-black/30"
+      title={`Copy ${label.toLowerCase()}`}
     >
-      <div 
-        className="relative w-full max-w-2xl bg-arma-card border border-arma-border rounded-md shadow-2xl overflow-hidden my-auto"
+      <span className="min-w-0">
+        <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
+        <span className="block truncate text-sm tabular-nums text-slate-100">{value}</span>
+      </span>
+      {copied ? <Check className="h-4 w-4 shrink-0 text-emerald-400" /> : <Copy className="h-4 w-4 shrink-0 text-slate-500" />}
+    </button>
+  );
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="connect-title"
+    >
+      <div
+        className="flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-lg bg-slate-800 shadow-2xl ring-1 ring-white/10 sm:rounded-md"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-arma-surface border-b border-arma-border">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-arma-red/15 border border-arma-red/40 flex items-center justify-center text-arma-red">
-              <Terminal className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-black text-arma-text uppercase font-mono tracking-wider">
-                Connect to Server
-              </h2>
-              <p className="text-[10px] sm:text-xs text-arma-khaki font-mono">
-                {stats.name}
-              </p>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 border-b border-white/5 px-4 py-3">
+          <div className="min-w-0">
+            <h2 id="connect-title" className="text-base font-medium text-slate-100">Join the server</h2>
+            <p className="truncate text-xs text-slate-400">{stats.name}</p>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-arma-textMuted hover:text-arma-text hover:bg-arma-card transition-colors"
-          >
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-white/10 hover:text-slate-100" aria-label="Close">
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Content Body */}
-        <div className="p-4 sm:p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-
-          {/* Steam Browser Protocol Notice */}
-          <div className="p-3.5 sm:p-4 rounded-lg bg-arma-red/10 border border-arma-red/30 space-y-1.5">
-            <div className="flex items-center gap-2 text-arma-red font-mono font-bold text-xs sm:text-sm">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-arma-red" />
-              <span>HOW TO JOIN ARMA 3 SERVERS</span>
-            </div>
-            <p className="text-xs text-arma-text leading-relaxed font-sans">
-              Clicking direct web links (<code className="text-arma-red font-mono px-1 py-0.5 bg-black/40 rounded">steam://connect</code>) fails on modded servers with <strong className="text-arma-red font-mono">&quot;Wrong Game ID / Invalid App ID&quot;</strong> due to Steam client limitations. 
-              Use the official <strong>Arma 3 Launcher Direct Connect</strong> below for seamless entry with automatic mod loading.
+        <div className="space-y-4 overflow-y-auto px-4 py-4">
+          {/* Step 1 */}
+          <section className="space-y-2">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-slate-200">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-arma-red text-[11px] text-white">1</span>
+              Get the mods
+            </h3>
+            <p className="text-xs leading-relaxed text-slate-400">
+              Download the preset, then in the Arma 3 Launcher open <strong className="text-slate-200">Mods → Preset → Import</strong> and
+              subscribe to everything it lists.
             </p>
-          </div>
+            <button
+              onClick={() => {
+                onDownloadPreset();
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-secondary"
+            >
+              <Download className="h-4 w-4" />
+              Download mod preset (.html)
+            </button>
+          </section>
 
-          {/* Primary Recommended Method: 2-Step Launcher Connect */}
-          <div className="border border-arma-border rounded-lg bg-arma-surface/60 p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold uppercase text-arma-red tracking-wider flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-arma-green" />
-                RECOMMENDED JOIN METHOD
+          {/* Step 2 */}
+          <section className="space-y-2 border-t border-white/5 pt-4">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-slate-200">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-arma-red text-[11px] text-white">2</span>
+              Open the launcher
+            </h3>
+            <a
+              href="steam://run/107410"
+              className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-primary"
+            >
+              <Play className="h-4 w-4 fill-white" />
+              Launch Arma 3 via Steam
+            </a>
+            <p className="text-xs text-slate-500">
+              Plain <code className="rounded bg-black/30 px-1">steam://connect</code> links fail for modded Arma servers, so join through
+              the launcher.
+            </p>
+          </section>
+
+          {/* Step 3 */}
+          <section className="space-y-2 border-t border-white/5 pt-4">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-slate-200">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-arma-red text-[11px] text-white">3</span>
+              Direct Connect
+            </h3>
+            <ol className="list-decimal space-y-0.5 pl-5 text-xs leading-relaxed text-slate-400">
+              <li>
+                In the launcher go to <strong className="text-slate-200">Servers → Direct Connect</strong>.
+              </li>
+              <li>Enter the IP and port below, then <strong className="text-slate-200">Join</strong>.</li>
+              <li>
+                Pick <strong className="text-slate-200">Setup DLCs and mods and join</strong> if it asks.
+              </li>
+            </ol>
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="col-span-2">
+                <Copyable label="Address" value={fullAddress} copied={copiedFull} onCopy={copyFull} />
+              </div>
+              <Copyable label="IP" value={stats.ip} copied={copiedIpOnly} onCopy={copyIp} />
+              <Copyable label="Port" value={String(stats.port)} copied={copiedPortOnly} onCopy={copyPort} />
+            </div>
+          </section>
+
+          {/* Extras */}
+          <section className="space-y-2 border-t border-white/5 pt-4">
+            <button
+              onClick={downloadBatchScript}
+              className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-xs arma-btn-secondary"
+            >
+              <FileCode className="h-4 w-4 shrink-0 text-slate-400" />
+              <span className="min-w-0">
+                <span className="block text-slate-200">Windows helper (.bat)</span>
+                <span className="block text-slate-500">Opens the launcher and prints these steps</span>
               </span>
-              <span className="text-[10px] font-mono text-arma-khaki uppercase bg-arma-card px-2 py-0.5 rounded border border-arma-border">
-                AUTO-SYNC MODS
-              </span>
-            </div>
-
-            {/* Step 1 */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
-                <span className="w-5 h-5 rounded-full bg-arma-red text-white flex items-center justify-center text-[10px] shrink-0">1</span>
-                <span>OPEN OFFICIAL ARMA 3 LAUNCHER</span>
-              </div>
-              <div className="pl-7">
-                <a
-                  href="steam://run/107410"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg arma-btn-primary text-xs font-mono font-bold shadow-arma-red transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Play className="w-3.5 h-3.5 fill-white" />
-                  <span>LAUNCH ARMA 3 VIA STEAM</span>
-                  <ExternalLink className="w-3 h-3 text-white/80" />
-                </a>
-                <p className="text-[11px] text-arma-textMuted mt-1.5 font-sans">
-                  This launches the official launcher using valid AppID 107410 (no errors).
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="space-y-2 pt-2 border-t border-arma-border/60">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
-                <span className="w-5 h-5 rounded-full bg-arma-red text-white flex items-center justify-center text-[10px] shrink-0">2</span>
-                <span>COPY SERVER CONNECTION INFO</span>
-              </div>
-              
-              <div className="pl-7 space-y-3">
-                {/* Full endpoint row */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <div className="flex-1 bg-arma-card border border-arma-border rounded-lg px-3.5 py-2.5 font-mono text-sm text-arma-red font-bold flex items-center justify-between">
-                    <span>{fullAddress}</span>
-                    <span className="text-[10px] text-arma-textMuted uppercase font-normal">GAME PORT</span>
-                  </div>
-                  <button
-                    onClick={copyFull}
-                    className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg arma-btn-secondary text-xs font-mono font-bold transition-all shrink-0"
-                  >
-                    {copiedFull ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-arma-green" />
-                        <span className="text-arma-green">COPIED</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 text-arma-textMuted" />
-                        <span>COPY ADDRESS</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Individual IP & Port breakdown for Direct Connect dialog */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="p-2.5 rounded bg-arma-card/80 border border-arma-border/70 flex items-center justify-between">
-                    <div>
-                      <div className="text-[10px] text-arma-textMuted uppercase">Server IP</div>
-                      <div className="font-bold text-arma-text">{stats.ip}</div>
-                    </div>
-                    <button
-                      onClick={copyIp}
-                      className="p-1.5 rounded hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
-                      title="Copy IP Only"
-                    >
-                      {copiedIpOnly ? <Check className="w-3.5 h-3.5 text-arma-green" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-
-                  <div className="p-2.5 rounded bg-arma-card/80 border border-arma-border/70 flex items-center justify-between">
-                    <div>
-                      <div className="text-[10px] text-arma-textMuted uppercase">Game Port</div>
-                      <div className="font-bold text-arma-text">{stats.port}</div>
-                    </div>
-                    <button
-                      onClick={copyPort}
-                      className="p-1.5 rounded hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
-                      title="Copy Port Only"
-                    >
-                      {copiedPortOnly ? <Check className="w-3.5 h-3.5 text-arma-green" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Instructions */}
-                <div className="p-3 rounded bg-black/40 border border-arma-border/60 text-xs text-arma-textMuted space-y-1 font-mono">
-                  <div className="text-arma-khaki font-bold uppercase text-[11px]">&gt; IN ARMA 3 LAUNCHER:</div>
-                  <div>1. Go to <strong className="text-white">SERVERS</strong> tab in the left sidebar.</div>
-                  <div>2. Click <strong className="text-white">DIRECT CONNECT</strong> (bottom right corner).</div>
-                  <div>3. Paste <strong className="text-arma-red">{stats.ip}</strong> and port <strong className="text-arma-red">{stats.port}</strong>.</div>
-                  <div>4. Click <strong className="text-arma-green">JOIN</strong> &bull; Select <em className="text-white">&quot;Setup DLCs and mods and join&quot;</em>.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Alternative Quick Methods: Preset HTML & Windows Batch Script */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* HTML Preset */}
-            <div className="p-4 hp-card flex flex-col justify-between space-y-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
-                  <Layers className="w-4 h-4 text-arma-red" />
-                  <span>OFFICIAL MOD PRESET (.HTML)</span>
-                </div>
-                <p className="text-[11px] text-arma-textMuted font-sans">
-                  Drag and drop this file into your Arma 3 Launcher to subscribe and load every required mod with 1 click.
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  onDownloadPreset();
-                  onClose();
-                }}
-                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg arma-btn-secondary text-xs font-mono font-bold w-full transition-all"
-              >
-                <Download className="w-3.5 h-3.5 text-arma-khaki" />
-                <span>DOWNLOAD PRESET (.HTML)</span>
-              </button>
-            </div>
-
-            {/* 1-Click Batch Script */}
-            <div className="p-4 hp-card flex flex-col justify-between space-y-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
-                  <FileCode className="w-4 h-4 text-arma-red" />
-                  <span>WINDOWS 1-CLICK LAUNCH SCRIPT</span>
-                </div>
-                <p className="text-[11px] text-arma-textMuted font-sans">
-                  Download a <code className="text-arma-text font-mono">.bat</code> helper that opens the launcher with server parameters and details.
-                </p>
-              </div>
-              <button
-                onClick={downloadBatchScript}
-                className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg arma-btn-secondary text-xs font-mono font-bold w-full transition-all"
-              >
-                <Download className="w-3.5 h-3.5 text-arma-khaki" />
-                <span>DOWNLOAD CONNECT.BAT</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Steam Favorites Section */}
-          <div className="p-3.5 rounded-lg bg-arma-surface/40 border border-arma-border text-xs font-mono text-arma-textMuted space-y-2">
+            </button>
             <button
               onClick={() => setShowTroubleshoot(!showTroubleshoot)}
-              className="flex items-center justify-between w-full text-left font-bold text-arma-text hover:text-arma-red transition-colors"
+              className="flex w-full items-center justify-between gap-2 rounded px-3 py-2 text-left text-xs arma-btn-secondary"
+              aria-expanded={showTroubleshoot}
             >
-              <span className="flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-arma-khaki" />
-                <span>HOW TO ADD TO STEAM FAVORITES PERMANENTLY</span>
+              <span className="flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 shrink-0 text-slate-400" />
+                <span className="text-slate-200">Add to Steam favourites</span>
               </span>
-              <span className="text-[11px] text-arma-khaki">{showTroubleshoot ? 'HIDE ▲' : 'SHOW ▼'}</span>
+              <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showTroubleshoot ? 'rotate-180' : ''}`} />
             </button>
-
             {showTroubleshoot && (
-              <div className="pt-2 text-[11px] text-arma-textMuted space-y-1 border-t border-arma-border/60">
-                <p>1. In your desktop Steam client, click <strong className="text-arma-text">View</strong> in the top menu.</p>
-                <p>2. Select <strong className="text-arma-text">Game Servers</strong> (or Servers).</p>
-                <p>3. Navigate to the <strong className="text-arma-text">Favorites</strong> tab and click the <strong className="text-arma-text">+ (Add Server)</strong> button.</p>
-                <p>4. Enter the Steam Query address: <code className="text-arma-red font-bold">{stats.ip}:{stats.queryPort}</code></p>
-                <p>5. Click <strong className="text-arma-text">OK</strong>. The server will now permanently appear in your Steam and in-game server favorites!</p>
-              </div>
+              <ol className="list-decimal space-y-0.5 pl-8 text-xs leading-relaxed text-slate-400">
+                <li>
+                  In Steam open <strong className="text-slate-200">View → Game Servers</strong>.
+                </li>
+                <li>
+                  On <strong className="text-slate-200">Favorites</strong>, click <strong className="text-slate-200">+</strong>.
+                </li>
+                <li>
+                  Enter the query address <code className="rounded bg-black/30 px-1 text-slate-200">{stats.ip}:{stats.queryPort}</code>.
+                </li>
+              </ol>
             )}
-          </div>
-
-        </div>
-
-        {/* Modal Footer */}
-        <div className="px-4 sm:px-6 py-3 bg-arma-surface border-t border-arma-border flex items-center justify-between text-xs font-mono">
-          <span className="text-arma-textMuted text-[11px]">
-            PORTAL &bull; {stats.ip}:{stats.port}
-          </span>
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 rounded arma-btn-secondary text-xs font-mono font-bold"
-          >
-            CLOSE DISPATCH
-          </button>
+          </section>
         </div>
       </div>
     </div>

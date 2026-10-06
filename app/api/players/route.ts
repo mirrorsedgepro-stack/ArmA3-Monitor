@@ -10,6 +10,8 @@ export interface PlayerRecord {
   firstSeen: string;
   lastSeen: string;
   online: boolean;
+  /** Deaths from the server log; absent on older bridges. */
+  deaths?: number;
 }
 
 export interface PlayersResponse {

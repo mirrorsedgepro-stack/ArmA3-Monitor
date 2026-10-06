@@ -56,10 +56,9 @@ export interface ArmaServerStats {
   countryCode?: string;
   isp?: string;
   // Optional protocol & tag facts
-  signatureVerification?: string;
-  vonEnabled?: boolean;
-  thirdPerson?: boolean;
-  joinInProgress?: boolean;
+  // From the Steam query tags (direct A2S fallback)
+  signaturesVerified?: boolean | null;
+  difficulty?: string | null;
   serverTags?: string;
   // Only available through the telemetry bridge (null/undefined = unknown)
   platform?: string;

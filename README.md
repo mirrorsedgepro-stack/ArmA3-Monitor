@@ -10,10 +10,11 @@ The dashboard follows [gethomepage/homepage](https://github.com/gethomepage/home
 - **Server**: the mission card (status pill with ping; players, FPS, HCs, uptime; click for the roster) and a host card (platform, difficulty, BattlEye, signatures, voice, persistence).
 - **Join**: Launch & Connect guide, copy `IP:port`, download the Launcher mod preset, Discord/TeamSpeak when configured.
 - **Campaign**: Antistasi war level, HR, money, aggression, and unit/vehicle counts from `logPerformance`.
-- **Activity**: player-count history and top players from the telemetry bridge's session log.
-- **Mods**, then **Bookmarks**.
+- **Activity**: player-count history, top players (time played, sessions, deaths, Antistasi rank) and an event feed (player deaths, flag captures, counterattacks and their outcome, promotions, joins/leaves), all parsed from the server log by the telemetry bridge.
+- **Mods**: the server's preset with real size, last update and subscriber counts from the Steam Workshop API.
+- **Bookmarks**.
 
-Values the server does not report show as `unknown`; nothing is filled in with placeholder data. The building blocks live in `components/dash/`.
+Only real data is shown: a value, card or section the server (or Steam) did not report is left out rather than filled with a placeholder. The building blocks live in `components/dash/`.
 
 ---
 

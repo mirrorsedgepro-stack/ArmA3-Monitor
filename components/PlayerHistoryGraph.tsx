@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { StatBlock } from '@/components/dash/StatBlock';
 import { 
   Users, 
   TrendingUp, 
@@ -20,7 +21,8 @@ interface HistoryPoint {
 }
 
 interface PlayerHistoryGraphProps {
-  currentPlayers: number;
+  /** Live player count, or null when the server is not answering. */
+  currentPlayers: number | null;
   maxPlayers?: number;
   serverName?: string;
 }
@@ -102,13 +104,15 @@ export function PlayerHistoryGraph({
       minute: '2-digit',
     });
 
-    list.push({
-      timestamp: now,
-      timeLabel,
-      fullDateLabel,
-      count: currentPlayers,
-      isLive: true,
-    });
+    if (currentPlayers != null) {
+      list.push({
+        timestamp: now,
+        timeLabel,
+        fullDateLabel,
+        count: currentPlayers,
+        isLive: true,
+      });
+    }
 
     return list;
   }, [points, currentPlayers]);
@@ -116,7 +120,7 @@ export function PlayerHistoryGraph({
   // Calculate summary statistics
   const { peakCount, peakPoint, avgCount } = useMemo(() => {
     if (history.length === 0) {
-      return { peakCount: currentPlayers, peakPoint: null, avgCount: currentPlayers };
+      return { peakCount: 0, peakPoint: null, avgCount: 0 };
     }
     let max = 0;
     let sum = 0;
@@ -191,38 +195,28 @@ export function PlayerHistoryGraph({
 
   const activeHoverPoint = hoverIndex !== null && coords[hoverIndex] ? coords[hoverIndex] : null;
 
+  // No recorded history (bridge unreachable or nothing logged yet): show nothing.
+  if (points.length === 0) return null;
+
   return (
-    <div className="hp-card p-5 sm:p-7 shadow-xl space-y-5">
+    <div className="hp-card p-3 space-y-3">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-arma-border/80 pb-4">
-        <div>
-          <div className="flex items-center gap-2 text-[11px] text-arma-khaki font-bold uppercase tracking-wider">
-            <Activity className="w-3.5 h-3.5 text-arma-red" />
-            <span>Activity timeline</span>
-          </div>
-          <h3 className="text-base font-medium text-arma-text mt-0.5">
-            Player count history
-          </h3>
-          <p className="text-xs text-arma-textMuted mt-0.5">
-            Live telemetry &amp; historical connection records
-            {trackingSince && (
-              <span className="text-arma-textDim ml-1">
-                (tracked since {new Date(trackingSince).toLocaleDateString()})
-              </span>
-            )}
-          </p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-medium text-slate-200">Player count</div>
+          {trackingSince && (
+            <div className="text-xs text-slate-500">Recorded since {new Date(trackingSince).toLocaleDateString()}</div>
+          )}
         </div>
 
         {/* Time Range Selector */}
-        <div className="flex items-center gap-1.5 p-1 rounded-md bg-black/20 ring-1 ring-white/5 text-xs self-start sm:self-auto">
+        <div className="flex shrink-0 items-center gap-1">
           {(['6h', '12h', '24h'] as TimeRange[]).map((range) => (
             <button
               key={range}
               onClick={() => setSelectedRange(range)}
-              className={`px-3 py-1 rounded font-bold uppercase transition-all ${
-                selectedRange === range
-                  ? 'bg-arma-red text-white shadow-sm'
-                  : 'text-arma-textMuted hover:text-arma-text'
+              className={`px-2 py-1 rounded text-[11px] transition-colors ${
+                selectedRange === range ? 'bg-white/15 text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {range}
@@ -238,44 +232,15 @@ export function PlayerHistoryGraph({
         </div>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
-        <div className="p-3 sm:p-4 rounded-md bg-black/20 ring-1 ring-white/5">
-          <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-arma-green" />
-            CURRENT
-          </div>
-          <div className="text-xl sm:text-2xl font-medium text-arma-text mt-1">
-            {currentPlayers}
-            <span className="text-xs text-arma-textDim font-normal ml-1">/ {maxPlayers}</span>
-          </div>
-        </div>
-
-        <div className="p-3 sm:p-4 rounded-md bg-black/20 ring-1 ring-white/5">
-          <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5 text-arma-red" />
-            PERIOD PEAK
-          </div>
-          <div className="text-xl sm:text-2xl font-medium text-arma-text mt-1">
-            {peakCount}
-            <span className="text-xs text-arma-textDim font-normal ml-1">players</span>
-          </div>
-        </div>
-
-        <div className="p-3 sm:p-4 rounded-md bg-black/20 ring-1 ring-white/5">
-          <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-arma-khaki" />
-            AVERAGE
-          </div>
-          <div className="text-xl sm:text-2xl font-medium text-arma-text mt-1">
-            {avgCount}
-            <span className="text-xs text-arma-textDim font-normal ml-1">avg</span>
-          </div>
-        </div>
+      {/* Summary */}
+      <div className="flex flex-wrap gap-1.5">
+        {currentPlayers != null && <StatBlock label="Now" value={`${currentPlayers}/${maxPlayers}`} />}
+        <StatBlock label={`Peak (${selectedRange})`} value={peakCount} />
+        <StatBlock label={`Average (${selectedRange})`} value={avgCount} />
       </div>
 
       {/* Interactive SVG Graph Area */}
-      <div ref={containerRef} className="relative w-full overflow-hidden bg-black/30 rounded-md border border-arma-border p-2 sm:p-4">
+      <div ref={containerRef} className="relative w-full overflow-hidden rounded-sm bg-black/20 p-1 sm:p-3">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className="w-full h-44 sm:h-56"
