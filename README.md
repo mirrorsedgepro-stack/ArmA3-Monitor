@@ -1,8 +1,19 @@
 # Arma 3 Server Portal & Mod Repository (Vercel Ready)
 
-A modern, high-performance web portal for your Arma 3 dedicated server designed for instant deployment on [Vercel](https://vercel.com). Built with Next.js 15, TypeScript, and Tailwind CSS in a tactical military HUD aesthetic.
+A modern, high-performance web portal for your Arma 3 dedicated server designed for instant deployment on [Vercel](https://vercel.com). Built with Next.js 15, TypeScript, and Tailwind CSS.
 
-![Arma 3 Portal](https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80)
+## Layout
+
+The dashboard follows [gethomepage/homepage](https://github.com/gethomepage/homepage)'s design: a dark slate theme, a top row of information widgets, service-style cards with stat blocks, and bookmarks.
+
+- **Info bar**: server status, players, server FPS, headless clients, uptime, local + Zulu clock, live/pause, refresh, settings.
+- **Server**: the mission card (status pill with ping; players, FPS, HCs, uptime; click for the roster) and a host card (platform, difficulty, BattlEye, signatures, voice, persistence).
+- **Join**: Launch & Connect guide, copy `IP:port`, download the Launcher mod preset, Discord/TeamSpeak when configured.
+- **Campaign**: Antistasi war level, HR, money, aggression, and unit/vehicle counts from `logPerformance`.
+- **Activity**: player-count history and top players from the telemetry bridge's session log.
+- **Mods**, then **Bookmarks**.
+
+Values the server does not report show as `unknown`; nothing is filled in with placeholder data. The building blocks live in `components/dash/`.
 
 ---
 

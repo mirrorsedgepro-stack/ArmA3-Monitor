@@ -11,27 +11,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // gethomepage/homepage "slate" theme. The arma.* names are kept so
+        // existing components re-skin without class changes.
         arma: {
-          bg: "#0c0e12",
-          surface: "#12151b",
-          card: "#161a22",
-          cardHover: "#1c212c",
-          border: "#232936",
-          borderHover: "#353d4f",
-          // Tactical Military Red Colorscheme
-          red: "#e03131",
-          redHover: "#f03e3e",
-          redDim: "rgba(224, 49, 49, 0.16)",
-          // Aliased to red for compatibility
-          amber: "#e03131",
-          amberHover: "#f03e3e",
-          amberDim: "rgba(224, 49, 49, 0.16)",
-          khaki: "#a89f91",
-          olive: "#5f7353",
-          green: "#46a758",
-          text: "#e1e4e8",
-          textMuted: "#8892a0",
-          textDim: "#545d6e",
+          bg: "#0f172a",
+          surface: "#162033",
+          card: "#1c2638",
+          cardHover: "#243045",
+          border: "#2a374d",
+          borderHover: "#3d4d68",
+          // Brand / CTA accent and down-state colour
+          red: "#ef4444",
+          redHover: "#f87171",
+          redDim: "rgba(239, 68, 68, 0.14)",
+          amber: "#ef4444",
+          amberHover: "#f87171",
+          amberDim: "rgba(239, 68, 68, 0.14)",
+          khaki: "#a5b4cb",
+          olive: "#4d7c5f",
+          green: "#22c55e",
+          text: "#e2e8f0",
+          textMuted: "#94a3b8",
+          textDim: "#64748b",
         },
       },
       fontFamily: {
@@ -53,8 +54,8 @@ const config: Config = {
         ],
       },
       boxShadow: {
-        "arma-red": "0 2px 14px rgba(224, 49, 49, 0.35)",
-        "arma-amber": "0 2px 14px rgba(224, 49, 49, 0.35)",
+        "arma-red": "0 2px 10px rgba(239, 68, 68, 0.25)",
+        "arma-amber": "0 2px 10px rgba(239, 68, 68, 0.25)",
       },
     },
   },

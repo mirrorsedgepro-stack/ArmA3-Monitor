@@ -192,18 +192,18 @@ export function PlayerHistoryGraph({
   const activeHoverPoint = hoverIndex !== null && coords[hoverIndex] ? coords[hoverIndex] : null;
 
   return (
-    <div className="rounded-xl bg-arma-surface border border-arma-border p-5 sm:p-7 shadow-xl space-y-5">
+    <div className="hp-card p-5 sm:p-7 shadow-xl space-y-5">
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-arma-border/80 pb-4">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-mono text-arma-khaki font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-[11px] text-arma-khaki font-bold uppercase tracking-wider">
             <Activity className="w-3.5 h-3.5 text-arma-red" />
-            <span>AUTHENTIC ACTIVITY TIMELINE</span>
+            <span>Activity timeline</span>
           </div>
-          <h3 className="text-lg sm:text-xl font-black text-arma-text font-mono uppercase tracking-tight mt-0.5">
-            PLAYER POPULATION HISTORY
+          <h3 className="text-base font-medium text-arma-text mt-0.5">
+            Player count history
           </h3>
-          <p className="text-xs text-arma-textMuted font-mono mt-0.5">
+          <p className="text-xs text-arma-textMuted mt-0.5">
             Live telemetry &amp; historical connection records
             {trackingSince && (
               <span className="text-arma-textDim ml-1">
@@ -214,7 +214,7 @@ export function PlayerHistoryGraph({
         </div>
 
         {/* Time Range Selector */}
-        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-arma-card border border-arma-border font-mono text-xs self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-md bg-black/20 ring-1 ring-white/5 text-xs self-start sm:self-auto">
           {(['6h', '12h', '24h'] as TimeRange[]).map((range) => (
             <button
               key={range}
@@ -239,35 +239,35 @@ export function PlayerHistoryGraph({
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 font-mono">
-        <div className="p-3 sm:p-4 rounded-lg bg-arma-card border border-arma-border">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="p-3 sm:p-4 rounded-md bg-black/20 ring-1 ring-white/5">
           <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
             <Users className="w-3.5 h-3.5 text-arma-green" />
             CURRENT
           </div>
-          <div className="text-xl sm:text-2xl font-black text-arma-text mt-1">
+          <div className="text-xl sm:text-2xl font-medium text-arma-text mt-1">
             {currentPlayers}
             <span className="text-xs text-arma-textDim font-normal ml-1">/ {maxPlayers}</span>
           </div>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-lg bg-arma-card border border-arma-border">
+        <div className="p-3 sm:p-4 rounded-md bg-black/20 ring-1 ring-white/5">
           <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5 text-arma-red" />
             PERIOD PEAK
           </div>
-          <div className="text-xl sm:text-2xl font-black text-arma-text mt-1">
+          <div className="text-xl sm:text-2xl font-medium text-arma-text mt-1">
             {peakCount}
             <span className="text-xs text-arma-textDim font-normal ml-1">players</span>
           </div>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-lg bg-arma-card border border-arma-border">
+        <div className="p-3 sm:p-4 rounded-md bg-black/20 ring-1 ring-white/5">
           <div className="text-[10px] sm:text-xs text-arma-textDim font-bold uppercase flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 text-arma-khaki" />
             AVERAGE
           </div>
-          <div className="text-xl sm:text-2xl font-black text-arma-text mt-1">
+          <div className="text-xl sm:text-2xl font-medium text-arma-text mt-1">
             {avgCount}
             <span className="text-xs text-arma-textDim font-normal ml-1">avg</span>
           </div>
@@ -275,7 +275,7 @@ export function PlayerHistoryGraph({
       </div>
 
       {/* Interactive SVG Graph Area */}
-      <div ref={containerRef} className="relative w-full overflow-hidden bg-[#07090c] rounded-lg border border-arma-border p-2 sm:p-4">
+      <div ref={containerRef} className="relative w-full overflow-hidden bg-black/30 rounded-md border border-arma-border p-2 sm:p-4">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className="w-full h-44 sm:h-56"
@@ -358,7 +358,7 @@ export function PlayerHistoryGraph({
         {/* Hover Tooltip Overlay */}
         {activeHoverPoint && (
           <div
-            className="absolute z-20 pointer-events-none p-2.5 rounded-lg bg-arma-surface/95 border border-arma-red/60 text-xs font-mono shadow-2xl backdrop-blur-md"
+            className="absolute z-20 pointer-events-none p-2.5 rounded-md bg-arma-surface/95 border border-arma-red/60 text-xs shadow-2xl backdrop-blur-md"
             style={{
               left: `${(activeHoverPoint.x / svgWidth) * 100}%`,
               top: `${Math.max(10, (activeHoverPoint.y / svgHeight) * 100 - 30)}%`,
@@ -368,7 +368,7 @@ export function PlayerHistoryGraph({
             <div className="text-[10px] text-arma-textDim font-bold">
               {activeHoverPoint.pt.fullDateLabel}
             </div>
-            <div className="text-sm font-black text-arma-text mt-0.5 flex items-center gap-1.5">
+            <div className="text-sm font-medium text-arma-text mt-0.5 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-arma-red" />
               <span>{activeHoverPoint.pt.count} Players</span>
               {activeHoverPoint.pt.isLive && (

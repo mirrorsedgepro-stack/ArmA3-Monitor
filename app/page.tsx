@@ -1,18 +1,40 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Header } from '@/components/Header';
-import { ServerOverview } from '@/components/ServerOverview';
 import { ModList } from '@/components/ModList';
 import { PlayerListModal } from '@/components/PlayerListModal';
 import { PresetModal } from '@/components/PresetModal';
 import { ServerConfigModal } from '@/components/ServerConfigModal';
 import { ConnectModal } from '@/components/ConnectModal';
 import { TopPlayers } from '@/components/TopPlayers';
+import { PlayerHistoryGraph } from '@/components/PlayerHistoryGraph';
+import { InfoWidgets } from '@/components/dash/InfoWidgets';
+import { ServiceGroup } from '@/components/dash/ServiceGroup';
+import { ServiceCard } from '@/components/dash/ServiceCard';
+import { StatBlock, StatRow } from '@/components/dash/StatBlock';
+import { StatusDot } from '@/components/dash/StatusDot';
+import { Bookmarks, Bookmark } from '@/components/dash/Bookmarks';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { ArrowUp, Compass, Layers, Trophy } from 'lucide-react';
+import { formatAge, formatBool, formatNumber, formatUptime, UNKNOWN } from '@/lib/format';
+import {
+  Check,
+  Copy,
+  Crosshair,
+  Download,
+  Flag,
+  HardDrive,
+  Layers,
+  MessageCircle,
+  Mic,
+  Play,
+  Swords,
+  Users,
+} from 'lucide-react';
+
+/** Antistasi logs performance every 30 s while players are on; older than this is stale. */
+const STALE_SAMPLE_SECONDS = 300;
 
 export default function Home() {
   const [serverConfig, setServerConfig] = useState<ServerDefinition>(SERVERS_LIST[0]);
@@ -21,38 +43,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeSection, setActiveSection] = useState<string>('overview');
-  
+  const [copied, setCopied] = useState<boolean>(false);
+
   // Modals state
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState<boolean>(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
-  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
-
-  // Track scroll position for smooth floating mechanics
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 350);
-
-      const overviewEl = document.getElementById('overview');
-      const playersEl = document.getElementById('players');
-      const modsEl = document.getElementById('mods');
-
-      const scrollPos = window.scrollY + 200;
-
-      if (modsEl && scrollPos >= modsEl.offsetTop) {
-        setActiveSection('mods');
-      } else if (playersEl && scrollPos >= playersEl.offsetTop) {
-        setActiveSection('players');
-      } else {
-        setActiveSection('overview');
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Check initial load
   useEffect(() => {
@@ -165,48 +162,195 @@ export default function Home() {
     }, 100);
   };
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(`${stats.ip}:${stats.port}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked (insecure context); the address is shown on the card.
     }
   };
 
+  const online = stats.status === 'online';
+  const maxPlayers = stats.maxPlayers || 32;
+  const fps = online ? stats.serverFps ?? stats.performance?.serverFps ?? null : null;
+  const hc = online ? stats.headlessClients : null;
+  const cfg = stats.serverConfig;
+  const perf = stats.performance;
+  const perfStale = !perf || perf.ageSeconds > STALE_SAMPLE_SECONDS;
+  const address = `${stats.ip}:${stats.port}`;
+
+  const fpsTone = fps == null ? 'default' : fps >= 35 ? 'good' : fps >= 20 ? 'warn' : 'bad';
+  const hcTone = !hc ? 'default' : hc.active >= hc.expected ? 'good' : hc.active > 0 ? 'warn' : 'bad';
+  const iconClass = 'h-7 w-7';
+
+  const bookmarks: Bookmark[] = [
+    { abbr: 'A3', name: 'Arma 3 Launcher', description: 'steam://run/107410', href: 'steam://run/107410' },
+    { abbr: 'AU', name: 'Antistasi Ultimate', description: 'Steam Workshop', href: 'https://steamcommunity.com/sharedfiles/filedetails/?id=3020755032' },
+    { abbr: 'GH', name: 'Antistasi Ultimate source', description: 'github.com', href: 'https://github.com/SilenceIsFatto/A3-Antistasi-Ultimate' },
+    { abbr: 'AC', name: 'ACE3 wiki', description: 'ace3.acemod.org', href: 'https://ace3.acemod.org/wiki/' },
+    { abbr: 'SV', name: 'Server setup (ARM64)', description: 'github.com', href: 'https://github.com/mirrorsedgepro-stack/ArmA3-Ultimate-Antistasi-Arm64' },
+    ...(stats.discordUrl ? [{ abbr: 'DC', name: 'Discord', description: 'Community', href: stats.discordUrl }] : []),
+    ...(stats.teamspeakUrl ? [{ abbr: 'TS', name: 'TeamSpeak', description: 'Voice', href: stats.teamspeakUrl }] : []),
+  ];
+
   return (
-    <div className="min-h-screen bg-arma-bg text-arma-text arma-grid-bg flex flex-col justify-between selection:bg-arma-red selection:text-white">
-      <div>
-        {/* Tactical Command Bar */}
-        <Header
+    <div className="min-h-screen flex flex-col">
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-8 px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+        <InfoWidgets
           stats={stats}
-          onRefresh={fetchServerStats}
           isLoading={isLoading}
+          autoRefresh={autoRefresh}
+          onToggleAutoRefresh={() => setAutoRefresh((v) => !v)}
+          onRefresh={fetchServerStats}
           onOpenConfig={() => setIsConfigModalOpen(true)}
-          onDownloadPreset={handleDownloadPreset}
-          onOpenConnect={() => setIsConnectModalOpen(true)}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
         />
 
-        {/* Dashboard Content - Responsive mobile & desktop spacing */}
-        <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-14 space-y-8 sm:space-y-16 lg:space-y-20">
-          
-          {/* Section 1: Server Overview */}
-          <ServerOverview
-            stats={stats}
-            onOpenPlayerList={() => setIsPlayerModalOpen(true)}
-            onOpenConfig={() => setIsConfigModalOpen(true)}
-            onDownloadPreset={handleDownloadPreset}
-            onOpenConnect={() => setIsConnectModalOpen(true)}
-            modCount={mods.length}
-          />
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <ServiceGroup id="overview" title="Server" columns="grid-cols-1">
+            <ServiceCard
+              icon={<Crosshair className={`${iconClass} text-arma-red`} />}
+              name={stats.mission || 'Antistasi Ultimate'}
+              description={`${stats.map || UNKNOWN} · ${stats.version ? `v${stats.version}` : 'version unknown'} · ${address}`}
+              status={<StatusDot status={stats.status} ping={stats.ping} />}
+              onClick={() => setIsPlayerModalOpen(true)}
+              title="Show who's online"
+            >
+              <StatRow>
+                <StatBlock label="Players" value={online ? `${stats.players}/${maxPlayers}` : UNKNOWN} />
+                <StatBlock
+                  label="Server FPS"
+                  value={formatNumber(fps, 1)}
+                  tone={fpsTone}
+                  title={perf ? `Sampled ${formatAge(perf.ageSeconds)}` : 'Antistasi only logs FPS while players are online'}
+                />
+                <StatBlock label="HCs" value={hc ? `${hc.active}/${hc.expected}` : UNKNOWN} tone={hcTone} />
+                <StatBlock label="Uptime" value={online ? formatUptime(stats.uptimeSeconds) : UNKNOWN} />
+              </StatRow>
+            </ServiceCard>
 
-          {/* Section 2: Top Players & Squadron Leaderboard */}
-          <TopPlayers
-            livePlayers={stats.playerList || []}
-            onOpenPlayerList={() => setIsPlayerModalOpen(true)}
-          />
+            <ServiceCard
+              icon={<HardDrive className={iconClass} />}
+              name="Host"
+              description={stats.platform || stats.location || UNKNOWN}
+            >
+              <StatRow>
+                <StatBlock label="Difficulty" value={cfg?.difficulty ?? UNKNOWN} />
+                <StatBlock label="BattlEye" value={formatBool(stats.battleye)} />
+                <StatBlock
+                  label="Signatures"
+                  value={cfg?.verifySignatures == null ? UNKNOWN : cfg.verifySignatures > 0 ? `v${cfg.verifySignatures}` : 'Off'}
+                />
+                <StatBlock label="Voice" value={formatBool(cfg?.voiceEnabled ?? null)} />
+                <StatBlock label="Persistent" value={formatBool(cfg?.persistent ?? null, 'Yes', 'No')} />
+              </StatRow>
+            </ServiceCard>
+          </ServiceGroup>
 
-          {/* Section 3: Addon Loadout & Workshop Manifest */}
+          <ServiceGroup id="join" title="Join" columns="grid-cols-1 sm:grid-cols-2">
+            <ServiceCard
+              icon={<Play className={`${iconClass} text-arma-red`} />}
+              name="Launch & Connect"
+              description="Step-by-step join guide"
+              onClick={() => setIsConnectModalOpen(true)}
+            >
+              <StatRow>
+                <StatBlock
+                  label="Password"
+                  value={stats.passwordProtected == null ? UNKNOWN : stats.passwordProtected ? 'Required' : 'None'}
+                />
+                <StatBlock label="Slots free" value={online ? Math.max(0, maxPlayers - stats.players) : UNKNOWN} />
+              </StatRow>
+            </ServiceCard>
+
+            <ServiceCard
+              icon={copied ? <Check className={`${iconClass} text-emerald-400`} /> : <Copy className={iconClass} />}
+              name={copied ? 'Copied!' : 'Copy address'}
+              description={address}
+              onClick={copyAddress}
+              title="Copy IP:port for Direct Connect"
+            >
+              <StatRow>
+                <StatBlock label="Game port" value={stats.port} />
+                <StatBlock label="Query port" value={stats.queryPort} />
+              </StatRow>
+            </ServiceCard>
+
+            <ServiceCard
+              icon={<Download className={iconClass} />}
+              name="Mod preset"
+              description="Launcher → Mods → Preset → Import"
+              onClick={handleDownloadPreset}
+              title="Download the Arma 3 Launcher preset (.html)"
+            >
+              <StatRow>
+                <StatBlock label="Mods" value={mods.length} />
+                <StatBlock label="Required" value={mods.filter((m) => m.required).length} />
+              </StatRow>
+            </ServiceCard>
+
+            {stats.discordUrl ? (
+              <ServiceCard
+                icon={<MessageCircle className={iconClass} />}
+                name="Discord"
+                description="Squad up, report issues"
+                href={stats.discordUrl}
+              />
+            ) : (
+              <ServiceCard
+                icon={<Layers className={iconClass} />}
+                name="Browse mods"
+                description="Full list with Workshop links"
+                href="#mods"
+              />
+            )}
+            {stats.teamspeakUrl && (
+              <ServiceCard icon={<Mic className={iconClass} />} name="TeamSpeak" description="Voice comms" href={stats.teamspeakUrl} />
+            )}
+          </ServiceGroup>
+        </div>
+
+        <ServiceGroup id="campaign" title="Campaign" columns="grid-cols-1 lg:grid-cols-2">
+          <ServiceCard
+            icon={<Flag className={iconClass} />}
+            name="Rebel faction"
+            description={
+              perf
+                ? `Sampled ${formatAge(perf.ageSeconds)}${perfStale ? ' · stale' : ''}`
+                : 'No sample yet: Antistasi only logs while players are online'
+            }
+          >
+            <StatRow>
+              <StatBlock label="War level" value={perf ? perf.warLevel : UNKNOWN} />
+              <StatBlock label="HR" value={perf ? perf.hr : UNKNOWN} />
+              <StatBlock label="Money" value={perf ? `€${formatNumber(perf.factionCash)}` : UNKNOWN} />
+              <StatBlock label="Occ. aggro" value={perf ? perf.occAggro : UNKNOWN} />
+              <StatBlock label="Inv. aggro" value={perf ? perf.invAggro : UNKNOWN} />
+            </StatRow>
+          </ServiceCard>
+          <ServiceCard
+            icon={<Swords className={iconClass} />}
+            name="World"
+            description="Simulation load on the server"
+          >
+            <StatRow>
+              <StatBlock label="Units" value={perf ? perf.allUnits : UNKNOWN} />
+              <StatBlock label="Dead" value={perf ? perf.deadUnits : UNKNOWN} />
+              <StatBlock label="Vehicles" value={perf ? perf.allVehicles : UNKNOWN} />
+              <StatBlock label="Clients" value={perf ? perf.connectedClientsInclHCs : UNKNOWN} title="Including headless clients" />
+            </StatRow>
+          </ServiceCard>
+        </ServiceGroup>
+
+        <ServiceGroup title="Activity" icon={<Users className="h-5 w-5 text-slate-400" />} className="space-y-4">
+          <div className="space-y-6">
+            <PlayerHistoryGraph currentPlayers={stats.players} maxPlayers={maxPlayers} serverName={stats.name} />
+            <TopPlayers livePlayers={stats.playerList || []} onOpenPlayerList={() => setIsPlayerModalOpen(true)} />
+          </div>
+        </ServiceGroup>
+
+        <ServiceGroup title="Mods" icon={<Layers className="h-5 w-5 text-slate-400" />}>
           <ModList
             mods={mods}
             serverName={serverConfig.name}
@@ -215,92 +359,17 @@ export default function Home() {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
+        </ServiceGroup>
 
-        </main>
-      </div>
+        <Bookmarks title="Bookmarks" items={bookmarks} />
+      </main>
 
-      {/* Floating Quick Navigation & Smooth Scrolling */}
-      {showScrollTop && (
-        <aside 
-          aria-label="Quick Navigation"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-1.5 sm:gap-2 p-1.5 rounded-xl bg-arma-surface/90 border border-arma-border backdrop-blur-md shadow-2xl font-mono text-xs"
-        >
-          <button
-            onClick={() => scrollToSection('overview')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-              activeSection === 'overview'
-                ? 'bg-arma-red text-white font-bold'
-                : 'text-arma-textMuted hover:text-arma-text'
-            }`}
-            title="Jump to Server Overview"
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">OVERVIEW</span>
-          </button>
-
-          <button
-            onClick={() => scrollToSection('players')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-              activeSection === 'players'
-                ? 'bg-arma-red text-white font-bold'
-                : 'text-arma-textMuted hover:text-arma-text'
-            }`}
-            title="Jump to Top Players"
-          >
-            <Trophy className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden sm:inline">PLAYERS</span>
-          </button>
-
-          <button
-            onClick={() => scrollToSection('mods')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-              activeSection === 'mods'
-                ? 'bg-arma-red text-white font-bold'
-                : 'text-arma-textMuted hover:text-arma-text'
-            }`}
-            title="Jump to Mods"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">MODS</span>
-          </button>
-
-          <div className="w-px h-5 bg-arma-border mx-0.5 sm:mx-1" />
-
-          {/* Scroll to Top */}
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="p-1.5 sm:p-2 rounded-lg bg-arma-card hover:bg-arma-surface text-arma-textMuted hover:text-arma-text transition-colors"
-            title="Smooth Scroll to Top"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
-        </aside>
-      )}
-
-      {/* Server Footer */}
-      <footer className="mt-16 sm:mt-20 border-t border-arma-border bg-[#07090c] py-6 sm:py-8 text-xs font-mono text-arma-textMuted">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-center md:text-left">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-            <span className="font-bold text-arma-text uppercase">{serverConfig.name}</span>
-            <span className="hidden sm:inline">&bull;</span>
-            <span className="text-arma-khaki">24/7 DEDICATED SERVER</span>
-            <span className="hidden sm:inline">&bull;</span>
-            <span className="hidden md:inline">SYDNEY, AUSTRALIA</span>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-            <span>DIRECT CONNECT:</span>
-            <code className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded bg-arma-card border border-arma-border text-arma-red font-bold">
-              {stats.ip}:{stats.port}
-            </code>
-            <span>&bull;</span>
-            <span>STATUS: <strong className="text-arma-green uppercase">{stats.status}</strong></span>
-          </div>
-
-          <div className="text-arma-textDim text-[11px]">
-            VALVE A2S PROTOCOL &bull; VERCEL DEPLOYMENT
-          </div>
-        </div>
+      <footer className="mt-8 border-t border-white/5 py-4 text-center text-[11px] text-slate-500">
+        {online ? 'Live' : 'Last known'} data via {stats.querySource.replace('_', ' ')} · updated{' '}
+        {stats.status === 'loading' ? '…' : new Date(stats.lastUpdated).toLocaleTimeString()} · layout inspired by{' '}
+        <a href="https://github.com/gethomepage/homepage" target="_blank" rel="noreferrer" className="underline hover:text-slate-300">
+          homepage
+        </a>
       </footer>
 
       {/* Modals */}

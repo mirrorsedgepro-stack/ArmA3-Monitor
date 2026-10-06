@@ -31,11 +31,11 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs font-mono">
       <div 
-        className="w-full max-w-xl rounded-xl bg-arma-surface border border-arma-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-xl rounded-md bg-slate-800 ring-1 ring-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-arma-border bg-[#0e1116] flex items-center justify-between">
+        <div className="p-4 border-b border-arma-border bg-black/20 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-red shrink-0">
               <Users className="w-4 h-4" />
@@ -117,7 +117,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-arma-border bg-[#0e1116] flex items-center justify-between text-xs text-arma-textMuted">
+        <div className="p-3 border-t border-arma-border bg-black/20 flex items-center justify-between text-xs text-arma-textMuted">
           <span className="text-[11px]">STEAM A2S PROTOCOL</span>
           <button
             onClick={onClose}

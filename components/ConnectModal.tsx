@@ -77,7 +77,7 @@ echo  1. In the Arma 3 Launcher, navigate to the SERVERS tab.
 echo  2. Click DIRECT CONNECT (in the bottom toolbar).
 echo  3. Enter IP: ${stats.ip}
 echo  4. Enter Port: ${stats.port}
-echo  5. Click JOIN - The Launcher will auto-match and subscribe to all 42 mods!
+echo  5. Click JOIN - The Launcher will auto-match and subscribe to every required mod.
 echo.
 echo ==============================================================================
 pause
@@ -100,7 +100,7 @@ pause
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-2xl bg-arma-card border border-arma-border rounded-xl shadow-2xl overflow-hidden my-auto"
+        className="relative w-full max-w-2xl bg-arma-card border border-arma-border rounded-md shadow-2xl overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
@@ -149,7 +149,7 @@ pause
                 RECOMMENDED JOIN METHOD
               </span>
               <span className="text-[10px] font-mono text-arma-khaki uppercase bg-arma-card px-2 py-0.5 rounded border border-arma-border">
-                AUTO-SYNC 42 MODS
+                AUTO-SYNC MODS
               </span>
             </div>
 
@@ -252,14 +252,14 @@ pause
           {/* Alternative Quick Methods: Preset HTML & Windows Batch Script */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* HTML Preset */}
-            <div className="p-4 rounded-lg bg-arma-surface border border-arma-border flex flex-col justify-between space-y-3">
+            <div className="p-4 hp-card flex flex-col justify-between space-y-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
                   <Layers className="w-4 h-4 text-arma-red" />
                   <span>OFFICIAL MOD PRESET (.HTML)</span>
                 </div>
                 <p className="text-[11px] text-arma-textMuted font-sans">
-                  Drag and drop this file into your Arma 3 Launcher to subscribe and load all 42 required mods with 1 click.
+                  Drag and drop this file into your Arma 3 Launcher to subscribe and load every required mod with 1 click.
                 </p>
               </div>
               <button
@@ -275,7 +275,7 @@ pause
             </div>
 
             {/* 1-Click Batch Script */}
-            <div className="p-4 rounded-lg bg-arma-surface border border-arma-border flex flex-col justify-between space-y-3">
+            <div className="p-4 hp-card flex flex-col justify-between space-y-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold text-arma-text">
                   <FileCode className="w-4 h-4 text-arma-red" />

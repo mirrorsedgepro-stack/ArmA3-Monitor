@@ -75,11 +75,11 @@ export function ServerConfigModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs font-mono">
       <div 
-        className="w-full max-w-md rounded-xl bg-arma-surface border border-arma-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-md rounded-md bg-slate-800 ring-1 ring-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-arma-border bg-[#0e1116] flex items-center justify-between">
+        <div className="p-4 border-b border-arma-border bg-black/20 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-red shrink-0">
               <Settings className="w-4 h-4" />
@@ -108,7 +108,7 @@ export function ServerConfigModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Frenchy's Antistasi Ultimate"
-              className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red uppercase"
+              className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text text-xs focus:outline-none focus:border-arma-red uppercase"
             />
           </div>
 
@@ -123,7 +123,7 @@ export function ServerConfigModal({
                 value={ip}
                 onChange={(e) => setIp(e.target.value)}
                 placeholder="180.181.238.103"
-                className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
+                className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text text-xs focus:outline-none focus:border-arma-red"
               />
             </div>
 
@@ -141,7 +141,7 @@ export function ServerConfigModal({
                   if (num) setQueryPort((num + 1).toString());
                 }}
                 placeholder="2302"
-                className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
+                className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text text-xs focus:outline-none focus:border-arma-red"
               />
             </div>
           </div>
@@ -155,7 +155,7 @@ export function ServerConfigModal({
               value={queryPort}
               onChange={(e) => setQueryPort(e.target.value)}
               placeholder="2303"
-              className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
+              className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text text-xs focus:outline-none focus:border-arma-red"
             />
           </div>
 
@@ -168,7 +168,7 @@ export function ServerConfigModal({
               value={bmId}
               onChange={(e) => setBmId(e.target.value)}
               placeholder="e.g. 2351240"
-              className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text text-xs focus:outline-none focus:border-arma-red"
+              className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text text-xs focus:outline-none focus:border-arma-red"
             />
           </div>
 

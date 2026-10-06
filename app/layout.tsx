@@ -24,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-arma-bg text-arma-text min-h-screen flex flex-col antialiased">
+      <body className="text-arma-text min-h-screen flex flex-col antialiased">
         {children}
       </body>
     </html>

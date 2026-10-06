@@ -152,14 +152,14 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-arma-border pb-4 sm:pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-arma-khaki font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-xs text-arma-khaki font-bold uppercase tracking-wider mb-1">
             <Trophy className="w-4 h-4 text-arma-red" />
-            <span>AUTHENTIC COMBAT ROSTER</span>
+            <span>Session records</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-arma-text font-mono uppercase tracking-tight">
-            SERVER PLAYERS &amp; ACTIVITY
+          <h2 className="text-base sm:text-lg font-medium text-arma-text">
+            Top players
           </h2>
-          <p className="text-xs sm:text-sm text-arma-textMuted font-mono mt-1">
+          <p className="text-xs sm:text-sm text-arma-textMuted mt-1">
             Real session records derived directly from server connection logs.
             {trackingSince && (
               <span className="text-arma-textDim ml-1">
@@ -170,15 +170,15 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
         </div>
 
         {/* Live status badge & filter controls */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-xs">
-          <span className="px-3 py-1.5 rounded-lg bg-arma-card border border-arma-border text-arma-text flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+          <span className="px-3 py-1.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${onlineCount > 0 ? 'bg-arma-green animate-pulse' : 'bg-gray-500'}`} />
             <span><strong>{onlineCount}</strong> ONLINE NOW</span>
           </span>
 
           <button
             onClick={fetchPlayers}
-            className="p-1.5 sm:p-2 rounded-lg bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text transition-colors"
+            className="p-1.5 sm:p-2 rounded-md bg-arma-card hover:bg-arma-cardHover border border-arma-border text-arma-textMuted hover:text-arma-text transition-colors"
             title="Refresh player list"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -187,7 +187,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
       </div>
 
       {/* Search & Sort Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 font-mono text-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-arma-textMuted" />
@@ -196,7 +196,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by player callsign..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-arma-surface border border-arma-border text-arma-text placeholder-arma-textDim focus:outline-none focus:border-arma-red text-xs"
+            className="w-full pl-9 pr-4 py-2 hp-card text-arma-text placeholder-arma-textDim focus:outline-none focus:border-arma-red text-xs"
           />
         </div>
 
@@ -240,7 +240,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
 
       {/* Players Grid / Table */}
       {filteredPlayers.length === 0 ? (
-        <div className="rounded-xl bg-arma-surface border border-arma-border p-8 sm:p-12 text-center font-mono space-y-3">
+        <div className="hp-card p-8 sm:p-12 text-center space-y-3">
           <Users className="w-10 h-10 text-arma-textDim mx-auto" />
           <div className="text-sm sm:text-base font-bold text-arma-text uppercase">
             {search ? 'No Players Found' : 'No Player Records Yet'}
@@ -260,7 +260,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
             return (
               <div
                 key={player.name}
-                className={`p-4 sm:p-5 rounded-xl bg-arma-surface border transition-all flex flex-col justify-between shadow-md ${
+                className={`p-4 sm:p-5 rounded-md bg-arma-surface border transition-all flex flex-col justify-between shadow-md ${
                   player.online
                     ? 'border-arma-green/60 ring-1 ring-arma-green/20'
                     : 'border-arma-border hover:border-arma-borderHover'
@@ -271,7 +271,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       {/* Avatar */}
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono font-black text-sm shrink-0 border ${
+                      <div className={`w-10 h-10 rounded-md flex items-center justify-center font-medium text-sm shrink-0 border ${
                         player.online
                           ? 'bg-arma-green/10 text-arma-green border-arma-green/40'
                           : 'bg-arma-card text-arma-textDim border-arma-border'
@@ -281,18 +281,18 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono font-black text-sm sm:text-base text-arma-text truncate">
+                          <span className="font-medium text-sm sm:text-base text-arma-text truncate">
                             {player.name}
                           </span>
                         </div>
-                        <div className="text-[11px] font-mono text-arma-khaki font-semibold">
+                        <div className="text-[11px] text-arma-khaki font-semibold">
                           {rank}
                         </div>
                       </div>
                     </div>
 
                     {/* Online status badge */}
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 border ${
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 border ${
                       player.online
                         ? 'bg-arma-green/15 text-arma-green border-arma-green/40'
                         : 'bg-arma-card text-arma-textDim border-arma-border'
@@ -302,8 +302,8 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-arma-border/60 text-xs font-mono">
-                    <div className="p-2 rounded bg-[#0b0d11] border border-arma-border/50">
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-arma-border/60 text-xs">
+                    <div className="p-2 rounded bg-black/20 border border-arma-border/50">
                       <div className="text-[10px] text-arma-textDim flex items-center gap-1">
                         <Clock className="w-3 h-3 text-arma-khaki" />
                         TIME PLAYED
@@ -313,7 +313,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
                       </div>
                     </div>
 
-                    <div className="p-2 rounded bg-[#0b0d11] border border-arma-border/50">
+                    <div className="p-2 rounded bg-black/20 border border-arma-border/50">
                       <div className="text-[10px] text-arma-textDim flex items-center gap-1">
                         <Flame className="w-3 h-3 text-arma-red" />
                         SESSIONS
@@ -326,7 +326,7 @@ export function TopPlayers({ livePlayers = [], onOpenPlayerList }: TopPlayersPro
                 </div>
 
                 {/* Footer timestamp */}
-                <div className="mt-3 pt-2 text-[10px] font-mono text-arma-textDim flex items-center justify-between">
+                <div className="mt-3 pt-2 text-[10px] text-arma-textDim flex items-center justify-between">
                   <span>First joined:</span>
                   <span>{player.firstSeen ? new Date(player.firstSeen).toLocaleDateString() : 'N/A'}</span>
                 </div>

@@ -99,11 +99,11 @@ export function PresetModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs font-mono">
       <div 
-        className="w-full max-w-xl rounded-xl bg-arma-surface border border-arma-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-xl rounded-md bg-slate-800 ring-1 ring-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-arma-border bg-[#0e1116] flex items-center justify-between">
+        <div className="p-4 border-b border-arma-border bg-black/20 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded bg-arma-card border border-arma-border flex items-center justify-center text-arma-red shrink-0">
               <Download className="w-4 h-4" />
@@ -122,7 +122,7 @@ export function PresetModal({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-arma-border bg-[#0e1116] text-xs">
+        <div className="flex border-b border-arma-border bg-black/20 text-xs">
           <button
             onClick={() => setActiveTab('download')}
             className={`flex-1 py-2.5 px-3 text-center font-bold uppercase transition-colors border-b-2 text-xs ${
@@ -149,7 +149,7 @@ export function PresetModal({
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
           {activeTab === 'download' ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-arma-card border border-arma-border space-y-2.5">
+              <div className="p-4 rounded-md bg-black/20 ring-1 ring-white/5 space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-arma-text uppercase">OPERATION LOADOUT</span>
                   <span className="text-arma-red font-bold">{currentMods.length} MODS</span>
@@ -170,15 +170,15 @@ export function PresetModal({
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-arma-text uppercase">INSTRUCTIONS:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                  <div className="p-3 rounded-lg bg-arma-card border border-arma-border">
+                  <div className="p-3 rounded-md bg-black/20 ring-1 ring-white/5">
                     <span className="text-arma-red font-bold block mb-1">01. EXPORT</span>
                     <p className="text-arma-textMuted text-[11px]">Save the .html preset</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-arma-card border border-arma-border">
+                  <div className="p-3 rounded-md bg-black/20 ring-1 ring-white/5">
                     <span className="text-arma-khaki font-bold block mb-1">02. DRAG &amp; DROP</span>
                     <p className="text-arma-textMuted text-[11px]">Drop into Arma 3 Launcher</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-arma-card border border-arma-border">
+                  <div className="p-3 rounded-md bg-black/20 ring-1 ring-white/5">
                     <span className="text-arma-green font-bold block mb-1">03. DEPLOY</span>
                     <p className="text-arma-textMuted text-[11px]">Steam synchronizes</p>
                   </div>
@@ -209,7 +209,7 @@ export function PresetModal({
                 placeholder="OR PASTE PRESET HTML CODE..."
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-arma-card border border-arma-border text-arma-text placeholder-arma-textDim text-xs focus:outline-none focus:border-arma-red"
+                className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text placeholder-arma-textDim text-xs focus:outline-none focus:border-arma-red"
               />
 
               <button

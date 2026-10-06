@@ -155,17 +155,17 @@ export function ModList({
   return (
     <section id="mods" className="space-y-4 sm:space-y-8 scroll-mt-20 sm:scroll-mt-24">
       {/* Manifest Master Control Bar */}
-      <div id="manifest-header" className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 p-5 sm:p-8 rounded-xl bg-arma-surface border border-arma-border shadow-lg">
+      <div id="manifest-header" className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 p-5 sm:p-8 hp-card shadow-lg">
         <div className="space-y-1.5 sm:space-y-2">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
             <span className="px-2.5 py-0.5 sm:py-1 rounded-md bg-arma-card text-arma-red border border-arma-border font-bold text-[11px] sm:text-xs">
-              [ADDON ARCHIVE]
+              Addons
             </span>
             <span className="text-arma-textMuted font-bold text-[11px] sm:text-xs">
               {totalRequired} REQUIRED &bull; {totalOptional} OPTIONAL &bull; {mods.length} TOTAL
             </span>
           </div>
-          <h2 className="text-xl sm:text-3xl font-black text-arma-text font-mono tracking-tight uppercase">
+          <h2 className="text-base sm:text-lg font-medium text-arma-text">
             Server Addons ({filteredMods.length} Visible)
           </h2>
           <p className="text-xs sm:text-sm text-arma-textMuted leading-relaxed max-w-2xl">
@@ -174,10 +174,10 @@ export function ModList({
         </div>
 
         {/* Global Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
           <button
             onClick={expandAll}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg arma-btn-secondary text-xs hover:bg-arma-cardHover"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md arma-btn-secondary text-xs hover:bg-arma-cardHover"
             title="Expand all category folders"
           >
             <Maximize2 className="w-3.5 h-3.5 text-arma-red" />
@@ -186,7 +186,7 @@ export function ModList({
 
           <button
             onClick={collapseAll}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg arma-btn-secondary text-xs hover:bg-arma-cardHover"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md arma-btn-secondary text-xs hover:bg-arma-cardHover"
             title="Collapse all category folders"
           >
             <Minimize2 className="w-3.5 h-3.5 text-arma-textDim" />
@@ -195,7 +195,7 @@ export function ModList({
 
           <button
             onClick={onDownloadPreset}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg arma-btn-primary font-bold shadow-arma-red text-xs transition-all hover:scale-[1.02]"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-md arma-btn-primary font-bold shadow-arma-red text-xs transition-all "
           >
             <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
             <span>EXPORT PRESET</span>
@@ -203,7 +203,7 @@ export function ModList({
 
           <button
             onClick={onOpenPresetModal}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg arma-btn-secondary text-xs hover:bg-arma-cardHover"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md arma-btn-secondary text-xs hover:bg-arma-cardHover"
           >
             <Filter className="w-3.5 h-3.5 text-arma-khaki" />
             <span>IMPORT</span>
@@ -212,12 +212,12 @@ export function ModList({
       </div>
 
       {/* Filter and Search Navigation Bar */}
-      <div id="manifest-search" className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 font-mono text-xs">
+      <div id="manifest-search" className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 text-xs">
         {/* Status Filters - Mobile touch scrollable */}
         <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           <button
             onClick={() => setFilterType('all')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs font-bold transition-all border whitespace-nowrap ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs font-bold transition-all border whitespace-nowrap ${
               filterType === 'all'
                 ? 'bg-arma-red text-white border-arma-red shadow-sm'
                 : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
@@ -227,7 +227,7 @@ export function ModList({
           </button>
           <button
             onClick={() => setFilterType('required')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs font-bold transition-all border whitespace-nowrap ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs font-bold transition-all border whitespace-nowrap ${
               filterType === 'required'
                 ? 'bg-arma-red text-white border-arma-red shadow-sm'
                 : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
@@ -237,7 +237,7 @@ export function ModList({
           </button>
           <button
             onClick={() => setFilterType('optional')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs font-bold transition-all border whitespace-nowrap ${
+            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs font-bold transition-all border whitespace-nowrap ${
               filterType === 'optional'
                 ? 'bg-arma-red text-white border-arma-red shadow-sm'
                 : 'bg-arma-surface text-arma-textMuted border-arma-border hover:text-arma-text hover:bg-arma-card'
@@ -255,7 +255,7 @@ export function ModList({
             placeholder="SEARCH ADDON NAME, ID, TAG..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 sm:pl-11 pr-8 py-2.5 sm:py-3 rounded-lg bg-arma-surface border border-arma-border text-arma-text placeholder-arma-textDim text-xs sm:text-sm focus:outline-none focus:border-arma-red transition-colors shadow-inner"
+            className="w-full pl-10 sm:pl-11 pr-8 py-2.5 sm:py-3 hp-card text-arma-text placeholder-arma-textDim text-xs sm:text-sm focus:outline-none focus:border-arma-red transition-colors shadow-inner"
           />
           {searchQuery && (
             <button
@@ -281,15 +281,15 @@ export function ModList({
           return (
             <div
               key={folder.id}
-              className="rounded-xl bg-arma-surface border border-arma-border overflow-hidden transition-all shadow-md"
+              className="hp-card overflow-hidden transition-all shadow-md"
             >
               {/* Folder Header (Click to Toggle) */}
               <button
                 onClick={() => toggleFolder(folder.id)}
-                className="w-full p-3.5 sm:p-5 bg-arma-surface hover:bg-arma-card flex items-center justify-between transition-colors text-left font-mono"
+                className="w-full p-3.5 sm:p-5 bg-arma-surface hover:bg-arma-card flex items-center justify-between transition-colors text-left"
               >
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="text-arma-red shrink-0 p-1.5 sm:p-2 rounded-lg bg-arma-card border border-arma-border">
+                  <div className="text-arma-red shrink-0 p-1.5 sm:p-2 rounded-md bg-black/20 ring-1 ring-white/5">
                     {isOpen ? <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-arma-red" /> : <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-arma-khaki" />}
                   </div>
 
@@ -323,12 +323,12 @@ export function ModList({
 
               {/* Folder Contents */}
               {isOpen && (
-                <div className="border-t border-arma-border bg-[#0d0f13]">
+                <div className="border-t border-arma-border bg-black/20">
                   {/* Desktop Table View (>= md) */}
                   <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs font-mono">
+                    <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-arma-border bg-[#090b0e] text-[11px] text-arma-textDim uppercase tracking-wider">
+                        <tr className="border-b border-arma-border bg-black/20 text-[11px] text-arma-textDim uppercase tracking-wider">
                           <th className="py-3 px-5 w-16 text-center">TYPE</th>
                           <th className="py-3 px-5">ADDON NAME &amp; DETAILS</th>
                           <th className="py-3 px-5 w-32">EST. SIZE</th>
@@ -350,7 +350,7 @@ export function ModList({
                                 {/* Type: REQ vs OPT */}
                                 <td className="py-3.5 px-5 text-center">
                                   {mod.required ? (
-                                    <span className="text-[10px] font-black px-2 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40">
+                                    <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40">
                                       REQ
                                     </span>
                                   ) : (
@@ -386,7 +386,7 @@ export function ModList({
                                 <td className="py-3.5 px-5">
                                   <button
                                     onClick={(e) => copyId(mod.id, e)}
-                                    className="text-arma-khaki hover:text-arma-red flex items-center gap-1.5 font-mono text-xs"
+                                    className="text-arma-khaki hover:text-arma-red flex items-center gap-1.5 text-xs"
                                     title="Click to copy Steam ID"
                                   >
                                     <span>{mod.id}</span>
@@ -423,7 +423,7 @@ export function ModList({
 
                               {/* Description Row */}
                               {isExpanded && mod.description && (
-                                <tr className="bg-[#090b0f] text-xs">
+                                <tr className="bg-black/20 text-xs">
                                   <td colSpan={5} className="py-4 px-8 text-arma-textMuted border-b border-arma-border/80">
                                     <div className="flex items-start gap-3">
                                       <Info className="w-4 h-4 text-arma-red shrink-0 mt-0.5" />
@@ -463,7 +463,7 @@ export function ModList({
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2">
                               {mod.required ? (
-                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40 shrink-0">
+                                <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-arma-redDim text-arma-red border border-arma-red/40 shrink-0">
                                   REQ
                                 </span>
                               ) : (
@@ -497,7 +497,7 @@ export function ModList({
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between text-[11px] font-mono text-arma-textMuted">
+                          <div className="flex items-center justify-between text-[11px] text-arma-textMuted">
                             <button
                               onClick={(e) => copyId(mod.id, e)}
                               className="text-arma-khaki hover:text-arma-red flex items-center gap-1"
