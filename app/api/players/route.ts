@@ -12,6 +12,8 @@ export interface PlayerRecord {
   online: boolean;
   /** Deaths from the server log; absent on older bridges. */
   deaths?: number;
+  /** Infantry kills from the A3KF kill feed; absent until the feed has reported. */
+  kills?: number;
 }
 
 export interface PlayersResponse {

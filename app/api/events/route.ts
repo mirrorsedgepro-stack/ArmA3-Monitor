@@ -11,7 +11,8 @@ export type CampaignEventType =
   | 'lost'
   | 'promotion'
   | 'join'
-  | 'leave';
+  | 'leave'
+  | 'kill';
 
 export interface CampaignEvent {
   id: string;
@@ -24,6 +25,16 @@ export interface CampaignEvent {
   by?: string | null;
   enemy?: string;
   rank?: string;
+  // kill (from the A3KF server hook)
+  kind?: 'man' | 'veh';
+  victim?: string;
+  victimSide?: string | null;
+  victimIsPlayer?: boolean;
+  killer?: string | null;
+  killerSide?: string | null;
+  killerIsPlayer?: boolean;
+  weapon?: string | null;
+  distance?: number | null;
 }
 
 export interface EventsResponse {

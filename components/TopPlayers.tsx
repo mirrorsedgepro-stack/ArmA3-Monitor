@@ -13,10 +13,11 @@ interface TopPlayersProps {
   ranks?: Record<string, string>;
 }
 
-type SortCriteria = 'hours' | 'sessions' | 'deaths' | 'recent';
+type SortCriteria = 'hours' | 'kills' | 'sessions' | 'deaths' | 'recent';
 
 const SORTS: { id: SortCriteria; label: string }[] = [
   { id: 'hours', label: 'Time played' },
+  { id: 'kills', label: 'Kills' },
   { id: 'sessions', label: 'Sessions' },
   { id: 'deaths', label: 'Deaths' },
   { id: 'recent', label: 'Last seen' },
@@ -49,6 +50,7 @@ export function TopPlayers({ livePlayers = [], ranks = {} }: TopPlayersProps) {
   }, [fetchPlayers]);
 
   const hasDeaths = players.some((p) => typeof p.deaths === 'number');
+  const hasKills = players.some((p) => typeof p.kills === 'number');
   const live = useMemo(() => new Set(livePlayers.map((p) => p.name.toLowerCase())), [livePlayers]);
 
   const shown = useMemo(() => {
@@ -59,6 +61,7 @@ export function TopPlayers({ livePlayers = [], ranks = {} }: TopPlayersProps) {
     list.sort((a, b) => {
       if (sortBy === 'sessions') return b.sessions - a.sessions;
       if (sortBy === 'deaths') return (b.deaths ?? 0) - (a.deaths ?? 0);
+      if (sortBy === 'kills') return (b.kills ?? 0) - (a.kills ?? 0);
       if (sortBy === 'recent') return Number(b.online) - Number(a.online) || b.lastSeen.localeCompare(a.lastSeen);
       return b.totalSeconds - a.totalSeconds;
     });
@@ -85,7 +88,7 @@ export function TopPlayers({ livePlayers = [], ranks = {} }: TopPlayersProps) {
             </div>
           )}
           <div className="flex gap-1 overflow-x-auto">
-            {SORTS.filter((s) => s.id !== 'deaths' || hasDeaths).map((s) => (
+            {SORTS.filter((s) => (s.id !== 'deaths' || hasDeaths) && (s.id !== 'kills' || hasKills)).map((s) => (
               <button
                 key={s.id}
                 onClick={() => setSortBy(s.id)}
@@ -122,8 +125,9 @@ export function TopPlayers({ livePlayers = [], ranks = {} }: TopPlayersProps) {
               </div>
               <StatRow>
                 <StatBlock label="Played" value={formatUptime(p.totalSeconds)} />
-                <StatBlock label="Sessions" value={p.sessions} />
+                {typeof p.kills === 'number' && <StatBlock label="Kills" value={p.kills} />}
                 {typeof p.deaths === 'number' && <StatBlock label="Deaths" value={p.deaths} />}
+                <StatBlock label="Sessions" value={p.sessions} />
               </StatRow>
             </li>
           );
