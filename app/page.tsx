@@ -14,7 +14,7 @@ import { ServiceCard } from '@/components/dash/ServiceCard';
 import { StatBlock, StatRow } from '@/components/dash/StatBlock';
 import { StatusDot } from '@/components/dash/StatusDot';
 import { Bookmarks, Bookmark } from '@/components/dash/Bookmarks';
-import { ActivitySection } from '@/components/dash/ActivitySection';
+import { ActivitySection, MapSection } from '@/components/dash/ActivitySection';
 import { EventFeed } from '@/components/EventFeed';
 import type { CampaignEvent, EventsResponse } from '@/app/api/events/route';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
@@ -368,6 +368,8 @@ export default function Home() {
             </ServiceCard>
           </ServiceGroup>
         )}
+
+        <MapSection autoRefresh={autoRefresh} />
 
         <ActivitySection>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">

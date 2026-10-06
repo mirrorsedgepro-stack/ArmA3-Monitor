@@ -92,3 +92,69 @@ body {
 .animate-radar {
   animation: radar-sweep 4s linear infinite;
 }
+
+/* Live map (Leaflet) */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.map-town {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e2e8f0;
+  text-shadow: 0 0 3px #0f172a, 0 0 3px #0f172a;
+  pointer-events: none;
+}
+
+.map-town-small {
+  font-size: 10px;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.map-hq {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #16a34a;
+  border: 1px solid #f8fafc;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.leaflet-container .leaflet-tooltip {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-container .leaflet-tooltip-top:before { border-top-color: #1e293b; }
+.leaflet-container .leaflet-tooltip-right:before { border-right-color: #1e293b; }
+
+.leaflet-container .leaflet-tooltip.map-player {
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.map-veh {
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.leaflet-container .leaflet-bar a {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.leaflet-container .leaflet-bar a:hover {
+  background: #334155;
+  color: #fff;
+}
