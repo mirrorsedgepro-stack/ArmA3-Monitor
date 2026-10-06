@@ -35,6 +35,7 @@ const ZONE_KIND_LABELS: Record<MapZone['kind'], string> = {
 };
 
 const SEA = '#0c1a2b';
+const SEA_LIGHT = '#a6c4de'; // matches the tiles' sea
 
 /** Shaded relief from the server's height grid (rows south to north). */
 function renderTerrain(t: TerrainResponse): string {
@@ -98,6 +99,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     null,
   );
   const terrainLayer = useRef<Leaflet.ImageOverlay | null>(null);
+  const tileLayer = useRef<{ version: string; layer: Leaflet.TileLayer } | null>(null);
   const fitted = useRef(false);
 
   // Poll the map state.
@@ -122,11 +124,13 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     };
   }, [autoRefresh]);
 
-  // Terrain once per world.
+  const tileVersion = data?.tiles?.ready ? data.tiles.version : null;
+
+  // Terrain once per world (only needed until the detailed tiles exist).
   const worldName = data?.world?.name;
   const terrainAvailable = data?.terrainAvailable;
   useEffect(() => {
-    if (!worldName || !terrainAvailable) return;
+    if (!worldName || !terrainAvailable || tileVersion) return;
     let alive = true;
     fetch('/api/map/terrain')
       .then((r) => (r.ok ? r.json() : null))
@@ -137,7 +141,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     return () => {
       alive = false;
     };
-  }, [worldName, terrainAvailable]);
+  }, [worldName, terrainAvailable, tileVersion]);
 
   // Create the Leaflet map once data exists.
   const size = data?.world?.size;
@@ -148,11 +152,16 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
       if (cancelled || !container.current) return;
       const L = mod.default ?? mod;
       const bounds = L.latLngBounds([0, 0], [size, size]);
+      // Game metres as lat (north) / lng (east); the whole world is 256 px at zoom 0, which is
+      // also the bridge's tile scheme (tile y=0 at the north edge).
+      const scale = 256 / size;
+      const crs = L.extend({}, L.CRS.Simple, { transformation: new L.Transformation(scale, 0, -scale, 256) });
       const map = L.map(container.current, {
-        crs: L.CRS.Simple,
-        minZoom: -7,
-        maxZoom: -3,
-        zoomSnap: 0.25,
+        crs,
+        minZoom: 1,
+        maxZoom: 7,
+        // Whole zoom levels: tiles draw at native size (sharp, and no hairline seams between them).
+        zoomSnap: 1,
         attributionControl: false,
         maxBounds: bounds.pad(0.1),
         maxBoundsViscosity: 0.8,
@@ -161,7 +170,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
       fitted.current = false;
       const towns = L.layerGroup();
       const updateTowns = () => {
-        if (map.getZoom() >= -4) towns.addTo(map);
+        if (map.getZoom() >= 3) towns.addTo(map);
         else towns.remove();
       };
       map.on('zoomend', updateTowns);
@@ -182,14 +191,31 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     [],
   );
 
-  // Terrain overlay.
+  // Base map: Arma-style tiles once the bridge has rendered them, shaded relief until then.
   useEffect(() => {
     const m = lf.current;
-    if (!m || !terrain || !size) return;
-    terrainLayer.current?.remove();
-    terrainLayer.current = m.L.imageOverlay(terrain, [[0, 0], [size, size]], { interactive: false }).addTo(m.map);
-    terrainLayer.current.bringToBack();
-  }, [terrain, size, ready]);
+    if (!m || !size) return;
+    if (tileVersion) {
+      if (tileLayer.current?.version !== tileVersion) {
+        tileLayer.current?.layer.remove();
+        const layer = m.L.tileLayer(`/api/map/tiles/${tileVersion}/{z}/{x}/{y}.png`, {
+          tileSize: 256,
+          minZoom: 0,
+          maxZoom: 7,
+          maxNativeZoom: 6,
+          noWrap: true,
+          bounds: m.L.latLngBounds([0, 0], [size, size]),
+        }).addTo(m.map);
+        layer.bringToBack();
+        tileLayer.current = { version: tileVersion, layer };
+      }
+      terrainLayer.current?.remove();
+      terrainLayer.current = null;
+    } else if (terrain && !terrainLayer.current) {
+      terrainLayer.current = m.L.imageOverlay(terrain, [[0, 0], [size, size]], { interactive: false }).addTo(m.map);
+      terrainLayer.current.bringToBack();
+    }
+  }, [terrain, size, ready, tileVersion]);
 
   // Zones, towns, HQ, players.
   useEffect(() => {
@@ -281,6 +307,12 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
                   data.delaySeconds > 0 ? `delayed ${Math.round(data.delaySeconds / 60)} min · ` : ''
                 }${formatSince(data.playersAt)}`
               : 'No players in the field'}
+            {data.tiles?.rendering && (
+              <span>
+                {' '}
+                · drawing detailed map{data.tiles.progress != null ? ` ${Math.round(data.tiles.progress * 100)}%` : ''}…
+              </span>
+            )}
           </div>
         </div>
         {military > 0 && (
@@ -300,8 +332,10 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
       </div>
       <div
         ref={container}
-        className="aspect-square w-full border-t border-white/5 sm:aspect-auto sm:h-[60vh] sm:max-h-[640px] sm:min-h-[360px]"
-        style={{ background: SEA }}
+        className={`aspect-square w-full border-t border-white/5 sm:aspect-auto sm:h-[60vh] sm:max-h-[640px] sm:min-h-[360px] ${
+          tileVersion ? 'map-light' : ''
+        }`}
+        style={{ background: tileVersion ? SEA_LIGHT : SEA }}
         aria-label={`Map of ${data.world?.name ?? 'the server'}`}
       />
     </div>
