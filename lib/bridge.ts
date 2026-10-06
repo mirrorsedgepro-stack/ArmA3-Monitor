@@ -26,20 +26,3 @@ export async function bridgeFetch<T>(path: string, timeoutMs = 3000): Promise<T 
     clearTimeout(timer);
   }
 }
-
-/** GET raw bytes from the bridge (map tiles); null if unreachable or not found. */
-export async function bridgeFetchBytes(path: string, timeoutMs = 8000): Promise<ArrayBuffer | null> {
-  const headers: Record<string, string> = {};
-  if (process.env.TELEMETRY_API_KEY) headers['x-api-key'] = process.env.TELEMETRY_API_KEY;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(`${bridgeBaseUrl()}${path}`, { headers, signal: controller.signal, cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.arrayBuffer();
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}

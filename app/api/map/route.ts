@@ -40,8 +40,6 @@ export interface MapResponse {
   trails: Record<string, [number, number][]>;
   playersAt: string | null;
   delaySeconds: number;
-  /** Arma-style tile set rendered by the bridge; null until a detail export has arrived. */
-  tiles: { version: string | null; ready: boolean; rendering: boolean; progress: number | null; maxZoom: number } | null;
 }
 
 /** Live map state reported by the game server (zones, HQ, player positions). */
@@ -60,7 +58,6 @@ export async function GET() {
         trails: {},
         playersAt: null,
         delaySeconds: 0,
-        tiles: null,
       };
   return NextResponse.json(body, { headers: { 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=20' } });
 }

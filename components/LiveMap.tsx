@@ -35,7 +35,27 @@ const ZONE_KIND_LABELS: Record<MapZone['kind'], string> = {
 };
 
 const SEA = '#0c1a2b';
-const SEA_LIGHT = '#a6c4de'; // matches the tiles' sea
+
+/**
+ * Detailed base maps from jetelain/Arma3Map (https://github.com/jetelain/Arma3Map), keyed by
+ * lower-case worldName. Coordinates are game metres, like ours; the projection values come from
+ * that project's maps/<world>.js. Worlds without an entry fall back to the server's height grid.
+ */
+const BASEMAPS: Record<
+  string,
+  { url: string; factorX: number; factorY: number; tileSize: number; maxNativeZoom: number; sea: string; attribution: string }
+> = {
+  altis: {
+    url: 'https://jetelain.github.io/Arma3Map/maps/altis/{z}/{x}/{y}.png',
+    factorX: 0.006839,
+    factorY: 0.006836,
+    tileSize: 212,
+    maxNativeZoom: 6,
+    sea: '#aec0d5',
+    attribution:
+      '&copy; Bohemia Interactive (<a href="https://www.bohemia.net/community/licenses/arma-public-license" target="_blank" rel="noreferrer">APL</a>) · map tiles <a href="https://github.com/jetelain/Arma3Map" target="_blank" rel="noreferrer">jetelain/Arma3Map</a>',
+  },
+};
 
 /** Shaded relief from the server's height grid (rows south to north). */
 function renderTerrain(t: TerrainResponse): string {
@@ -99,7 +119,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     null,
   );
   const terrainLayer = useRef<Leaflet.ImageOverlay | null>(null);
-  const tileLayer = useRef<{ version: string; layer: Leaflet.TileLayer } | null>(null);
+  const tileLayer = useRef<Leaflet.TileLayer | null>(null);
   const fitted = useRef(false);
 
   // Poll the map state.
@@ -124,13 +144,13 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     };
   }, [autoRefresh]);
 
-  const tileVersion = data?.tiles?.ready ? data.tiles.version : null;
-
-  // Terrain once per world (only needed until the detailed tiles exist).
   const worldName = data?.world?.name;
+  const basemap = worldName ? BASEMAPS[worldName.toLowerCase()] : undefined;
+
+  // Shaded relief from the server's height grid, only for worlds without a detailed base map.
   const terrainAvailable = data?.terrainAvailable;
   useEffect(() => {
-    if (!worldName || !terrainAvailable || tileVersion) return;
+    if (!worldName || !terrainAvailable || basemap) return;
     let alive = true;
     fetch('/api/map/terrain')
       .then((r) => (r.ok ? r.json() : null))
@@ -141,32 +161,35 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     return () => {
       alive = false;
     };
-  }, [worldName, terrainAvailable, tileVersion]);
+  }, [worldName, terrainAvailable, basemap]);
 
   // Create the Leaflet map once data exists.
   const size = data?.world?.size;
   useEffect(() => {
-    if (!size || !container.current || lf.current) return;
+    if (!size || !worldName || !container.current || lf.current) return;
     let cancelled = false;
     import('leaflet').then((mod) => {
       if (cancelled || !container.current) return;
       const L = mod.default ?? mod;
       const bounds = L.latLngBounds([0, 0], [size, size]);
-      // Game metres as lat (north) / lng (east); the whole world is 256 px at zoom 0, which is
-      // also the bridge's tile scheme (tile y=0 at the north edge).
-      const scale = 256 / size;
-      const crs = L.extend({}, L.CRS.Simple, { transformation: new L.Transformation(scale, 0, -scale, 256) });
+      // Game metres as lat (north) / lng (east). With a base map, use its projection so its tiles
+      // line up; otherwise the whole world is 256 px at zoom 0.
+      const transformation = basemap
+        ? new L.Transformation(basemap.factorX, 0, -basemap.factorY, basemap.tileSize)
+        : new L.Transformation(256 / size, 0, -256 / size, 256);
+      const crs = L.extend({}, L.CRS.Simple, { transformation });
       const map = L.map(container.current, {
         crs,
         minZoom: 1,
         maxZoom: 7,
         // Whole zoom levels: tiles draw at native size (sharp, and no hairline seams between them).
         zoomSnap: 1,
-        attributionControl: false,
+        attributionControl: !!basemap,
         maxBounds: bounds.pad(0.1),
         maxBoundsViscosity: 0.8,
       });
       map.fitBounds(bounds);
+      map.attributionControl?.setPrefix(false);
       fitted.current = false;
       const towns = L.layerGroup();
       const updateTowns = () => {
@@ -181,7 +204,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [size]);
+  }, [size, worldName, basemap]);
 
   useEffect(
     () => () => {
@@ -191,31 +214,46 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     [],
   );
 
-  // Base map: Arma-style tiles once the bridge has rendered them, shaded relief until then.
+  // Base map: jetelain's detailed tiles when this world has them, shaded relief otherwise.
   useEffect(() => {
     const m = lf.current;
     if (!m || !size) return;
-    if (tileVersion) {
-      if (tileLayer.current?.version !== tileVersion) {
-        tileLayer.current?.layer.remove();
-        const layer = m.L.tileLayer(`/api/map/tiles/${tileVersion}/{z}/{x}/{y}.png`, {
-          tileSize: 256,
+    if (basemap) {
+      if (!tileLayer.current) {
+        tileLayer.current = m.L.tileLayer(basemap.url, {
+          tileSize: basemap.tileSize,
           minZoom: 0,
           maxZoom: 7,
-          maxNativeZoom: 6,
+          maxNativeZoom: basemap.maxNativeZoom,
           noWrap: true,
           bounds: m.L.latLngBounds([0, 0], [size, size]),
+          attribution: basemap.attribution,
         }).addTo(m.map);
-        layer.bringToBack();
-        tileLayer.current = { version: tileVersion, layer };
+        tileLayer.current.bringToBack();
+        // The base map's tiles run a few pixels past the world's east and north edges, where they
+        // are blank; paint those strips in the sea colour just above the tiles.
+        const pane = m.map.createPane('worldEdge');
+        pane.style.zIndex = '250';
+        pane.style.pointerEvents = 'none';
+        const far = size * 2;
+        for (const rect of [
+          [[-size, size], [far, far]],
+          [[size, -size], [far, size]],
+        ] as [number, number][][]) {
+          m.L.rectangle(m.L.latLngBounds(rect), {
+            pane: 'worldEdge',
+            stroke: false,
+            fillColor: basemap.sea,
+            fillOpacity: 1,
+            interactive: false,
+          }).addTo(m.map);
+        }
       }
-      terrainLayer.current?.remove();
-      terrainLayer.current = null;
     } else if (terrain && !terrainLayer.current) {
       terrainLayer.current = m.L.imageOverlay(terrain, [[0, 0], [size, size]], { interactive: false }).addTo(m.map);
       terrainLayer.current.bringToBack();
     }
-  }, [terrain, size, ready, tileVersion]);
+  }, [terrain, size, ready, basemap]);
 
   // Zones, towns, HQ, players.
   useEffect(() => {
@@ -228,13 +266,14 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     if (!fitted.current) {
       const pts = [...data.towns, ...data.zones].map((p) => [p.y, p.x] as [number, number]);
       if (pts.length > 1) {
-        map.fitBounds(L.latLngBounds(pts).pad(0.06));
+        map.fitBounds(L.latLngBounds(pts).pad(0.02));
         fitted.current = true;
       }
     }
     towns.clearLayers();
 
-    for (const t of data.towns) {
+    // The detailed base maps already print town names.
+    for (const t of basemap ? [] : data.towns) {
       if (!['NameCityCapital', 'NameCity', 'NameVillage'].includes(t.type)) continue;
       L.marker([t.y, t.x], {
         interactive: false,
@@ -289,7 +328,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
         })
         .addTo(layers);
     }
-  }, [data, ready]);
+  }, [data, ready, basemap]);
 
   if (!data) return null;
 
@@ -307,12 +346,6 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
                   data.delaySeconds > 0 ? `delayed ${Math.round(data.delaySeconds / 60)} min · ` : ''
                 }${formatSince(data.playersAt)}`
               : 'No players in the field'}
-            {data.tiles?.rendering && (
-              <span>
-                {' '}
-                · drawing detailed map{data.tiles.progress != null ? ` ${Math.round(data.tiles.progress * 100)}%` : ''}…
-              </span>
-            )}
           </div>
         </div>
         {military > 0 && (
@@ -333,9 +366,9 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
       <div
         ref={container}
         className={`aspect-square w-full border-t border-white/5 sm:aspect-auto sm:h-[60vh] sm:max-h-[640px] sm:min-h-[360px] ${
-          tileVersion ? 'map-light' : ''
+          basemap ? 'map-light' : ''
         }`}
-        style={{ background: tileVersion ? SEA_LIGHT : SEA }}
+        style={{ background: basemap ? basemap.sea : SEA }}
         aria-label={`Map of ${data.world?.name ?? 'the server'}`}
       />
     </div>
