@@ -208,6 +208,10 @@ pause
                 In-game radio (TFAR) runs over our TeamSpeak 3 server. Connect before you join; TFAR moves you into the{' '}
                 <strong className="text-slate-200">TaskForceRadio</strong> channel when the mission starts.
               </p>
+              <p className="rounded-sm bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-200 ring-1 ring-amber-500/20">
+                Use the <strong>TeamSpeak 3</strong> client (3.6.x, from teamspeak.com → Downloads). TeamSpeak 5 and 6 can&apos;t
+                load the TFAR plugin, so the game never links to them.
+              </p>
               <a
                 href={stats.teamspeakUrl}
                 className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-primary"
@@ -222,7 +226,8 @@ pause
                 First time: install the TFAR plugin by double-clicking{' '}
                 <code className="rounded bg-black/30 px-1">task_force_radio.ts3_plugin</code> in{' '}
                 <code className="break-all rounded bg-black/30 px-1">steamapps\workshop\content\107410\894678801\teamspeak</code>, then
-                enable it under <strong className="text-slate-300">Tools → Options → Addons</strong>.
+                enable it under <strong className="text-slate-300">Tools → Options → Addons</strong>. Run TeamSpeak and Arma the same
+                way (neither as administrator), or TFAR can&apos;t connect them.
               </p>
             </section>
           )}
