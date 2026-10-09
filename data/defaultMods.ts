@@ -37,6 +37,13 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3020755032"
   },
   {
+    id: "894678801",
+    name: "Task Force Arrowhead Radio (BETA!!!)",
+    category: "core",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=894678801"
+  },
+  {
     id: "463939057",
     name: "ace",
     category: "core",
