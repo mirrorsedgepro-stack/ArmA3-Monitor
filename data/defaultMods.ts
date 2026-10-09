@@ -329,63 +329,7 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2981582086"
   },
-  // Chernarus Redux + CUP + Antistasi Ultimate extenders
-  {
-    id: "583496184",
-    name: "CUP Terrains - Core",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583496184"
-  },
-  {
-    id: "583544987",
-    name: "CUP Terrains - Maps",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583544987"
-  },
-  {
-    id: "1981964169",
-    name: "CUP Terrains - Maps 2.0",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1981964169"
-  },
-  {
-    id: "853743366",
-    name: "CUP Terrains - CWA",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=853743366"
-  },
-  {
-    id: "1128256978",
-    name: "Chernarus Redux",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1128256978"
-  },
-  {
-    id: "497660133",
-    name: "CUP Weapons",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=497660133"
-  },
-  {
-    id: "497661914",
-    name: "CUP Units",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=497661914"
-  },
-  {
-    id: "541888371",
-    name: "CUP Vehicles",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=541888371"
-  },
+  // Antistasi Ultimate extenders
   {
     id: "3414068749",
     name: "A3UE - Faction Madness",
