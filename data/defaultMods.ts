@@ -65,37 +65,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1779063631"
   },
 
-  // ==========================================
-  // 2. RHS Factions & Military Gear (4 mods)
-  // ==========================================
-  {
-    id: "843425103",
-    name: "RHSAFRF",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=843425103"
-  },
-  {
-    id: "843577117",
-    name: "RHSUSAF",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=843577117"
-  },
-  {
-    id: "843593391",
-    name: "RHSGREF",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=843593391"
-  },
-  {
-    id: "843632231",
-    name: "RHSSAF",
-    category: "equipment",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=843632231"
-  },
 
   // ==========================================
   // 3. Movement, Animations & Gunplay (14 mods)
@@ -329,6 +298,70 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2981582086"
   },
+  // ==========================================
+  // CUP Weapons, Units & Vehicles (3 mods)
+  // ==========================================
+  {
+    id: "497660133",
+    name: "CUP Weapons",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=497660133"
+  },
+  {
+    id: "497661914",
+    name: "CUP Units",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=497661914"
+  },
+  {
+    id: "541888371",
+    name: "CUP Vehicles",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=541888371"
+  },
+
+  // ==========================================
+  // CUP Terrains & Chernarus Redux (5 mods)
+  // ==========================================
+  {
+    id: "583496184",
+    name: "CUP Terrains - Core",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583496184"
+  },
+  {
+    id: "583544987",
+    name: "CUP Terrains - Maps",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583544987"
+  },
+  {
+    id: "1981964169",
+    name: "CUP Terrains - Maps 2.0",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1981964169"
+  },
+  {
+    id: "853743366",
+    name: "CUP Terrains - CWA",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=853743366"
+  },
+  {
+    id: "1128256978",
+    name: "Chernarus Redux",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1128256978"
+  },
+
   // Antistasi Ultimate extenders
   {
     id: "3414068749",
