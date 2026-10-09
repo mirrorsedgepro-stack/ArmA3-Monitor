@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { X, Copy, Check, ChevronDown, Download, Play, HelpCircle, FileCode } from 'lucide-react';
+import { X, Copy, Check, ChevronDown, Download, Play, HelpCircle, FileCode, Mic } from 'lucide-react';
 import { ArmaServerStats } from '@/data/defaultServer';
 
 interface ConnectModalProps {
@@ -20,6 +20,7 @@ export function ConnectModal({
   const [copiedFull, setCopiedFull] = useState(false);
   const [copiedIpOnly, setCopiedIpOnly] = useState(false);
   const [copiedPortOnly, setCopiedPortOnly] = useState(false);
+  const [copiedTs, setCopiedTs] = useState(false);
   const [showTroubleshoot, setShowTroubleshoot] = useState(false);
 
   useEffect(() => {
@@ -49,6 +50,12 @@ export function ConnectModal({
     navigator.clipboard.writeText(stats.port.toString());
     setCopiedPortOnly(true);
     setTimeout(() => setCopiedPortOnly(false), 2000);
+  };
+
+  const copyTs = () => {
+    navigator.clipboard.writeText(stats.teamspeakAddress || '');
+    setCopiedTs(true);
+    setTimeout(() => setCopiedTs(false), 2000);
   };
 
   const downloadBatchScript = () => {
@@ -189,6 +196,36 @@ pause
               <Copyable label="Port" value={String(stats.port)} copied={copiedPortOnly} onCopy={copyPort} />
             </div>
           </section>
+
+          {/* Step 4 */}
+          {stats.teamspeakUrl && (
+            <section className="space-y-2 border-t border-white/5 pt-4">
+              <h3 className="flex items-center gap-2 text-sm font-medium text-slate-200">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-arma-red text-[11px] text-white">4</span>
+                Join TeamSpeak
+              </h3>
+              <p className="text-xs leading-relaxed text-slate-400">
+                In-game radio (TFAR) runs over our TeamSpeak 3 server. Connect before you join; TFAR moves you into the{' '}
+                <strong className="text-slate-200">TaskForceRadio</strong> channel when the mission starts.
+              </p>
+              <a
+                href={stats.teamspeakUrl}
+                className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-primary"
+              >
+                <Mic className="h-4 w-4" />
+                Connect with TeamSpeak 3
+              </a>
+              {stats.teamspeakAddress && (
+                <Copyable label="TeamSpeak address" value={stats.teamspeakAddress} copied={copiedTs} onCopy={copyTs} />
+              )}
+              <p className="text-xs leading-relaxed text-slate-500">
+                First time: install the TFAR plugin by double-clicking{' '}
+                <code className="rounded bg-black/30 px-1">task_force_radio.ts3_plugin</code> in{' '}
+                <code className="break-all rounded bg-black/30 px-1">steamapps\workshop\content\107410\894678801\teamspeak</code>, then
+                enable it under <strong className="text-slate-300">Tools → Options → Addons</strong>.
+              </p>
+            </section>
+          )}
 
           {/* Extras */}
           <section className="space-y-2 border-t border-white/5 pt-4">

@@ -339,7 +339,13 @@ export default function Home() {
               />
             )}
             {stats.teamspeakUrl && (
-              <ServiceCard icon={<Mic className={iconClass} />} name="TeamSpeak" description="Voice comms" href={stats.teamspeakUrl} />
+              <ServiceCard
+                icon={<Mic className={iconClass} />}
+                name="TeamSpeak"
+                description={stats.teamspeakAddress ? `${stats.teamspeakAddress} · TFAR voice` : 'Voice comms'}
+                href={stats.teamspeakUrl}
+                title="Open in TeamSpeak 3"
+              />
             )}
           </ServiceGroup>
         </div>

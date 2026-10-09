@@ -51,6 +51,8 @@ export interface ArmaServerStats {
   lastUpdated: string;
   discordUrl?: string;
   teamspeakUrl?: string;
+  /** What players type into TeamSpeak's Connect dialog */
+  teamspeakAddress?: string;
   // Verified static facts about the host (ipinfo for 180.181.238.103)
   location?: string;
   countryCode?: string;
@@ -116,10 +118,19 @@ export const SERVERS_LIST: ServerDefinition[] = [
   },
 ];
 
+// The community TeamSpeak runs next to the game servers (ArmaA's `teamspeak` service).
+export const TEAMSPEAK_HOST = process.env.NEXT_PUBLIC_TS3_HOST || SERVERS_LIST[0].ip;
+export const TEAMSPEAK_PORT = parseInt(process.env.NEXT_PUBLIC_TS3_PORT || "9987", 10);
+// A full NEXT_PUBLIC_TS3_URL may point anywhere, so only show an address we built ourselves.
+const teamspeakAddress = process.env.NEXT_PUBLIC_TS3_URL
+  ? ""
+  : TEAMSPEAK_PORT === 9987 ? TEAMSPEAK_HOST : `${TEAMSPEAK_HOST}:${TEAMSPEAK_PORT}`;
+
 export const DEFAULT_SERVER_CONFIG = {
   ...SERVERS_LIST[0],
   discordUrl: process.env.NEXT_PUBLIC_DISCORD_URL || "",
-  teamspeakUrl: process.env.NEXT_PUBLIC_TS3_URL || "",
+  teamspeakUrl: process.env.NEXT_PUBLIC_TS3_URL || `ts3server://${TEAMSPEAK_HOST}?port=${TEAMSPEAK_PORT}`,
+  teamspeakAddress,
 };
 
 /**
@@ -146,6 +157,7 @@ export const INITIAL_SERVER_STATS: ArmaServerStats = {
   lastUpdated: new Date(0).toISOString(),
   discordUrl: DEFAULT_SERVER_CONFIG.discordUrl,
   teamspeakUrl: DEFAULT_SERVER_CONFIG.teamspeakUrl,
+  teamspeakAddress: DEFAULT_SERVER_CONFIG.teamspeakAddress,
   location: 'Sydney, New South Wales, Australia',
   isp: 'Aussie Fibre Pty Ltd (AS4764)',
 };
