@@ -19,7 +19,7 @@ interface ModListProps {
 // Display grouping chosen by the server operator (not data from Steam).
 const CATEGORIES: { id: ArmaMod['category']; title: string }[] = [
   { id: 'core', title: 'Core & mission' },
-  { id: 'equipment', title: 'RHS factions & gear' },
+  { id: 'equipment', title: 'Factions, weapons & gear' },
   { id: 'realism', title: 'Movement, animation & gunplay' },
   { id: 'audio', title: 'Audio' },
   { id: 'visuals', title: 'Visual effects' },
