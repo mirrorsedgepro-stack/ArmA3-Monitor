@@ -90,16 +90,16 @@ export interface ServerDefinition {
 export const SERVERS_LIST: ServerDefinition[] = [
   {
     id: 'antistasi',
-    name: process.env.NEXT_PUBLIC_SERVER_NAME || "Frenchy's Antistasi Ultimate [CUP Chernarus Redux] | 32-Player Dedicated",
+    name: process.env.NEXT_PUBLIC_SERVER_NAME || "Frenchy's Antistasi Ultimate [RHS] | 32-Player Dedicated",
     ip: process.env.NEXT_PUBLIC_SERVER_IP || "180.181.238.103",
     port: parseInt(process.env.NEXT_PUBLIC_GAME_PORT || "2302", 10),
     queryPort: parseInt(process.env.NEXT_PUBLIC_QUERY_PORT || "2303", 10),
     telemetryPort: parseInt(process.env.NEXT_PUBLIC_TELEMETRY_PORT || "2310", 10),
     mode: "Antistasi Ultimate",
-    mission: "Antistasi Ultimate - Chernarus Redux",
-    map: "Chernarus Redux",
+    mission: "Antistasi Ultimate - Altis",
+    map: "Altis",
     hasModpack: true,
-    tagline: "Persistent Guerilla Campaign (49 Mods)",
+    tagline: "Persistent Guerilla Campaign (45 Mods)",
     maxPlayers: 32,
   },
   {
