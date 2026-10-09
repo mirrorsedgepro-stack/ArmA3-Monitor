@@ -15,8 +15,12 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const hours = Math.max(1, Math.min(720, parseInt(searchParams.get('hours') || '24', 10) || 24));
   const bucket = Math.max(1, Math.min(240, parseInt(searchParams.get('bucket') || '30', 10) || 30));
+  const port = searchParams.get('port');
+  const telemetryPort = searchParams.get('telemetryPort') || (port === '2402' ? '2410' : null);
   const data = await bridgeFetch<{ trackingSince: string | null; bucketMinutes: number; points: { t: string; players: number }[] }>(
     `/api/history?hours=${hours}&bucket=${bucket}`,
+    3000,
+    telemetryPort
   );
   const body: HistoryResponse = data
     ? { available: true, trackingSince: data.trackingSince, bucketMinutes: data.bucketMinutes, points: data.points }

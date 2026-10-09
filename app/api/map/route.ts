@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { bridgeFetch } from '@/lib/bridge';
 
 export const dynamic = 'force-dynamic';
@@ -43,8 +43,11 @@ export interface MapResponse {
 }
 
 /** Live map state reported by the game server (zones, HQ, player positions). */
-export async function GET() {
-  const data = await bridgeFetch<Omit<MapResponse, 'available'>>('/api/map');
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const port = searchParams.get('port');
+  const telemetryPort = searchParams.get('telemetryPort') || (port === '2402' ? '2410' : null);
+  const data = await bridgeFetch<Omit<MapResponse, 'available'>>('/api/map', 3000, telemetryPort);
   const body: MapResponse = data?.world
     ? { available: true, ...data }
     : {

@@ -110,7 +110,7 @@ const escapeHtml = (s: string) =>
  * Live map of the server: terrain, Antistasi zone ownership, rebel HQ and player positions.
  * Renders nothing until the game server has reported its map.
  */
-export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
+export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; port?: number }) {
   const [data, setData] = useState<MapResponse | null>(null);
   const [terrain, setTerrain] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -127,7 +127,8 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     let alive = true;
     const load = async () => {
       try {
-        const res = await fetch('/api/map');
+        const url = port ? `/api/map?port=${port}` : '/api/map';
+        const res = await fetch(url);
         if (!res.ok) return;
         const d: MapResponse = await res.json();
         if (alive && d.available) setData(d);
@@ -142,7 +143,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
       alive = false;
       clearInterval(t);
     };
-  }, [autoRefresh]);
+  }, [autoRefresh, port]);
 
   const worldName = data?.world?.name;
   const basemap = worldName ? BASEMAPS[worldName.toLowerCase()] : undefined;
@@ -152,7 +153,8 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
   useEffect(() => {
     if (!worldName || !terrainAvailable || basemap) return;
     let alive = true;
-    fetch('/api/map/terrain')
+    const url = port ? `/api/map/terrain?port=${port}` : '/api/map/terrain';
+    fetch(url)
       .then((r) => (r.ok ? r.json() : null))
       .then((t: TerrainResponse | null) => {
         if (alive && t?.rows?.length) setTerrain(renderTerrain(t));
@@ -161,7 +163,7 @@ export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
     return () => {
       alive = false;
     };
-  }, [worldName, terrainAvailable, basemap]);
+  }, [worldName, terrainAvailable, basemap, port]);
 
   // Create the Leaflet map once data exists.
   const size = data?.world?.size;

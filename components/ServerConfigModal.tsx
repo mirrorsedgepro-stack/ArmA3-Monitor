@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Settings, RotateCcw, Check, Save } from 'lucide-react';
-import { DEFAULT_SERVER_CONFIG } from '@/data/defaultServer';
+import { X, Settings, RotateCcw, Check, Save, Server } from 'lucide-react';
+import { DEFAULT_SERVER_CONFIG, SERVERS_LIST, ServerDefinition } from '@/data/defaultServer';
 
 interface ServerConfigModalProps {
   isOpen: boolean;
@@ -47,6 +47,14 @@ export function ServerConfigModal({
   }, [isOpen, currentConfig]);
 
   if (!isOpen) return null;
+
+  const handleSelectPreset = (preset: ServerDefinition) => {
+    setName(preset.name);
+    setIp(preset.ip);
+    setPort(preset.port.toString());
+    setQueryPort(preset.queryPort.toString());
+    setBmId(preset.bmId || '');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +107,29 @@ export function ServerConfigModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-3.5 overflow-y-auto">
+          <div>
+            <label className="block text-xs font-bold text-arma-text uppercase mb-1.5">
+              QUICK SERVER PRESETS
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {SERVERS_LIST.map((srv) => (
+                <button
+                  key={srv.id}
+                  type="button"
+                  onClick={() => handleSelectPreset(srv)}
+                  className={`flex flex-col items-start p-2 rounded-md border text-left transition-colors ${
+                    port === srv.port.toString()
+                      ? 'border-arma-red/60 bg-arma-red/10 text-slate-200'
+                      : 'border-white/10 bg-black/20 text-slate-400 hover:text-slate-200 hover:border-white/20'
+                  }`}
+                >
+                  <span className="text-[11px] font-bold truncate w-full">{srv.mode}</span>
+                  <span className="text-[10px] text-slate-500">Port {srv.port}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-arma-text uppercase mb-1">
               COMMUNITY / SERVER NAME

@@ -125,7 +125,8 @@ export default function Home() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/events?limit=300');
+        const url = serverConfig.port ? `/api/events?limit=300&port=${serverConfig.port}` : '/api/events?limit=300';
+        const res = await fetch(url);
         if (!res.ok) return;
         const data: EventsResponse = await res.json();
         if (data.available) setEvents(data.events);
@@ -137,7 +138,7 @@ export default function Home() {
     if (!autoRefresh) return;
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, [autoRefresh]);
+  }, [autoRefresh, serverConfig.port]);
 
   const handleDownloadPreset = () => {
     const html = generateArma3PresetHtml('FAS', mods);
@@ -369,13 +370,13 @@ export default function Home() {
           </ServiceGroup>
         )}
 
-        <MapSection autoRefresh={autoRefresh} />
+        <MapSection autoRefresh={autoRefresh} port={serverConfig.port} />
 
         <ActivitySection>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
             <div className="space-y-3 lg:col-span-3">
-              <PlayerHistoryGraph currentPlayers={online ? stats.players : null} maxPlayers={maxPlayers} serverName={stats.name} />
-              <TopPlayers livePlayers={stats.playerList || []} ranks={ranks} />
+              <PlayerHistoryGraph currentPlayers={online ? stats.players : null} maxPlayers={maxPlayers} serverName={stats.name} port={serverConfig.port} />
+              <TopPlayers livePlayers={stats.playerList || []} ranks={ranks} port={serverConfig.port} />
             </div>
             <div className="lg:col-span-2">
               <EventFeed events={events} />

@@ -11,6 +11,7 @@ interface TopPlayersProps {
   livePlayers?: ServerPlayer[];
   /** Latest Antistasi rank per player, from promotion events. */
   ranks?: Record<string, string>;
+  port?: number;
 }
 
 type SortCriteria = 'hours' | 'kills' | 'sessions' | 'deaths' | 'recent';
@@ -27,21 +28,22 @@ const SORTS: { id: SortCriteria; label: string }[] = [
  * Player leaderboard built only from sessions recorded in the server log.
  * Renders nothing until the bridge has returned at least one player.
  */
-export function TopPlayers({ livePlayers = [], ranks = {} }: TopPlayersProps) {
+export function TopPlayers({ livePlayers = [], ranks = {}, port }: TopPlayersProps) {
   const [players, setPlayers] = useState<PlayerRecord[]>([]);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortCriteria>('hours');
 
   const fetchPlayers = useCallback(async () => {
     try {
-      const res = await fetch('/api/players');
+      const url = port ? `/api/players?port=${port}` : '/api/players';
+      const res = await fetch(url);
       if (!res.ok) return;
       const data: PlayersResponse = await res.json();
       if (data.available && Array.isArray(data.players)) setPlayers(data.players);
     } catch {
       // Keep the last good list.
     }
-  }, []);
+  }, [port]);
 
   useEffect(() => {
     fetchPlayers();

@@ -45,8 +45,11 @@ export interface EventsResponse {
 
 /** Campaign event feed parsed from the game server's log by the telemetry bridge. */
 export async function GET(request: NextRequest) {
-  const limit = Math.max(1, Math.min(500, parseInt(new URL(request.url).searchParams.get('limit') || '200', 10) || 200));
-  const data = await bridgeFetch<{ trackingSince: string | null; events: CampaignEvent[] }>(`/api/events?limit=${limit}`);
+  const { searchParams } = new URL(request.url);
+  const limit = Math.max(1, Math.min(500, parseInt(searchParams.get('limit') || '200', 10) || 200));
+  const port = searchParams.get('port');
+  const telemetryPort = searchParams.get('telemetryPort') || (port === '2402' ? '2410' : null);
+  const data = await bridgeFetch<{ trackingSince: string | null; events: CampaignEvent[] }>(`/api/events?limit=${limit}`, 3000, telemetryPort);
   const body: EventsResponse = data
     ? { available: true, trackingSince: data.trackingSince, events: data.events }
     : { available: false, trackingSince: null, events: [] };

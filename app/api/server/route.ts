@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
 
   // 1. Telemetry bridge (only meaningful for the default host)
   if (host === DEFAULT_SERVER_CONFIG.ip) {
-    const bridge = await bridgeFetch<Partial<ArmaServerStats>>('/api/telemetry');
+    const telemetryPort = searchParams.get('telemetryPort') || (gamePort === 2402 ? '2410' : '2310');
+    const bridge = await bridgeFetch<Partial<ArmaServerStats>>('/api/telemetry', 3000, telemetryPort);
     if (bridge && bridge.status) {
       return json({ ...base, ...bridge, querySource: 'telemetry_bridge', lastUpdated: new Date().toISOString() } as ArmaServerStats, 5);
     }

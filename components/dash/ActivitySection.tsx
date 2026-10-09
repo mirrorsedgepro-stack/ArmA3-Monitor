@@ -16,10 +16,10 @@ export function ActivitySection({ children }: { children: React.ReactNode }) {
 }
 
 /** The Map group; hidden until the game server has reported its map. */
-export function MapSection({ autoRefresh }: { autoRefresh: boolean }) {
+export function MapSection({ autoRefresh, port }: { autoRefresh: boolean; port?: number }) {
   return (
     <ServiceGroup id="map" title="Map" icon={<MapIcon className="h-5 w-5 text-slate-400" />} className="[&:not(:has(.hp-card))]:hidden">
-      <LiveMap autoRefresh={autoRefresh} />
+      <LiveMap autoRefresh={autoRefresh} port={port} />
     </ServiceGroup>
   );
 }

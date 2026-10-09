@@ -100,6 +100,20 @@ export const SERVERS_LIST: ServerDefinition[] = [
     tagline: "Persistent Guerilla Campaign (40 Mods)",
     maxPlayers: 32,
   },
+  {
+    id: 'wasteland',
+    name: "Frenchy's A3Wasteland 64 Player",
+    ip: process.env.NEXT_PUBLIC_SERVER_IP || "180.181.238.103",
+    port: 2402,
+    queryPort: 2403,
+    telemetryPort: 2410,
+    mode: "Wasteland",
+    mission: "ArmA3_Wasteland.Altis",
+    map: "Altis",
+    hasModpack: false,
+    tagline: "Survival Sandbox with MariaDB Persistence",
+    maxPlayers: 64,
+  },
 ];
 
 export const DEFAULT_SERVER_CONFIG = {
