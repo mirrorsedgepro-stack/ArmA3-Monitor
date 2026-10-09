@@ -280,6 +280,7 @@ function formatMapName(rawMap: string): string {
   const clean = rawMap.toLowerCase().trim();
   const mapDictionary: Record<string, string> = {
     altis: 'Altis',
+    chernarusredux: 'Chernarus Redux',
     stratis: 'Stratis',
     tanoa: 'Tanoa',
     malden: 'Malden 2035',

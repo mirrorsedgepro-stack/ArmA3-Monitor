@@ -9,7 +9,7 @@ export interface ArmaMod {
 
 export const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
   core: { label: 'Core Framework', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-  equipment: { label: 'RHS Factions', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
+  equipment: { label: 'Factions & Gear', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
   realism: { label: 'Movement & Gunplay', color: 'bg-red-500/10 text-red-400 border-red-500/30' },
   audio: { label: 'Audio & SFX', color: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
   visuals: { label: 'Visuals & Blood', color: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
@@ -321,5 +321,90 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "qol",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2981582086"
+  },
+  // Chernarus Redux + CUP + Antistasi Ultimate extenders
+  {
+    id: "583496184",
+    name: "CUP Terrains - Core",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583496184"
+  },
+  {
+    id: "583544987",
+    name: "CUP Terrains - Maps",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583544987"
+  },
+  {
+    id: "1981964169",
+    name: "CUP Terrains - Maps 2.0",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1981964169"
+  },
+  {
+    id: "853743366",
+    name: "CUP Terrains - CWA",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=853743366"
+  },
+  {
+    id: "1128256978",
+    name: "Chernarus Redux",
+    category: "terrain",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1128256978"
+  },
+  {
+    id: "497660133",
+    name: "CUP Weapons",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=497660133"
+  },
+  {
+    id: "497661914",
+    name: "CUP Units",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=497661914"
+  },
+  {
+    id: "541888371",
+    name: "CUP Vehicles",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=541888371"
+  },
+  {
+    id: "3414068749",
+    name: "A3UE - Faction Madness",
+    category: "core",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3414068749"
+  },
+  {
+    id: "3792065519",
+    name: "[A3UE] - Frontlines & Patrols (A3U v12.0)",
+    category: "core",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3792065519"
+  },
+  {
+    id: "3457274925",
+    name: "A3UE Active-Anti-artillery-Defence-System",
+    category: "core",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3457274925"
+  },
+  {
+    id: "3558334679",
+    name: "A3UE - Point Campfire",
+    category: "core",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3558334679"
   }
 ];

@@ -439,6 +439,7 @@ export default function Home() {
         onClose={() => setIsPlayerModalOpen(false)}
         players={stats.playerList || []}
         serverName={serverConfig.name}
+        mapName={stats.map}
       />
 
       <PresetModal

@@ -5,13 +5,14 @@ import { X, Users, Search, Clock, Shield } from 'lucide-react';
 import { ServerPlayer } from '@/data/defaultServer';
 
 interface PlayerListModalProps {
+  mapName?: string;
   isOpen: boolean;
   onClose: () => void;
   players: ServerPlayer[];
   serverName: string;
 }
 
-export function PlayerListModal({ isOpen, onClose, players, serverName }: PlayerListModalProps) {
+export function PlayerListModal({ isOpen, onClose, players, serverName, mapName }: PlayerListModalProps) {
   const [filter, setFilter] = useState('');
 
   if (!isOpen) return null;
@@ -96,7 +97,7 @@ export function PlayerListModal({ isOpen, onClose, players, serverName }: Player
                         {player.name}
                       </div>
                       <div className="text-[10px] text-arma-textMuted">
-                        Playing on Altis
+                        Playing on {mapName || 'the server'}
                       </div>
                     </div>
                   </div>
