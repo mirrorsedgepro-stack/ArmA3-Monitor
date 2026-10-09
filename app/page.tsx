@@ -18,7 +18,7 @@ import { ActivitySection, MapSection } from '@/components/dash/ActivitySection';
 import { EventFeed } from '@/components/EventFeed';
 import type { CampaignEvent, EventsResponse } from '@/app/api/events/route';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
-import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
+import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition, DOWNLOADS } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
 import { formatAge, formatBool, formatNumber, formatUptime, has } from '@/lib/format';
 import {
@@ -33,6 +33,7 @@ import {
   Mic,
   Play,
   Swords,
+  Radio,
 } from 'lucide-react';
 
 /** Antistasi logs performance every 30 s while players are on; older than this is stale. */
@@ -345,6 +346,24 @@ export default function Home() {
                 description={stats.teamspeakAddress ? `${stats.teamspeakAddress} · TFAR voice` : 'Voice comms'}
                 href={stats.teamspeakUrl}
                 title="Open in TeamSpeak 3"
+              />
+            )}
+            {stats.teamspeakUrl && (
+              <ServiceCard
+                icon={<Download className={iconClass} />}
+                name="TeamSpeak 3 client"
+                description={`${DOWNLOADS.ts3Version} for Windows · needed for TFAR (not TS5/TS6)`}
+                href={DOWNLOADS.ts3Win64}
+                title="Download TeamSpeak 3 (64-bit) from teamspeak.com"
+              />
+            )}
+            {stats.teamspeakUrl && (
+              <ServiceCard
+                icon={<Radio className={iconClass} />}
+                name="TFAR radio plugin"
+                description="Double-click to install into TeamSpeak 3"
+                href={DOWNLOADS.tfarPlugin}
+                title="Download task_force_radio.ts3_plugin"
               />
             )}
           </ServiceGroup>

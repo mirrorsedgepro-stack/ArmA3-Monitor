@@ -118,6 +118,19 @@ export const SERVERS_LIST: ServerDefinition[] = [
   },
 ];
 
+// Player downloads for TFAR voice. The TeamSpeak 3 client is linked from TeamSpeak's own servers (its
+// licence doesn't allow re-hosting); the TFAR plugin (APL-SA) is hosted here, the same build as the server's
+// Workshop mod (894678801, plugin 1.-1.0.341).
+export const DOWNLOADS = {
+  ts3Win64: "https://files.teamspeak-services.com/releases/client/3.6.2/TeamSpeak3-Client-win64-3.6.2.exe",
+  ts3Win32: "https://files.teamspeak-services.com/releases/client/3.6.2/TeamSpeak3-Client-win32-3.6.2.exe",
+  ts3Version: "3.6.2",
+  tfarPlugin: "/downloads/task_force_radio.ts3_plugin",
+  tfarVersion: "1.-1.0.341",
+  tfarLicense: "https://www.bistudio.com/community/licenses/arma-public-license-share-alike",
+  tfarSource: "https://github.com/michail-nikolaev/task-force-arma-3-radio",
+};
+
 // The community TeamSpeak runs next to the game servers (ArmaA's `teamspeak` service).
 export const TEAMSPEAK_HOST = process.env.NEXT_PUBLIC_TS3_HOST || SERVERS_LIST[0].ip;
 export const TEAMSPEAK_PORT = parseInt(process.env.NEXT_PUBLIC_TS3_PORT || "9987", 10);

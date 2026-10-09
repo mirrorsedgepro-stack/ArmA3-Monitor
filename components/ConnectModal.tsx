@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, Copy, Check, ChevronDown, Download, Play, HelpCircle, FileCode, Mic } from 'lucide-react';
-import { ArmaServerStats } from '@/data/defaultServer';
+import { ArmaServerStats, DOWNLOADS } from '@/data/defaultServer';
 
 interface ConnectModalProps {
   isOpen: boolean;
@@ -209,26 +209,66 @@ pause
                 <strong className="text-slate-200">TaskForceRadio</strong> channel when the mission starts.
               </p>
               <p className="rounded-sm bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-200 ring-1 ring-amber-500/20">
-                Use the <strong>TeamSpeak 3</strong> client (3.6.x, from teamspeak.com → Downloads). TeamSpeak 5 and 6 can&apos;t
-                load the TFAR plugin, so the game never links to them.
+                Use the <strong>TeamSpeak 3</strong> client. TeamSpeak 5 and 6 can&apos;t load the TFAR plugin, so the game never
+                links to them.
               </p>
-              <a
-                href={stats.teamspeakUrl}
-                className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-primary"
-              >
-                <Mic className="h-4 w-4" />
-                Connect with TeamSpeak 3
-              </a>
-              {stats.teamspeakAddress && (
-                <Copyable label="TeamSpeak address" value={stats.teamspeakAddress} copied={copiedTs} onCopy={copyTs} />
-              )}
-              <p className="text-xs leading-relaxed text-slate-500">
-                First time: install the TFAR plugin by double-clicking{' '}
-                <code className="rounded bg-black/30 px-1">task_force_radio.ts3_plugin</code> in{' '}
-                <code className="break-all rounded bg-black/30 px-1">steamapps\workshop\content\107410\894678801\teamspeak</code>, then
-                enable it under <strong className="text-slate-300">Tools → Options → Addons</strong>. Run TeamSpeak and Arma the same
-                way (neither as administrator), or TFAR can&apos;t connect them.
-              </p>
+
+              <ol className="space-y-3">
+                <li className="space-y-1.5">
+                  <p className="text-xs font-medium text-slate-300">a. Install TeamSpeak 3 ({DOWNLOADS.ts3Version}, Windows)</p>
+                  <a
+                    href={DOWNLOADS.ts3Win64}
+                    className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-secondary"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download TeamSpeak 3 (64-bit)
+                  </a>
+                  <p className="text-[11px] text-slate-500">
+                    From TeamSpeak&apos;s own servers.{' '}
+                    <a href={DOWNLOADS.ts3Win32} className="underline hover:text-slate-300">32-bit version</a>
+                  </p>
+                </li>
+
+                <li className="space-y-1.5">
+                  <p className="text-xs font-medium text-slate-300">b. Install the TFAR radio plugin</p>
+                  <a
+                    href={DOWNLOADS.tfarPlugin}
+                    download
+                    className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-secondary"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download TFAR plugin (.ts3_plugin)
+                  </a>
+                  <p className="text-xs leading-relaxed text-slate-400">
+                    Double-click the file with TeamSpeak 3 installed, then enable{' '}
+                    <strong className="text-slate-200">Task Force Arrowhead Radio</strong> under{' '}
+                    <strong className="text-slate-200">Tools → Options → Addons</strong>. It&apos;s the same build as the
+                    Workshop mod (also in <code className="break-all rounded bg-black/30 px-1">steamapps\workshop\content\107410\894678801\teamspeak</code>).
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-slate-500">
+                    Task Force Arrowhead Radio {DOWNLOADS.tfarVersion}, © Michail Nikolaev and contributors, under the{' '}
+                    <a href={DOWNLOADS.tfarLicense} target="_blank" rel="noreferrer" className="underline hover:text-slate-300">APL-SA</a>{' '}
+                    (<a href={DOWNLOADS.tfarSource} target="_blank" rel="noreferrer" className="underline hover:text-slate-300">source</a>).
+                  </p>
+                </li>
+
+                <li className="space-y-1.5">
+                  <p className="text-xs font-medium text-slate-300">c. Connect</p>
+                  <a
+                    href={stats.teamspeakUrl}
+                    className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-primary"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Connect with TeamSpeak 3
+                  </a>
+                  {stats.teamspeakAddress && (
+                    <Copyable label="TeamSpeak address" value={stats.teamspeakAddress} copied={copiedTs} onCopy={copyTs} />
+                  )}
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    Run TeamSpeak and Arma the same way (neither as administrator), or TFAR can&apos;t connect them.
+                  </p>
+                </li>
+              </ol>
             </section>
           )}
 
