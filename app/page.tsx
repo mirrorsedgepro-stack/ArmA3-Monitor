@@ -16,6 +16,7 @@ import { StatusDot } from '@/components/dash/StatusDot';
 import { Bookmarks, Bookmark } from '@/components/dash/Bookmarks';
 import { ActivitySection, MapSection } from '@/components/dash/ActivitySection';
 import { EventFeed } from '@/components/EventFeed';
+import { TrainingPanel } from '@/components/TrainingPanel';
 import type { CampaignEvent, EventsResponse } from '@/app/api/events/route';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
 import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition, DOWNLOADS } from '@/data/defaultServer';
@@ -394,6 +395,8 @@ export default function Home() {
             </ServiceCard>
           </ServiceGroup>
         )}
+
+        <TrainingPanel autoRefresh={autoRefresh} />
 
         <MapSection autoRefresh={autoRefresh} port={serverConfig.port} />
 
