@@ -68,17 +68,17 @@ const BASEMAPS: Record<
   },
   // Chernarus Redux is Chernarus on a 16384 m world: every town sits where it does on classic Chernarus (all 46
   // checked against the server's map feed), so its "chernarus_a3s" tiles line up; they cover the first 15360 m.
+  // Our own tiles, rendered from the server's terrain export (scripts/basemap/render.py)
   chernarusredux: {
-    url: 'https://jetelain.github.io/Arma3Map/maps/chernarus_a3s/{z}/{x}/{y}.png',
-    factorX: 0.01575,
-    factorY: 0.01575,
-    tileSize: 242,
-    maxNativeZoom: 6,
-    sea: '#a7b9d1',
-    land: '#d7d7d5',
-    extent: 15360,
+    url: '/maps/chernarusredux/{z}/{x}/{y}.png',
+    factorX: 256 / 16384,
+    factorY: 256 / 16384,
+    tileSize: 256,
+    maxNativeZoom: 5,
+    sea: '#769ec7',
+    land: '#a5bf89',
     attribution:
-      '&copy; Bohemia Interactive, CUP Team (<a href="https://www.bohemia.net/community/licenses/arma-public-license" target="_blank" rel="noreferrer">APL</a>) · map tiles <a href="https://github.com/jetelain/Arma3Map" target="_blank" rel="noreferrer">jetelain/Arma3Map</a>',
+      'Map rendered from server terrain data &copy; Bohemia Interactive, CUP Team (<a href="https://www.bohemia.net/community/licenses/arma-public-license" target="_blank" rel="noreferrer">APL</a>)',
   },
 };
 
