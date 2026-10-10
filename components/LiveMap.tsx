@@ -43,7 +43,18 @@ const SEA = '#0c1a2b';
  */
 const BASEMAPS: Record<
   string,
-  { url: string; factorX: number; factorY: number; tileSize: number; maxNativeZoom: number; sea: string; attribution: string }
+  {
+    url: string;
+    factorX: number;
+    factorY: number;
+    tileSize: number;
+    maxNativeZoom: number;
+    sea: string;
+    attribution: string;
+    /** Metres the tiles cover when less than the world (the rest is painted: sea to the east, `land` to the north). */
+    extent?: number;
+    land?: string;
+  }
 > = {
   altis: {
     url: 'https://jetelain.github.io/Arma3Map/maps/altis/{z}/{x}/{y}.png',
@@ -54,6 +65,20 @@ const BASEMAPS: Record<
     sea: '#aec0d5',
     attribution:
       '&copy; Bohemia Interactive (<a href="https://www.bohemia.net/community/licenses/arma-public-license" target="_blank" rel="noreferrer">APL</a>) · map tiles <a href="https://github.com/jetelain/Arma3Map" target="_blank" rel="noreferrer">jetelain/Arma3Map</a>',
+  },
+  // Chernarus Redux is Chernarus on a 16384 m world: every town sits where it does on classic Chernarus (all 46
+  // checked against the server's map feed), so its "chernarus_a3s" tiles line up; they cover the first 15360 m.
+  chernarusredux: {
+    url: 'https://jetelain.github.io/Arma3Map/maps/chernarus_a3s/{z}/{x}/{y}.png',
+    factorX: 0.01575,
+    factorY: 0.01575,
+    tileSize: 242,
+    maxNativeZoom: 6,
+    sea: '#a7b9d1',
+    land: '#d7d7d5',
+    extent: 15360,
+    attribution:
+      '&copy; Bohemia Interactive, CUP Team (<a href="https://www.bohemia.net/community/licenses/arma-public-license" target="_blank" rel="noreferrer">APL</a>) · map tiles <a href="https://github.com/jetelain/Arma3Map" target="_blank" rel="noreferrer">jetelain/Arma3Map</a>',
   },
 };
 
@@ -228,7 +253,7 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
           maxZoom: 7,
           maxNativeZoom: basemap.maxNativeZoom,
           noWrap: true,
-          bounds: m.L.latLngBounds([0, 0], [size, size]),
+          bounds: m.L.latLngBounds([0, 0], [basemap.extent ?? size, basemap.extent ?? size]),
           attribution: basemap.attribution,
         }).addTo(m.map);
         tileLayer.current.bringToBack();
@@ -237,15 +262,16 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
         const pane = m.map.createPane('worldEdge');
         pane.style.zIndex = '250';
         pane.style.pointerEvents = 'none';
+        const edge = basemap.extent ?? size; // where the tiles end
         const far = size * 2;
-        for (const rect of [
-          [[-size, size], [far, far]],
-          [[size, -size], [far, size]],
-        ] as [number, number][][]) {
+        for (const [rect, colour] of [
+          [[[-size, edge], [far, far]], basemap.sea], // east
+          [[[edge, -size], [far, edge]], basemap.land ?? basemap.sea], // north
+        ] as [[number, number][], string][]) {
           m.L.rectangle(m.L.latLngBounds(rect), {
             pane: 'worldEdge',
             stroke: false,
-            fillColor: basemap.sea,
+            fillColor: colour,
             fillOpacity: 1,
             interactive: false,
           }).addTo(m.map);
