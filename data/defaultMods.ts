@@ -390,5 +390,26 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "core",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3558334679"
+  },
+  {
+    id: "3805259447",
+    name: "[A3UE] Coalition Factions Extender",
+    category: "core",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3805259447"
+  },
+  {
+    id: "3762390554",
+    name: "[A3UE] CL's Antistasi QoL Tweaks",
+    category: "qol",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3762390554"
+  },
+  {
+    id: "2946868556",
+    name: "ACSTG AI Cannot See Through Grass",
+    category: "realism",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2946868556"
   }
 ];
