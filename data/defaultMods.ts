@@ -404,12 +404,5 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "qol",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3762390554"
-  },
-  {
-    id: "2946868556",
-    name: "ACSTG AI Cannot See Through Grass",
-    category: "realism",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2946868556"
   }
 ];
