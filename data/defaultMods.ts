@@ -404,5 +404,12 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "qol",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3762390554"
+  },
+  {
+    id: "3346427969",
+    name: "Hide Among The Grass - HATG",
+    category: "realism",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3346427969"
   }
 ];
