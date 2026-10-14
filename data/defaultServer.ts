@@ -99,7 +99,7 @@ export const SERVERS_LIST: ServerDefinition[] = [
     mission: "Antistasi Ultimate - Chernarus Redux",
     map: "Chernarus Redux",
     hasModpack: true,
-    tagline: "Persistent Guerilla Campaign (49 Mods)",
+    tagline: "Persistent Guerilla Campaign (59 Mods)",
     maxPlayers: 32,
   },
   {

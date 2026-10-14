@@ -322,9 +322,82 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=541888371"
   },
+  // ==========================================
+  // Weapon packs - Antistasi Ultimate arms trader (10 mods)
+  // ==========================================
+  {
+    id: "2595680138",
+    name: "NIArms All In One",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2595680138"
+  },
+  {
+    id: "699630614",
+    name: "Specialist Military Arms (SMA)",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=699630614"
+  },
+  {
+    id: "2424797017",
+    name: "The Free World Armoury",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2424797017"
+  },
+  {
+    id: "3333302397",
+    name: "JCA - Infantry Arsenal",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3333302397"
+  },
+  {
+    id: "807038742",
+    name: "Project Infinite - All in one",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=807038742"
+  },
+  {
+    id: "3052209341",
+    name: "YLArms All In One",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3052209341"
+  },
+  {
+    id: "3557431447",
+    name: "Quiggs's Firearms Pack",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3557431447"
+  },
+  {
+    id: "3564392635",
+    name: "Modern Sniper Systems (All-in-One)",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3564392635"
+  },
+  {
+    id: "3742163031",
+    name: "ReArma Rus Weapons",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3742163031"
+  },
+  {
+    id: "3770609240",
+    name: "ReArma US Weapons",
+    category: "equipment",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3770609240"
+  },
 
   // ==========================================
-  // CUP Terrains & Chernarus Redux (5 mods)
+  // CUP Terrains & Chernarus Redux (2 mods)
   // ==========================================
   {
     id: "583496184",
@@ -332,27 +405,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "terrain",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583496184"
-  },
-  {
-    id: "583544987",
-    name: "CUP Terrains - Maps",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=583544987"
-  },
-  {
-    id: "1981964169",
-    name: "CUP Terrains - Maps 2.0",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1981964169"
-  },
-  {
-    id: "853743366",
-    name: "CUP Terrains - CWA",
-    category: "terrain",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=853743366"
   },
   {
     id: "1128256978",
