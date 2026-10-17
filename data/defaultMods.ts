@@ -197,11 +197,11 @@ export const DEFAULT_MODS: ArmaMod[] = [
   // 5. Visuals, Particles & Blood (7 mods)
   // ==========================================
   {
-    id: "2257686620",
-    name: "Blastcore Murr Edition",
+    id: "3784954744",
+    name: "Blastcore CoB Edition",
     category: "visuals",
     required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2257686620"
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3784954744"
   },
   {
     id: "2309871702",

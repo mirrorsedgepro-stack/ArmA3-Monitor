@@ -116,7 +116,16 @@ ${modRows}
       </table>
     </div>
     <div class="dlc-list">
-      <table />
+      <table>
+        <tr data-type="DlcContainer">
+          <td data-type="DisplayName">Apex</td>
+          <td><a href="https://store.steampowered.com/app/395180" data-type="Link">https://store.steampowered.com/app/395180</a></td>
+        </tr>
+        <tr data-type="DlcContainer">
+          <td data-type="DisplayName">Jets</td>
+          <td><a href="https://store.steampowered.com/app/601670" data-type="Link">https://store.steampowered.com/app/601670</a></td>
+        </tr>
+      </table>
     </div>
     <div class="footer">
       <span>Created by Arma 3 Launcher by Bohemia Interactive.</span>
