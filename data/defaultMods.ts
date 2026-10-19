@@ -18,7 +18,7 @@ export const CATEGORY_LABELS: Record<string, { label: string; color: string }> =
   server: { label: 'Server & Admin', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30' },
 };
 
-// Matches the server preset (~/A3Wasteland/configs/preset.html), 46 mods.
+// Matches the server preset (~/A3Wasteland/configs/preset.html), 45 mods.
 export const DEFAULT_MODS: ArmaMod[] = [
   // ==========================================
   // 1. Core Framework (2 mods)
@@ -216,13 +216,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "qol",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2791403093"
-  },
-  {
-    id: "2981582086",
-    name: "Simplex Tools and Extensions",
-    category: "qol",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2981582086"
   },
   {
     id: "2800081814",
