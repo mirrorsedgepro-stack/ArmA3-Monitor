@@ -210,7 +210,7 @@ pause
               <li>
                 Stores in Chernogorsk, Elektrozavodsk, Berezino, Zelenogorsk, Stary Sobor and Krasnostav.
               </li>
-              <li>Hold any of the 12 capture territories and your team gets paid for it.</li>
+              <li>Hold any of the 14 capture territories and your team gets paid for it.</li>
               <li>R3F logistics: tow, lift and load crates and vehicles. Lock your base objects to keep them yours.</li>
               <li>Your gear, money, bases and vehicles are saved between sessions.</li>
             </ul>
