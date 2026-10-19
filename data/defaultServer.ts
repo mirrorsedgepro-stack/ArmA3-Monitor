@@ -79,7 +79,7 @@ export const SERVERS_LIST: ServerDefinition[] = [
     mission: "Frenchy's A3Wasteland Chernarus Redux [CUP]",
     map: "Chernarus Redux",
     hasModpack: true,
-    tagline: "Persistent PvP Survival Sandbox (47 Mods)",
+    tagline: "Persistent PvP Survival Sandbox (46 Mods)",
     maxPlayers: 64,
   },
 ];

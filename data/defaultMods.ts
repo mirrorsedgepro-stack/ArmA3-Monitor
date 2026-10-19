@@ -18,7 +18,7 @@ export const CATEGORY_LABELS: Record<string, { label: string; color: string }> =
   server: { label: 'Server & Admin', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30' },
 };
 
-// Matches the server preset (~/A3Wasteland/configs/preset.html), 47 mods.
+// Matches the server preset (~/A3Wasteland/configs/preset.html), 46 mods.
 export const DEFAULT_MODS: ArmaMod[] = [
   // ==========================================
   // 1. Core Framework (2 mods)
@@ -74,13 +74,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "realism",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2198339170"
-  },
-  {
-    id: "1841047025",
-    name: "Prone Launcher",
-    category: "realism",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1841047025"
   },
   {
     id: "3165450999",
