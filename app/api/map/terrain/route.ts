@@ -14,8 +14,7 @@ export interface TerrainResponse {
 /** Height grid the game server sampled from its own terrain. Changes only with the map. */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const port = searchParams.get('port');
-  const telemetryPort = searchParams.get('telemetryPort') || (port === '2402' ? '2410' : null);
+  const telemetryPort = searchParams.get('telemetryPort');
   const data = await bridgeFetch<TerrainResponse>('/api/map/terrain', 10000, telemetryPort);
   if (!data?.rows?.length) {
     return NextResponse.json({ error: 'Terrain not available' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });

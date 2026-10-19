@@ -3,36 +3,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { MapResponse, MapZone } from '@/app/api/map/route';
+import type { MapResponse } from '@/app/api/map/route';
 import type { TerrainResponse } from '@/app/api/map/terrain/route';
 import { formatSince } from '@/lib/format';
-
-const SIDE_COLORS: Record<string, string> = {
-  GUER: '#22c55e', // rebels
-  WEST: '#ef4444', // occupants
-  EAST: '#f97316', // invaders
-  CIV: '#94a3b8',
-};
-const SIDE_LABELS: Record<string, string> = { GUER: 'Rebels', WEST: 'Occupants', EAST: 'Invaders', CIV: 'Civilian' };
-
-const ZONE_RADIUS: Record<MapZone['kind'], number> = {
-  airbase: 7,
-  milbase: 6,
-  outpost: 5,
-  seaport: 4,
-  factory: 4,
-  resource: 4,
-  city: 3,
-};
-const ZONE_KIND_LABELS: Record<MapZone['kind'], string> = {
-  airbase: 'Airbase',
-  milbase: 'Military base',
-  outpost: 'Outpost',
-  seaport: 'Seaport',
-  factory: 'Factory',
-  resource: 'Resource',
-  city: 'Town',
-};
 
 const SEA = '#0c1a2b';
 
@@ -132,10 +105,10 @@ const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!);
 
 /**
- * Live map of the server: terrain, Antistasi zone ownership, rebel HQ and player positions.
+ * Live map of the server: terrain, towns and player positions.
  * Renders nothing until the game server has reported its map.
  */
-export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; port?: number }) {
+export function LiveMap({ autoRefresh = true }: { autoRefresh?: boolean }) {
   const [data, setData] = useState<MapResponse | null>(null);
   const [terrain, setTerrain] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -152,8 +125,7 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
     let alive = true;
     const load = async () => {
       try {
-        const url = port ? `/api/map?port=${port}` : '/api/map';
-        const res = await fetch(url);
+        const res = await fetch('/api/map');
         if (!res.ok) return;
         const d: MapResponse = await res.json();
         if (alive && d.available) setData(d);
@@ -168,7 +140,7 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
       alive = false;
       clearInterval(t);
     };
-  }, [autoRefresh, port]);
+  }, [autoRefresh]);
 
   const worldName = data?.world?.name;
   const basemap = worldName ? BASEMAPS[worldName.toLowerCase()] : undefined;
@@ -178,8 +150,7 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
   useEffect(() => {
     if (!worldName || !terrainAvailable || basemap) return;
     let alive = true;
-    const url = port ? `/api/map/terrain?port=${port}` : '/api/map/terrain';
-    fetch(url)
+    fetch('/api/map/terrain')
       .then((r) => (r.ok ? r.json() : null))
       .then((t: TerrainResponse | null) => {
         if (alive && t?.rows?.length) setTerrain(renderTerrain(t));
@@ -188,7 +159,7 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
     return () => {
       alive = false;
     };
-  }, [worldName, terrainAvailable, basemap, port]);
+  }, [worldName, terrainAvailable, basemap]);
 
   // Create the Leaflet map once data exists.
   const size = data?.world?.size;
@@ -283,16 +254,16 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
     }
   }, [terrain, size, ready, basemap]);
 
-  // Zones, towns, HQ, players.
+  // Towns, trails, players.
   useEffect(() => {
     const m = lf.current;
     if (!m || !data) return;
     const { L, map, layers, towns } = m;
     layers.clearLayers();
 
-    // First draw: frame the area that has towns and zones rather than the whole (mostly sea) square.
+    // First draw: frame the area that has towns rather than the whole (mostly sea) square.
     if (!fitted.current) {
-      const pts = [...data.towns, ...data.zones].map((p) => [p.y, p.x] as [number, number]);
+      const pts = data.towns.map((p) => [p.y, p.x] as [number, number]);
       if (pts.length > 1) {
         map.fitBounds(L.latLngBounds(pts).pad(0.02));
         fitted.current = true;
@@ -311,31 +282,6 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
           iconSize: [0, 0],
         }),
       }).addTo(towns);
-    }
-
-    for (const z of data.zones) {
-      const color = (z.side && SIDE_COLORS[z.side]) || '#64748b';
-      const owner = (z.side && SIDE_LABELS[z.side]) || 'Unknown';
-      const since = z.changedAt ? ` · since ${formatSince(z.changedAt)}` : '';
-      L.circleMarker([z.y, z.x], {
-        radius: ZONE_RADIUS[z.kind] ?? 4,
-        color: z.kind === 'airbase' || z.kind === 'milbase' ? '#e2e8f0' : color,
-        weight: z.kind === 'airbase' || z.kind === 'milbase' ? 1.5 : 1,
-        fillColor: color,
-        fillOpacity: z.kind === 'city' ? 0.5 : 0.85,
-      })
-        .bindTooltip(`<b>${escapeHtml(z.label)}</b><br>${ZONE_KIND_LABELS[z.kind] ?? z.kind} · ${owner}${since}`, {
-          direction: 'top',
-        })
-        .addTo(layers);
-    }
-
-    if (data.hq) {
-      L.marker([data.hq.y, data.hq.x], {
-        icon: L.divIcon({ className: '', html: '<span class="map-hq">HQ</span>', iconSize: [0, 0] }),
-      })
-        .bindTooltip('<b>Rebel HQ</b>', { direction: 'top' })
-        .addTo(layers);
     }
 
     for (const trail of Object.values(data.trails)) {
@@ -360,9 +306,6 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
 
   if (!data) return null;
 
-  const owned = (side: string) => data.zones.filter((z) => z.kind !== 'city' && z.side === side).length;
-  const military = data.zones.filter((z) => z.kind !== 'city').length;
-
   return (
     <div className="hp-card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
@@ -376,20 +319,6 @@ export function LiveMap({ autoRefresh = true, port }: { autoRefresh?: boolean; p
               : 'No players in the field'}
           </div>
         </div>
-        {military > 0 && (
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-400">
-            {(['GUER', 'WEST', 'EAST'] as const).map((s) => (
-              <span key={s} className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full" style={{ background: SIDE_COLORS[s] }} />
-                {SIDE_LABELS[s]} {owned(s)}
-              </span>
-            ))}
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full border-2 border-slate-100 bg-sky-400" />
-              Players
-            </span>
-          </div>
-        )}
       </div>
       <div
         ref={container}

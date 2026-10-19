@@ -1,6 +1,6 @@
 import { DEFAULT_SERVER_CONFIG } from '@/data/defaultServer';
 
-/** Base URL of the telemetry bridge running on the game host (port 2310 default, or custom e.g. 2410). */
+/** Base URL of the telemetry bridge running on the game host (port 2310 by default). */
 export function bridgeBaseUrl(telemetryPort?: number | string | null): string {
   if (process.env.TELEMETRY_BRIDGE_URL && !telemetryPort) {
     // Accept either the base URL or the legacy .../api/telemetry form.

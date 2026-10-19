@@ -16,29 +16,22 @@ import { StatusDot } from '@/components/dash/StatusDot';
 import { Bookmarks, Bookmark } from '@/components/dash/Bookmarks';
 import { ActivitySection, MapSection } from '@/components/dash/ActivitySection';
 import { EventFeed } from '@/components/EventFeed';
-import { TrainingPanel } from '@/components/TrainingPanel';
-import type { CampaignEvent, EventsResponse } from '@/app/api/events/route';
+import type { ServerEvent, EventsResponse } from '@/app/api/events/route';
 import { DEFAULT_MODS, ArmaMod } from '@/data/defaultMods';
-import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition, DOWNLOADS } from '@/data/defaultServer';
+import { INITIAL_SERVER_STATS, SERVERS_LIST, ArmaServerStats, ServerDefinition } from '@/data/defaultServer';
 import { generateArma3PresetHtml } from '@/lib/presetGenerator';
-import { formatAge, formatBool, formatNumber, formatUptime, has } from '@/lib/format';
+import { formatBool, formatNumber, formatUptime, has } from '@/lib/format';
 import {
   Check,
   Copy,
   Crosshair,
   Download,
-  Flag,
   HardDrive,
   Layers,
   MessageCircle,
   Mic,
   Play,
-  Swords,
-  Radio,
 } from 'lucide-react';
-
-/** Antistasi logs performance every 30 s while players are on; older than this is stale. */
-const STALE_SAMPLE_SECONDS = 300;
 
 export default function Home() {
   const [serverConfig, setServerConfig] = useState<ServerDefinition>(SERVERS_LIST[0]);
@@ -48,7 +41,7 @@ export default function Home() {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
-  const [events, setEvents] = useState<CampaignEvent[]>([]);
+  const [events, setEvents] = useState<ServerEvent[]>([]);
 
   // Modals state
   const [isPlayerModalOpen, setIsPlayerModalOpen] = useState<boolean>(false);
@@ -127,8 +120,7 @@ export default function Home() {
   useEffect(() => {
     const load = async () => {
       try {
-        const url = serverConfig.port ? `/api/events?limit=300&port=${serverConfig.port}` : '/api/events?limit=300';
-        const res = await fetch(url);
+        const res = await fetch('/api/events?limit=300');
         if (!res.ok) return;
         const data: EventsResponse = await res.json();
         if (data.available) setEvents(data.events);
@@ -140,7 +132,7 @@ export default function Home() {
     if (!autoRefresh) return;
     const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, [autoRefresh, serverConfig.port]);
+  }, [autoRefresh]);
 
   const handleDownloadPreset = () => {
     const html = generateArma3PresetHtml('FAS', mods);
@@ -201,20 +193,12 @@ export default function Home() {
   const fps = online ? stats.serverFps ?? null : null;
   const hc = online ? stats.headlessClients ?? null : null;
   const cfg = stats.serverConfig;
-  const perf = stats.performance ?? null;
-  const perfStale = !!perf && perf.ageSeconds > STALE_SAMPLE_SECONDS;
   const address = `${stats.ip}:${stats.port}`;
   const uptime = online && has(stats.uptimeSeconds) ? stats.uptimeSeconds : null;
 
   const fpsTone = fps == null ? 'default' : fps >= 35 ? 'good' : fps >= 20 ? 'warn' : 'bad';
   const hcTone = !hc ? 'default' : hc.active >= hc.expected ? 'good' : hc.active > 0 ? 'warn' : 'bad';
   const iconClass = 'h-7 w-7';
-
-  // Latest Antistasi rank per player (events are newest first).
-  const ranks: Record<string, string> = {};
-  for (const e of events) {
-    if (e.type === 'promotion' && e.player && e.rank && !ranks[e.player]) ranks[e.player] = e.rank;
-  }
 
   // Bridge config facts first, then what the Steam query tags report.
   const difficulty = cfg?.difficulty ?? stats.difficulty ?? null;
@@ -232,12 +216,9 @@ export default function Home() {
 
   const bookmarks: Bookmark[] = [
     { abbr: 'A3', name: 'Arma 3 Launcher', description: 'steam://run/107410', href: 'steam://run/107410' },
-    { abbr: 'AU', name: 'Antistasi Ultimate', description: 'Steam Workshop', href: 'https://steamcommunity.com/sharedfiles/filedetails/?id=3020755032' },
-    { abbr: 'GH', name: 'Antistasi Ultimate source', description: 'github.com', href: 'https://github.com/SilenceIsFatto/A3-Antistasi-Ultimate' },
-    { abbr: 'AC', name: 'ACE3 wiki', description: 'ace3.acemod.org', href: 'https://ace3.acemod.org/wiki/' },
-    { abbr: 'SV', name: 'Server setup (ARM64)', description: 'github.com', href: 'https://github.com/mirrorsedgepro-stack/ArmA3-Ultimate-Antistasi-Arm64' },
+    { abbr: 'CR', name: 'Chernarus Redux', description: 'Steam Workshop', href: 'https://steamcommunity.com/sharedfiles/filedetails/?id=1128256978' },
+    { abbr: 'GH', name: 'A3Wasteland source', description: 'github.com', href: 'https://github.com/A3Wasteland/ArmA3_Wasteland.Altis' },
     ...(stats.discordUrl ? [{ abbr: 'DC', name: 'Discord', description: 'Community', href: stats.discordUrl }] : []),
-    ...(stats.teamspeakUrl ? [{ abbr: 'TS', name: 'TeamSpeak', description: 'Voice', href: stats.teamspeakUrl }] : []),
   ];
 
   const serverDescription = [stats.map, stats.version && `v${stats.version}`, address].filter(has).join(' · ');
@@ -258,7 +239,7 @@ export default function Home() {
           <ServiceGroup id="overview" title="Server" columns="grid-cols-1">
             <ServiceCard
               icon={<Crosshair className={`${iconClass} text-arma-red`} />}
-              name={stats.mission || 'Antistasi Ultimate'}
+              name={stats.mission || 'A3Wasteland'}
               description={serverDescription}
               status={<StatusDot status={stats.status} ping={stats.ping} />}
               onClick={online && stats.playerList?.length ? () => setIsPlayerModalOpen(true) : undefined}
@@ -272,7 +253,6 @@ export default function Home() {
                       label="FPS"
                       value={formatNumber(fps, 1)}
                       tone={fpsTone}
-                      title={perf ? `Sampled ${formatAge(perf.ageSeconds)}` : undefined}
                     />
                   )}
                   {hc && <StatBlock label="HCs" value={`${hc.active}/${hc.expected}`} tone={hcTone} />}
@@ -340,71 +320,21 @@ export default function Home() {
                 href="#mods"
               />
             )}
-            {stats.teamspeakUrl && (
-              <ServiceCard
-                icon={<Mic className={iconClass} />}
-                name="TeamSpeak"
-                description={stats.teamspeakAddress ? `${stats.teamspeakAddress} · TFAR voice` : 'Voice comms'}
-                href={stats.teamspeakUrl}
-                title="Open in TeamSpeak 3"
-              />
-            )}
-            {stats.teamspeakUrl && (
-              <ServiceCard
-                icon={<Download className={iconClass} />}
-                name="TeamSpeak 3 client"
-                description={`${DOWNLOADS.ts3Version} for Windows · needed for TFAR (not TS5/TS6)`}
-                href={DOWNLOADS.ts3Win64}
-                title="Download TeamSpeak 3 (64-bit) from teamspeak.com"
-              />
-            )}
-            {stats.teamspeakUrl && (
-              <ServiceCard
-                icon={<Radio className={iconClass} />}
-                name="TFAR radio plugin"
-                description="Double-click to install into TeamSpeak 3"
-                href={DOWNLOADS.tfarPlugin}
-                title="Download task_force_radio.ts3_plugin"
-              />
-            )}
+            <ServiceCard
+              icon={<Mic className={iconClass} />}
+              name="In-game voice"
+              description="VON · Side / Group / Direct · hold Caps Lock to talk"
+            />
           </ServiceGroup>
         </div>
 
-        {perf && (
-          <ServiceGroup id="campaign" title="Campaign" columns="grid-cols-1 lg:grid-cols-2">
-            <ServiceCard
-              icon={<Flag className={iconClass} />}
-              name="Rebel faction"
-              description={`Sampled ${formatAge(perf.ageSeconds)}${perfStale ? ' · last values while players were online' : ''}`}
-            >
-              <StatRow>
-                <StatBlock label="War level" value={perf.warLevel} />
-                <StatBlock label="HR" value={perf.hr} />
-                <StatBlock label="Money" value={`€${formatNumber(perf.factionCash)}`} />
-                <StatBlock label="Occ. aggro" value={perf.occAggro} />
-                <StatBlock label="Inv. aggro" value={perf.invAggro} />
-              </StatRow>
-            </ServiceCard>
-            <ServiceCard icon={<Swords className={iconClass} />} name="World" description="Simulation load on the server">
-              <StatRow>
-                <StatBlock label="Units" value={perf.allUnits} />
-                <StatBlock label="Dead" value={perf.deadUnits} />
-                <StatBlock label="Vehicles" value={perf.allVehicles} />
-                <StatBlock label="Clients" value={perf.connectedClientsInclHCs} title="Including headless clients" />
-              </StatRow>
-            </ServiceCard>
-          </ServiceGroup>
-        )}
-
-        <TrainingPanel autoRefresh={autoRefresh} />
-
-        <MapSection autoRefresh={autoRefresh} port={serverConfig.port} />
+        <MapSection autoRefresh={autoRefresh} />
 
         <ActivitySection>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
             <div className="space-y-3 lg:col-span-3">
-              <PlayerHistoryGraph currentPlayers={online ? stats.players : null} maxPlayers={maxPlayers} serverName={stats.name} port={serverConfig.port} />
-              <TopPlayers livePlayers={stats.playerList || []} ranks={ranks} port={serverConfig.port} />
+              <PlayerHistoryGraph currentPlayers={online ? stats.players : null} maxPlayers={maxPlayers} serverName={stats.name} />
+              <TopPlayers livePlayers={stats.playerList || []} />
             </div>
             <div className="lg:col-span-2">
               <EventFeed events={events} />

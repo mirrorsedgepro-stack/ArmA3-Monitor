@@ -138,7 +138,7 @@ export function ServerConfigModal({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Frenchy's Antistasi Ultimate"
+              placeholder="e.g. Frenchy's A3Wasteland"
               className="w-full p-2.5 rounded-md bg-black/20 ring-1 ring-white/5 text-arma-text text-xs focus:outline-none focus:border-arma-red uppercase"
             />
           </div>

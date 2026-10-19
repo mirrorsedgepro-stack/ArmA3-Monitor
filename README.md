@@ -6,11 +6,11 @@ A modern, high-performance web portal for your Arma 3 dedicated server designed 
 
 The dashboard follows [gethomepage/homepage](https://github.com/gethomepage/homepage)'s design: a dark slate theme, a top row of information widgets, service-style cards with stat blocks, and bookmarks.
 
-- **Info bar**: server status, players, server FPS, headless clients, uptime, local + Zulu clock, live/pause, refresh, settings.
+- **Info bar**: server status, players, uptime (server FPS / headless clients when the bridge reports them), local + Zulu clock, live/pause, refresh, settings.
 - **Server**: the mission card (status pill with ping; players, FPS, HCs, uptime; click for the roster) and a host card (platform, difficulty, BattlEye, signatures, voice, persistence).
-- **Join**: Launch & Connect guide, copy `IP:port`, download the Launcher mod preset, Discord/TeamSpeak when configured.
-- **Campaign**: Antistasi war level, HR, money, aggression, and unit/vehicle counts from `logPerformance`.
-- **Activity**: player-count history, top players (time played, sessions, deaths, Antistasi rank) and an event feed (player deaths, flag captures, counterattacks and their outcome, promotions, joins/leaves), all parsed from the server log by the telemetry bridge.
+- **Join**: Launch & Connect guide (in-game VON voice, A3Wasteland basics), copy `IP:port`, download the Launcher mod preset, Discord when configured.
+- **Map**: live Chernarus Redux map with player positions.
+- **Activity**: player-count history, top players (time played, kills, sessions, deaths) and an event feed (kills, deaths, joins/leaves), all parsed from the server log by the telemetry bridge.
 - **Mods**: the server's preset with real size, last update and subscriber counts from the Steam Workshop API.
 - **Bookmarks**.
 
@@ -42,8 +42,7 @@ Only real data is shown: a value, card or section the server (or Steam) did not 
 - **🎮 Direct Connect & Community Links**:
   - Steam Direct Connect (`steam://connect/IP:PORT`).
   - 1-click clipboard copy for IP and Port.
-  - Discord and TeamSpeak 3 / TFAR integration.
-  - Operational Rules of Engagement (ROE), ACE3 keybinds cheat sheet, and TFAR radio channel matrix.
+  - Discord integration; voice is Arma's in-game VON.
 
 - **☁️ Cloud & Vercel Optimized**:
   - Direct Valve A2S UDP query protocol support.
@@ -87,12 +86,11 @@ Configure these either in `.env.local` (for local development) or directly in **
 
 | Variable | Description | Example Default |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_SERVER_NAME` | Display name of your Arma 3 server/community | `Frenchy's Antistasi Ultimate [CUP Chernarus Redux] \| 32-Player Dedicated` |
+| `NEXT_PUBLIC_SERVER_NAME` | Display name of your Arma 3 server/community | `Frenchy's A3Wasteland [CUP Chernarus Redux] \| 64-Player` |
 | `NEXT_PUBLIC_SERVER_IP` | Public IP or domain name of your Arma 3 server | `180.181.238.103` |
 | `NEXT_PUBLIC_GAME_PORT` | Game connection port | `2302` |
 | `NEXT_PUBLIC_QUERY_PORT` | Steam A2S query port (normally Game Port + 1) | `2303` |
 | `NEXT_PUBLIC_DISCORD_URL` | Community Discord invite link | `https://discord.gg/arma3` |
-| `NEXT_PUBLIC_TS3_URL` | TeamSpeak 3 connection URL for TFAR/ACRE | `ts3server://voice.arma3aegis.net?port=9987` |
 | `BATTLEMETRICS_SERVER_ID` | *(Optional)* BattleMetrics server ID for cloud querying | `2351240` |
 
 ---
@@ -142,7 +140,6 @@ Open [`data/defaultMods.ts`](file:///c:/Users/JED-Tools2/Downloads/ArmA3/data/de
 │   ├── PlayerListModal.tsx      # Active squad roster modal
 │   ├── PresetModal.tsx          # Launcher preset download & import manager
 │   ├── ServerConfigModal.tsx    # Live target IP/port changer
-│   └── ServerRules.tsx          # Rules of engagement, keybinds, TFAR channels
 ├── data/
 │   ├── defaultMods.ts           # Curated tactical Arma 3 mod list
 │   └── defaultServer.ts         # Server configuration & fallback telemetry

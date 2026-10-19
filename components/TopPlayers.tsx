@@ -9,9 +9,6 @@ import { formatSince, formatUptime } from '@/lib/format';
 
 interface TopPlayersProps {
   livePlayers?: ServerPlayer[];
-  /** Latest Antistasi rank per player, from promotion events. */
-  ranks?: Record<string, string>;
-  port?: number;
 }
 
 type SortCriteria = 'hours' | 'kills' | 'sessions' | 'deaths' | 'recent';
@@ -28,22 +25,21 @@ const SORTS: { id: SortCriteria; label: string }[] = [
  * Player leaderboard built only from sessions recorded in the server log.
  * Renders nothing until the bridge has returned at least one player.
  */
-export function TopPlayers({ livePlayers = [], ranks = {}, port }: TopPlayersProps) {
+export function TopPlayers({ livePlayers = [] }: TopPlayersProps) {
   const [players, setPlayers] = useState<PlayerRecord[]>([]);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortCriteria>('hours');
 
   const fetchPlayers = useCallback(async () => {
     try {
-      const url = port ? `/api/players?port=${port}` : '/api/players';
-      const res = await fetch(url);
+      const res = await fetch('/api/players');
       if (!res.ok) return;
       const data: PlayersResponse = await res.json();
       if (data.available && Array.isArray(data.players)) setPlayers(data.players);
     } catch {
       // Keep the last good list.
     }
-  }, [port]);
+  }, []);
 
   useEffect(() => {
     fetchPlayers();
@@ -105,14 +101,12 @@ export function TopPlayers({ livePlayers = [], ranks = {}, port }: TopPlayersPro
 
       <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((p, idx) => {
-          const rank = ranks[p.name];
           return (
             <li key={p.name} className="hp-card list-none">
               <div className="flex items-center gap-2.5 px-3 py-2.5">
                 <span className="w-5 shrink-0 text-center text-xs tabular-nums text-slate-500">{idx + 1}</span>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-slate-200">{p.name}</div>
-                  {rank && <div className="text-xs text-slate-400">{rank}</div>}
                 </div>
                 {p.online ? (
                   <span className="flex shrink-0 items-center gap-1 rounded bg-black/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">

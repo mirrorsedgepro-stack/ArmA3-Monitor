@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, Copy, Check, ChevronDown, Download, Play, HelpCircle, FileCode, Mic } from 'lucide-react';
-import { ArmaServerStats, DOWNLOADS } from '@/data/defaultServer';
+import { ArmaServerStats } from '@/data/defaultServer';
 
 interface ConnectModalProps {
   isOpen: boolean;
@@ -20,7 +20,6 @@ export function ConnectModal({
   const [copiedFull, setCopiedFull] = useState(false);
   const [copiedIpOnly, setCopiedIpOnly] = useState(false);
   const [copiedPortOnly, setCopiedPortOnly] = useState(false);
-  const [copiedTs, setCopiedTs] = useState(false);
   const [showTroubleshoot, setShowTroubleshoot] = useState(false);
 
   useEffect(() => {
@@ -50,12 +49,6 @@ export function ConnectModal({
     navigator.clipboard.writeText(stats.port.toString());
     setCopiedPortOnly(true);
     setTimeout(() => setCopiedPortOnly(false), 2000);
-  };
-
-  const copyTs = () => {
-    navigator.clipboard.writeText(stats.teamspeakAddress || '');
-    setCopiedTs(true);
-    setTimeout(() => setCopiedTs(false), 2000);
   };
 
   const downloadBatchScript = () => {
@@ -198,79 +191,30 @@ pause
           </section>
 
           {/* Step 4 */}
-          {stats.teamspeakUrl && (
-            <section className="space-y-2 border-t border-white/5 pt-4">
-              <h3 className="flex items-center gap-2 text-sm font-medium text-slate-200">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-arma-red text-[11px] text-white">4</span>
-                Join TeamSpeak
-              </h3>
-              <p className="text-xs leading-relaxed text-slate-400">
-                In-game radio (TFAR) runs over our TeamSpeak 3 server. Connect before you join; TFAR moves you into the{' '}
-                <strong className="text-slate-200">TaskForceRadio</strong> channel when the mission starts.
-              </p>
-              <p className="rounded-sm bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-200 ring-1 ring-amber-500/20">
-                Use the <strong>TeamSpeak 3</strong> client. TeamSpeak 5 and 6 can&apos;t load the TFAR plugin, so the game never
-                links to them.
-              </p>
-
-              <ol className="space-y-3">
-                <li className="space-y-1.5">
-                  <p className="text-xs font-medium text-slate-300">a. Install TeamSpeak 3 ({DOWNLOADS.ts3Version}, Windows)</p>
-                  <a
-                    href={DOWNLOADS.ts3Win64}
-                    className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-secondary"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download TeamSpeak 3 (64-bit)
-                  </a>
-                  <p className="text-[11px] text-slate-500">
-                    From TeamSpeak&apos;s own servers.{' '}
-                    <a href={DOWNLOADS.ts3Win32} className="underline hover:text-slate-300">32-bit version</a>
-                  </p>
-                </li>
-
-                <li className="space-y-1.5">
-                  <p className="text-xs font-medium text-slate-300">b. Install the TFAR radio plugin</p>
-                  <a
-                    href={DOWNLOADS.tfarPlugin}
-                    download
-                    className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-secondary"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download TFAR plugin (.ts3_plugin)
-                  </a>
-                  <p className="text-xs leading-relaxed text-slate-400">
-                    Double-click the file with TeamSpeak 3 installed, then enable{' '}
-                    <strong className="text-slate-200">Task Force Arrowhead Radio</strong> under{' '}
-                    <strong className="text-slate-200">Tools → Options → Addons</strong>. It&apos;s the same build as the
-                    Workshop mod (also in <code className="break-all rounded bg-black/30 px-1">steamapps\workshop\content\107410\894678801\teamspeak</code>).
-                  </p>
-                  <p className="text-[11px] leading-relaxed text-slate-500">
-                    Task Force Arrowhead Radio {DOWNLOADS.tfarVersion}, © Michail Nikolaev and contributors, under the{' '}
-                    <a href={DOWNLOADS.tfarLicense} target="_blank" rel="noreferrer" className="underline hover:text-slate-300">APL-SA</a>{' '}
-                    (<a href={DOWNLOADS.tfarSource} target="_blank" rel="noreferrer" className="underline hover:text-slate-300">source</a>).
-                  </p>
-                </li>
-
-                <li className="space-y-1.5">
-                  <p className="text-xs font-medium text-slate-300">c. Connect</p>
-                  <a
-                    href={stats.teamspeakUrl}
-                    className="flex w-full items-center justify-center gap-2 rounded px-3 py-2.5 text-sm arma-btn-primary"
-                  >
-                    <Mic className="h-4 w-4" />
-                    Connect with TeamSpeak 3
-                  </a>
-                  {stats.teamspeakAddress && (
-                    <Copyable label="TeamSpeak address" value={stats.teamspeakAddress} copied={copiedTs} onCopy={copyTs} />
-                  )}
-                  <p className="text-xs leading-relaxed text-slate-500">
-                    Run TeamSpeak and Arma the same way (neither as administrator), or TFAR can&apos;t connect them.
-                  </p>
-                </li>
-              </ol>
-            </section>
-          )}
+          <section className="space-y-2 border-t border-white/5 pt-4">
+            <h3 className="flex items-center gap-2 text-sm font-medium text-slate-200">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-arma-red text-[11px] text-white">4</span>
+              Voice &amp; play
+            </h3>
+            <p className="flex gap-2 text-xs leading-relaxed text-slate-400">
+              <Mic className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+              <span>
+                Voice is Arma&apos;s built-in VON, nothing extra to install. Hold <strong className="text-slate-200">Caps Lock</strong>{' '}
+                (push-to-talk) to speak and switch channel with <strong className="text-slate-200">,</strong> /{' '}
+                <strong className="text-slate-200">.</strong>: <strong className="text-slate-200">Side</strong> (your whole team),{' '}
+                <strong className="text-slate-200">Group</strong> (your squad) or <strong className="text-slate-200">Direct</strong> (anyone
+                close by).
+              </span>
+            </p>
+            <ul className="list-disc space-y-0.5 pl-5 text-xs leading-relaxed text-slate-400">
+              <li>
+                Stores in Chernogorsk, Elektrozavodsk, Berezino, Zelenogorsk, Stary Sobor and Krasnostav.
+              </li>
+              <li>Hold any of the 12 capture territories and your team gets paid for it.</li>
+              <li>R3F logistics: tow, lift and load crates and vehicles. Lock your base objects to keep them yours.</li>
+              <li>Your gear, money, bases and vehicles are saved between sessions.</li>
+            </ul>
+          </section>
 
           {/* Extras */}
           <section className="space-y-2 border-t border-white/5 pt-4">

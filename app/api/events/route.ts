@@ -3,28 +3,17 @@ import { bridgeFetch } from '@/lib/bridge';
 
 export const dynamic = 'force-dynamic';
 
-export type CampaignEventType =
+export type ServerEventType =
   | 'death'
-  | 'capture'
-  | 'counterattack'
-  | 'defended'
-  | 'lost'
-  | 'promotion'
   | 'join'
   | 'leave'
   | 'kill';
 
-export interface CampaignEvent {
+export interface ServerEvent {
   id: string;
   t: string;
-  type: CampaignEventType;
+  type: ServerEventType;
   player?: string | null;
-  place?: string;
-  marker?: string;
-  grid?: string;
-  by?: string | null;
-  enemy?: string;
-  rank?: string;
   // kill (from the A3KF server hook)
   kind?: 'man' | 'veh';
   victim?: string;
@@ -40,16 +29,15 @@ export interface CampaignEvent {
 export interface EventsResponse {
   available: boolean;
   trackingSince: string | null;
-  events: CampaignEvent[];
+  events: ServerEvent[];
 }
 
-/** Campaign event feed parsed from the game server's log by the telemetry bridge. */
+/** Event feed (joins, leaves, deaths, kills) parsed from the game server's log by the telemetry bridge. */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const limit = Math.max(1, Math.min(500, parseInt(searchParams.get('limit') || '200', 10) || 200));
-  const port = searchParams.get('port');
-  const telemetryPort = searchParams.get('telemetryPort') || (port === '2402' ? '2410' : null);
-  const data = await bridgeFetch<{ trackingSince: string | null; events: CampaignEvent[] }>(`/api/events?limit=${limit}`, 3000, telemetryPort);
+  const telemetryPort = searchParams.get('telemetryPort');
+  const data = await bridgeFetch<{ trackingSince: string | null; events: ServerEvent[] }>(`/api/events?limit=${limit}`, 3000, telemetryPort);
   const body: EventsResponse = data
     ? { available: true, trackingSince: data.trackingSince, events: data.events }
     : { available: false, trackingSince: null, events: [] };

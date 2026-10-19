@@ -1,27 +1,26 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowUpCircle, Crosshair, Flag, LogIn, LogOut, Shield, ShieldAlert, Skull, Swords } from 'lucide-react';
-import type { CampaignEvent, CampaignEventType } from '@/app/api/events/route';
+import { Crosshair, LogIn, LogOut, Skull } from 'lucide-react';
+import type { ServerEvent, ServerEventType } from '@/app/api/events/route';
 import { formatSince } from '@/lib/format';
 
-const CAMPAIGN: CampaignEventType[] = ['capture', 'counterattack', 'defended', 'lost'];
-const PLAYERS: CampaignEventType[] = ['join', 'leave', 'promotion', 'death'];
+const PLAYERS: ServerEventType[] = ['join', 'leave', 'death'];
 
-type Filter = 'all' | 'kills' | 'campaign' | 'players';
+type Filter = 'all' | 'kills' | 'players';
 
-// Antistasi sides as the rebels (GUER) see them.
+// A3Wasteland teams.
 const SIDES: Record<string, { label: string; className: string }> = {
-  GUER: { label: 'Rebel', className: 'text-emerald-400' },
-  WEST: { label: 'Occupant', className: 'text-red-400' },
-  EAST: { label: 'Invader', className: 'text-orange-400' },
+  WEST: { label: 'BLUFOR', className: 'text-sky-400' },
+  EAST: { label: 'OPFOR', className: 'text-red-400' },
+  GUER: { label: 'Independent', className: 'text-emerald-400' },
   CIV: { label: 'Civilian', className: 'text-slate-400' },
 };
 
-const involvesPlayer = (e: CampaignEvent) => e.type !== 'kill' || !!e.killerIsPlayer || !!e.victimIsPlayer;
+const involvesPlayer = (e: ServerEvent) => e.type !== 'kill' || !!e.killerIsPlayer || !!e.victimIsPlayer;
 
 /** Drop the engine's "X was killed" line when the kill feed already reported that death. */
-function withoutDuplicateDeaths(events: CampaignEvent[]) {
+function withoutDuplicateDeaths(events: ServerEvent[]) {
   const killed = events
     .filter((e) => e.type === 'kill' && e.victimIsPlayer && e.victim)
     .map((e) => ({ name: e.victim!, t: Date.parse(e.t) }));
@@ -31,14 +30,14 @@ function withoutDuplicateDeaths(events: CampaignEvent[]) {
   );
 }
 
-function describe(e: CampaignEvent): { icon: React.ReactNode; text: React.ReactNode } | null {
+function describe(e: ServerEvent): { icon: React.ReactNode; text: React.ReactNode } | null {
   const who = (name?: string | null) => <span className="font-medium text-slate-100">{name}</span>;
   const unit = (name?: string | null, side?: string | null, isPlayer?: boolean) => {
     const s = side ? SIDES[side] : undefined;
     return (
       <span className={`font-medium ${isPlayer ? 'text-slate-100' : s?.className ?? 'text-slate-200'}`}>
         {name}
-        {!isPlayer && s && <span className="font-normal text-slate-500"> ({s.label.toLowerCase()})</span>}
+        {!isPlayer && s && <span className="font-normal text-slate-500"> ({s.label})</span>}
       </span>
     );
   };
@@ -60,27 +59,6 @@ function describe(e: CampaignEvent): { icon: React.ReactNode; text: React.ReactN
     }
     case 'death':
       return { icon: <Skull className="h-4 w-4 text-red-400" />, text: <>{who(e.player)} was killed</> };
-    case 'capture':
-      return {
-        icon: <Flag className="h-4 w-4 text-emerald-400" />,
-        text: (
-          <>
-            {who(e.player || e.by)} captured {who(e.place)}
-            {e.grid && <span className="text-slate-500"> · grid {e.grid}</span>}
-          </>
-        ),
-      };
-    case 'counterattack':
-      return {
-        icon: <Swords className="h-4 w-4 text-amber-400" />,
-        text: <>{e.enemy ?? 'Enemy'} counterattack on {who(e.place)}</>,
-      };
-    case 'defended':
-      return { icon: <Shield className="h-4 w-4 text-emerald-400" />, text: <>Counterattack on {who(e.place)} repelled</> };
-    case 'lost':
-      return { icon: <ShieldAlert className="h-4 w-4 text-red-400" />, text: <>{who(e.place)} lost to a counterattack</> };
-    case 'promotion':
-      return { icon: <ArrowUpCircle className="h-4 w-4 text-sky-400" />, text: <>{who(e.player)} promoted to {e.rank}</> };
     case 'join':
       return { icon: <LogIn className="h-4 w-4 text-slate-400" />, text: <>{who(e.player)} joined</> };
     case 'leave':
@@ -90,8 +68,8 @@ function describe(e: CampaignEvent): { icon: React.ReactNode; text: React.ReactN
   }
 }
 
-/** Campaign event feed. Renders nothing when the server has reported no events. */
-export function EventFeed({ events }: { events: CampaignEvent[] }) {
+/** Server event feed. Renders nothing when the server has reported no events. */
+export function EventFeed({ events }: { events: ServerEvent[] }) {
   const [filter, setFilter] = useState<Filter>('all');
   const [limit, setLimit] = useState(12);
 
@@ -103,8 +81,6 @@ export function EventFeed({ events }: { events: CampaignEvent[] }) {
     switch (filter) {
       case 'kills':
         return e.type === 'kill';
-      case 'campaign':
-        return CAMPAIGN.includes(e.type);
       case 'players':
         return PLAYERS.includes(e.type) || (e.type === 'kill' && involvesPlayer(e));
       default:
@@ -118,7 +94,7 @@ export function EventFeed({ events }: { events: CampaignEvent[] }) {
       <div className="flex items-center justify-between gap-2 px-3 pt-2.5 pb-2">
         <span className="text-sm font-medium text-slate-200">Event feed</span>
         <div className="flex gap-1">
-          {(['all', ...(hasKills ? ['kills'] : []), 'campaign', 'players'] as Filter[]).map((f) => (
+          {(['all', ...(hasKills ? ['kills'] : []), 'players'] as Filter[]).map((f) => (
             <button
               key={f}
               onClick={() => {

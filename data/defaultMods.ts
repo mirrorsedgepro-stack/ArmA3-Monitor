@@ -18,9 +18,10 @@ export const CATEGORY_LABELS: Record<string, { label: string; color: string }> =
   server: { label: 'Server & Admin', color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30' },
 };
 
+// Matches the server preset (~/A3Wasteland/configs/preset.html), 47 mods.
 export const DEFAULT_MODS: ArmaMod[] = [
   // ==========================================
-  // 1. Core Framework & Missions (5 mods)
+  // 1. Core Framework (2 mods)
   // ==========================================
   {
     id: "450814997",
@@ -30,45 +31,22 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=450814997"
   },
   {
-    id: "3020755032",
-    name: "Antistasi Ultimate - Mod",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3020755032"
-  },
-  {
-    id: "894678801",
-    name: "Task Force Arrowhead Radio (BETA!!!)",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=894678801"
-  },
-  {
-    id: "463939057",
-    name: "ace",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=463939057"
-  },
-  {
-    id: "3053169823",
-    name: "ACE No Medical",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3053169823"
-  },
-  {
     id: "1779063631",
     name: "Zeus Enhanced",
     category: "core",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1779063631"
   },
-
-
   // ==========================================
-  // 3. Movement, Animations & Gunplay (14 mods)
+  // 2. Movement, Animations & Gunplay (12 mods)
   // ==========================================
+  {
+    id: "632435682",
+    name: "Remove stamina",
+    category: "realism",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=632435682"
+  },
   {
     id: "333310405",
     name: "Enhanced Movement",
@@ -84,13 +62,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2034363662"
   },
   {
-    id: "2198339170",
-    name: "Alternative Running",
-    category: "realism",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2198339170"
-  },
-  {
     id: "2993442344",
     name: "Death and Hit reactions",
     category: "realism",
@@ -98,11 +69,11 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2993442344"
   },
   {
-    id: "3165450999",
-    name: "WBK Immersive Animations",
+    id: "2198339170",
+    name: "Alternative Running",
     category: "realism",
     required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3165450999"
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2198339170"
   },
   {
     id: "1841047025",
@@ -112,25 +83,11 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1841047025"
   },
   {
-    id: "3450227250",
-    name: "Reload While Aiming",
+    id: "3165450999",
+    name: "WBK Immersive Animations",
     category: "realism",
     required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3450227250"
-  },
-  {
-    id: "2623341670",
-    name: "Animated Recoil coefficient changer",
-    category: "realism",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2623341670"
-  },
-  {
-    id: "567737932",
-    name: "Reduced Weapon Sway",
-    category: "realism",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=567737932"
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3165450999"
   },
   {
     id: "2011658088",
@@ -140,22 +97,35 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2011658088"
   },
   {
-    id: "632435682",
-    name: "Remove stamina",
+    id: "3450227250",
+    name: "Reload While Aiming",
     category: "realism",
     required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=632435682"
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3450227250"
   },
   {
-    id: "782415569",
-    name: "Remove stamina - ACE 3",
+    id: "567737932",
+    name: "Reduced Weapon Sway",
     category: "realism",
     required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=782415569"
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=567737932"
   },
-
+  {
+    id: "2623341670",
+    name: "Animated Recoil coefficient changer",
+    category: "realism",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2623341670"
+  },
+  {
+    id: "3346427969",
+    name: "Hide Among The Grass - HATG",
+    category: "realism",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3346427969"
+  },
   // ==========================================
-  // 4. Audio & Soundscapes (5 mods)
+  // 3. Audio & Soundscapes (5 mods)
   // ==========================================
   {
     id: "3407948300",
@@ -192,11 +162,17 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2806487814"
   },
-
   // ==========================================
-  // 5. Visuals, Particles & Blood (7 mods)
+  // 4. Visuals, Particles & Blood (7 mods)
   // ==========================================
   {
+    id: "2041057379",
+    name: "A3 Thermal Improvement",
+    category: "visuals",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2041057379"
+  },
+  { // client-side only: the server skips it
     id: "3784954744",
     name: "Blastcore CoB Edition",
     category: "visuals",
@@ -238,16 +214,8 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3525653940"
   },
-  {
-    id: "2041057379",
-    name: "A3 Thermal Improvement",
-    category: "visuals",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2041057379"
-  },
-
   // ==========================================
-  // 6. HUD, Logistics & Quality of Life (7 mods)
+  // 5. HUD, Logistics & Quality of Life (6 mods)
   // ==========================================
   {
     id: "2791403093",
@@ -255,6 +223,20 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "qol",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2791403093"
+  },
+  {
+    id: "2981582086",
+    name: "Simplex Tools and Extensions",
+    category: "qol",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2981582086"
+  },
+  {
+    id: "2800081814",
+    name: "Dynamic Camo System",
+    category: "qol",
+    required: true,
+    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2800081814"
   },
   {
     id: "2390063219",
@@ -271,35 +253,14 @@ export const DEFAULT_MODS: ArmaMod[] = [
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=837729515"
   },
   {
-    id: "2467590475",
-    name: "Enhanced Map Ace Version",
-    category: "qol",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2467590475"
-  },
-  {
     id: "2480263219",
     name: "Enhanced GPS",
     category: "qol",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2480263219"
   },
-  {
-    id: "2800081814",
-    name: "Dynamic Camo System",
-    category: "qol",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2800081814"
-  },
-  {
-    id: "2981582086",
-    name: "Simplex Tools and Extensions",
-    category: "qol",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=2981582086"
-  },
   // ==========================================
-  // CUP Weapons, Units & Vehicles (3 mods)
+  // 6. CUP Factions & Weapon Packs (13 mods)
   // ==========================================
   {
     id: "497660133",
@@ -322,9 +283,6 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=541888371"
   },
-  // ==========================================
-  // Weapon packs - Antistasi Ultimate arms trader (10 mods)
-  // ==========================================
   {
     id: "2595680138",
     name: "NIArms All In One",
@@ -395,9 +353,8 @@ export const DEFAULT_MODS: ArmaMod[] = [
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3770609240"
   },
-
   // ==========================================
-  // CUP Terrains & Chernarus Redux (2 mods)
+  // 7. Terrains (2 mods)
   // ==========================================
   {
     id: "583496184",
@@ -412,56 +369,5 @@ export const DEFAULT_MODS: ArmaMod[] = [
     category: "terrain",
     required: true,
     steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=1128256978"
-  },
-
-  // Antistasi Ultimate extenders
-  {
-    id: "3414068749",
-    name: "A3UE - Faction Madness",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3414068749"
-  },
-  {
-    id: "3792065519",
-    name: "[A3UE] - Frontlines & Patrols (A3U v12.0)",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3792065519"
-  },
-  {
-    id: "3457274925",
-    name: "A3UE Active-Anti-artillery-Defence-System",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3457274925"
-  },
-  {
-    id: "3558334679",
-    name: "A3UE - Point Campfire",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3558334679"
-  },
-  {
-    id: "3805259447",
-    name: "[A3UE] Coalition Factions Extender",
-    category: "core",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3805259447"
-  },
-  {
-    id: "3762390554",
-    name: "[A3UE] CL's Antistasi QoL Tweaks",
-    category: "qol",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3762390554"
-  },
-  {
-    id: "3346427969",
-    name: "Hide Among The Grass - HATG",
-    category: "realism",
-    required: true,
-    steamUrl: "https://steamcommunity.com/sharedfiles/filedetails/?id=3346427969"
   }
 ];

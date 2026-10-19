@@ -57,7 +57,7 @@ export function InfoWidgets({ stats, isLoading, autoRefresh, onToggleAutoRefresh
   const now = useClock();
   const online = stats.status === 'online';
   const max = stats.maxPlayers || 32;
-  // serverFps is null once Antistasi's last sample is older than 90 s.
+  // serverFps / headlessClients are null or absent when the bridge doesn't report them (A3Wasteland's doesn't).
   const fps = online ? stats.serverFps ?? null : null;
   const uptime = online ? stats.uptimeSeconds ?? null : null;
   const hc = online ? stats.headlessClients : null;

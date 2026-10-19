@@ -116,16 +116,7 @@ ${modRows}
       </table>
     </div>
     <div class="dlc-list">
-      <table>
-        <tr data-type="DlcContainer">
-          <td data-type="DisplayName">Apex</td>
-          <td><a href="https://store.steampowered.com/app/395180" data-type="Link">https://store.steampowered.com/app/395180</a></td>
-        </tr>
-        <tr data-type="DlcContainer">
-          <td data-type="DisplayName">Jets</td>
-          <td><a href="https://store.steampowered.com/app/601670" data-type="Link">https://store.steampowered.com/app/601670</a></td>
-        </tr>
-      </table>
+      <table />
     </div>
     <div class="footer">
       <span>Created by Arma 3 Launcher by Bohemia Interactive.</span>
@@ -195,7 +186,7 @@ export function parseArma3PresetHtml(htmlContent: string): Partial<ArmaMod>[] {
 
 function categorizeMod(name: string): ArmaMod['category'] {
   const lower = name.toLowerCase();
-  if (lower.includes('cba') || lower.includes('antistasi') || lower.includes('zeus') || lower.includes('zen')) return 'core';
+  if (lower.includes('cba') || lower.includes('zeus') || lower.includes('zen')) return 'core';
   if (lower.includes('rhs') || lower.includes('gref') || lower.includes('saf')) return 'equipment';
   if (lower.includes('movement') || lower.includes('running') || lower.includes('animation') || lower.includes('recoil') || lower.includes('sway') || lower.includes('stamina') || lower.includes('grass')) return 'realism';
   if (lower.includes('sound') || lower.includes('sfx') || lower.includes('jsrs') || lower.includes('audio')) return 'audio';

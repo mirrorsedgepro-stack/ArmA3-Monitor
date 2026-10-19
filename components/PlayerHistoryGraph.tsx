@@ -25,7 +25,6 @@ interface PlayerHistoryGraphProps {
   currentPlayers: number | null;
   maxPlayers?: number;
   serverName?: string;
-  port?: number;
 }
 
 type TimeRange = '6h' | '12h' | '24h';
@@ -33,8 +32,7 @@ type TimeRange = '6h' | '12h' | '24h';
 export function PlayerHistoryGraph({
   currentPlayers,
   maxPlayers = 32,
-  serverName = "Frenchy's Antistasi Ultimate",
-  port,
+  serverName = "Frenchy's A3Wasteland",
 }: PlayerHistoryGraphProps) {
   const [points, setPoints] = useState<{ t: string; players: number }[]>([]);
   const [trackingSince, setTrackingSince] = useState<string | null>(null);
@@ -54,10 +52,7 @@ export function PlayerHistoryGraph({
     try {
       const hours = hoursForRange[selectedRange];
       const bucket = selectedRange === '6h' ? 15 : (selectedRange === '12h' ? 30 : 60);
-      const url = port
-        ? `/api/history?hours=${hours}&bucket=${bucket}&port=${port}`
-        : `/api/history?hours=${hours}&bucket=${bucket}`;
-      const res = await fetch(url);
+      const res = await fetch(`/api/history?hours=${hours}&bucket=${bucket}`);
       if (res.ok) {
         const data = await res.json();
         if (data.available && Array.isArray(data.points)) {
@@ -70,7 +65,7 @@ export function PlayerHistoryGraph({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedRange, port]);
+  }, [selectedRange]);
 
   useEffect(() => {
     fetchHistory();
